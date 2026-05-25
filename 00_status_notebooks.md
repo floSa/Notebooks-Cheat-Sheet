@@ -134,12 +134,12 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 33 | `TS_Time_Series_Intro.md` | 📥 ingéré | TUTO | M | 🌐 | Tendance, saison, autocorr, lag, régression. Manque stationnarité (ADF), ACF/PACF complet. Refresh imports Colab. |
-| 34 | `TS_Time_Series_Overview.md` | 📥 ingéré | WIKI | L | 🌐 | **Référence** : EDA, feat eng (lag/rolling/décomp), down/up-sampling, ARIMA/SARIMA, ACF/PACF, prédictions. Manque métriques détaillées. |
-| 35 | `TS_ARIMAs_Revoir.md` | 📥 ingéré | TUTO | S | 🌐 | Brouillon AR/MA/ARMA/ARIMA + GridSearch. Erreur import dernière cellule. **Renommer `TS_ARIMA`** et finaliser. |
-| 36 | `TS_Generer_Sequence.md` | 📥 ingéré | TUTO | S | | Snippet utility génération séquences chevauchantes (prep LSTM). Compléter docstring + cas d'usage, ou déplacer en utility. |
-| 37 | `TS_Maintenance_Prédictive.md` | 🗑️ supprimer | — | — | | Version antérieure (25 KB) moins complète que `_GOOD`. |
-| 38 | `TS_Maintenance_Predictive_GOOD.md` | 📥 ingéré | CS (case study) | L | 🌐 | **Garder, renommer `TS_Maintenance_Predictive`**. EDA pompe, interpolation, LOF, PCA (3 stratégies), ML/DL/LSTM, optim hyperparam. Refresh Keras/Colab. |
+| 33 | `TS_Time_Series_Intro.md` | ✅ fait | TUTO | M | 🌐 | Refonte tutoriel débutant : décomposition, stationnarité (ADF+KPSS), ACF/PACF, lag features, train/test temporel strict, baseline LinReg. |
+| 34 | `TS_Time_Series_Overview.md` | ✅ fait | WIKI | L | 🌐 | Wiki exhaustif : matrice de décision 2026, ETS+ARIMA+Theta, Prophet, ML global (Nixtla mlforecast), DL (TFT/NHiTS/DeepAR/PatchTST), **foundation models** (TimeGPT/Chronos/TimesFM/Moirai), métriques (MASE/WAPE). |
+| 35 | `TS_ARIMA.md` (renommé) | ✅ fait | WIKI + TUTO | M | 🌐 | Refonte ARIMA : famille (AR/MA/ARMA/ARIMA/SARIMA/SARIMAX), Box-Jenkins, ACF/PACF lecture, diagnostic résidus, **AutoARIMA** (pmdarima+statsforecast). Smoke MAPE 2-3%. |
+| 36 | `TS_Generer_Sequence.md` | ✅ fait | CS | S | | Cheat-sheet sliding window : NumPy (boucle + vectorisé stride_tricks), multi-features 3D, PyTorch Dataset streaming, split temporel avec gap, multi-séries (panel), renvoi Nixtla. |
+| 37 | `TS_Maintenance_Prédictive.md` | 🗑️ supprimé | — | — | | Remplacé par version `_GOOD` renommée. |
+| 38 | `TS_Maintenance_Predictive.md` (renommé) | ✅ fait | CS (case study) | L | 🌐 | Pipeline complet : RUL/classif/anomaly, EDA capteurs, feature eng rolling, **PCA 3 stratégies**, XGBoost régression RUL, **score asymétrique C-MAPSS**, variante LSTM pseudo, déploiement edge/cloud. Smoke MAE=20 cycles. |
 
 ## BDD
 
