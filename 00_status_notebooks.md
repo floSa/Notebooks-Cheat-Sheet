@@ -128,7 +128,7 @@
 | 29 | `NLP_NER_BiLSTM_CRF.md` | 📥 ingéré | WIKI historique | M | | GMB dataset + BiLSTM-CRF TF. **Conserver comme référence historique** avec disclaimer + lien vers NER moderne. |
 | 30 | `NLP_Classification_Smote.md` | 📥 ingéré | TUTO | L | 🌐 | LSTM IMDB + BoW/TF-IDF + NB/SVM/LR/RF. **SMOTE annoncé mais absent** → ajouter ou renommer. Ajouter DistilBERT. |
 | 31 | `NLP_Classification_Spervisé.md` | 📥 ingéré | TUTO | S | 🌐 | 20newsgroups + TF-IDF + baselines. Trop basique. Ajouter zero-shot/few-shot LLM. **Renommer `Supervisee`**. Candidat fusion avec Smote ? |
-| 32 | `NLP_Recherche_d_informations.md` | 📥 ingéré | TUTO | M | 🌐 | TF-IDF, Gensim, SpaCy, BERT pour search. **Mise à jour RAG/dense retrievers (ColBERT, SBERT) + Langchain/LlamaIndex**. |
+| 32 | `NLP_Recherche_d_informations.md` | ✅ fait | TUTO + WIKI | L | 🌐 | Refonte massive : sparse (TF-IDF + BM25 via bm25s), dense (sentence-transformers + BGE/E5), hybrid (RRF), reranking (ColBERT + cross-encoders), pipeline RAG complet, frameworks (LangChain/LlamaIndex/DSPy), eval (Recall@k/MRR/RAGAS), bonnes pratiques 2026 (HyDE, multi-query, Corrective RAG). Smoke test BM25+RRF OK. |
 
 ## Time Series
 
