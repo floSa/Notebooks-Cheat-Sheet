@@ -99,9 +99,34 @@ def spans_to_iob2(tokens: list[str], spans: list[tuple[int, int, str]]) -> list[
     return tags
 
 
+def spans_to_bilou(tokens: list[str], spans: list[tuple[int, int, str]]) -> list[str]:
+    """Format BILOU : B (Begin), I (Inside), L (Last), O (Outside), U (Unit single)."""
+    tags = ["O"] * len(tokens)
+    for start, end, label in spans:
+        if start >= len(tokens):
+            continue
+        end_clip = min(end, len(tokens))
+        if end_clip - start == 1:
+            tags[start] = f"U-{label}"
+        else:
+            tags[start] = f"B-{label}"
+            for i in range(start + 1, end_clip - 1):
+                tags[i] = f"I-{label}"
+            tags[end_clip - 1] = f"L-{label}"
+    return tags
+
+
+def spans_to_bioes(tokens: list[str], spans: list[tuple[int, int, str]]) -> list[str]:
+    """Format BIOES : B, I, O, E (End), S (Single). Synonyme de BILOU avec E/S au lieu de L/U."""
+    tags = spans_to_bilou(tokens, spans)
+    return [t.replace("L-", "E-").replace("U-", "S-") for t in tags]
+
+
 tokens = "Steve Jobs founded Apple in California".split()
 spans = [(0, 2, "PER"), (3, 4, "ORG"), (5, 6, "LOC")]
-print(list(zip(tokens, spans_to_iob2(tokens, spans))))
+print("IOB2  :", list(zip(tokens, spans_to_iob2(tokens, spans))))
+print("BILOU :", list(zip(tokens, spans_to_bilou(tokens, spans))))
+print("BIOES :", list(zip(tokens, spans_to_bioes(tokens, spans))))
 ```
 
 <!-- #region -->

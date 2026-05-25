@@ -183,7 +183,36 @@ print(f"MCC             SMOTE : {matthews_corrcoef(y_test, y_pred_s):.3f}")
 ```
 
 <!-- #region -->
-### 3.3 Variantes de SMOTE à connaître
+### 3.3 Comparaison vectorisation BoW vs TF-IDF
+<!-- #endregion -->
+
+<!-- #region -->
+Avant de partir sur SMOTE, vérifier que la vectorisation choisie n'est pas elle-même la cause de la mauvaise perf. Comparaison rapide BoW vs TF-IDF sur la même tâche déséquilibrée :
+<!-- #endregion -->
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import roc_auc_score
+
+results_vec = []
+for name, vec_cls, params in [
+    ("BoW",         CountVectorizer, dict(ngram_range=(1,1), min_df=2, max_df=0.95, stop_words="english")),
+    ("BoW bigrams", CountVectorizer, dict(ngram_range=(1,2), min_df=2, max_df=0.95, stop_words="english")),
+    ("TF-IDF",      TfidfVectorizer, dict(ngram_range=(1,2), min_df=2, max_df=0.95, stop_words="english", sublinear_tf=True)),
+]:
+    vec_tmp = vec_cls(**params)
+    Xtr_v = vec_tmp.fit_transform(X_train)
+    Xte_v = vec_tmp.transform(X_test)
+    m = LogisticRegression(max_iter=1000, class_weight="balanced").fit(Xtr_v, y_train)
+    score = m.predict_proba(Xte_v)[:, 1]
+    results_vec.append({"vectorizer": name, "F1+": f1_score(y_test, score > 0.5, pos_label=1),
+                         "AUC": roc_auc_score(y_test, score)})
+
+print(pd.DataFrame(results_vec).to_string(index=False))
+```
+
+<!-- #region -->
+### 3.4 Variantes de SMOTE à connaître
 <!-- #endregion -->
 
 <!-- #region -->
