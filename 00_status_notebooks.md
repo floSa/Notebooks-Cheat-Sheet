@@ -124,7 +124,7 @@
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
 | 27 | `NLP_Transformers.md` | ✅ fait | TUTO + WIKI | L | 🌐 | Refonte complète Hugging Face 5.x (2026) : briques de base, familles (ModernBERT/Llama/T5/multimodaux), pipelines, fine-tuning Trainer sur 20 Newsgroups, PEFT/LoRA, génération chat templates, bonnes pratiques (quantization/serving/eval). Smoke test imports + APIs OK. |
-| 28 | `NLP_NER.md` | 📥 ingéré | TUTO | M | 🌐 | Formats IOB/BILOU/IOBES + LSTM/CRF. Pivoter vers HF transformers-NER, garder formats. |
+| 28 | `NLP_NER.md` | ✅ fait | TUTO + WIKI | M | 🌐 | Refonte transformers-first : formats IOB/BIOES/BILOU, dataset CoNLL-2003, fine-tuning DistilBERT (tokenize_and_align_labels), GLiNER zero-shot (game-changer 2024-2026), LLMs/function calling, eval seqeval entity-level. BiLSTM-CRF renvoie au notebook dédié. Smoke test alignment+seqeval OK. |
 | 29 | `NLP_NER_BiLSTM_CRF.md` | 📥 ingéré | WIKI historique | M | | GMB dataset + BiLSTM-CRF TF. **Conserver comme référence historique** avec disclaimer + lien vers NER moderne. |
 | 30 | `NLP_Classification_Smote.md` | 📥 ingéré | TUTO | L | 🌐 | LSTM IMDB + BoW/TF-IDF + NB/SVM/LR/RF. **SMOTE annoncé mais absent** → ajouter ou renommer. Ajouter DistilBERT. |
 | 31 | `NLP_Classification_Spervisé.md` | 📥 ingéré | TUTO | S | 🌐 | 20newsgroups + TF-IDF + baselines. Trop basique. Ajouter zero-shot/few-shot LLM. **Renommer `Supervisee`**. Candidat fusion avec Smote ? |
