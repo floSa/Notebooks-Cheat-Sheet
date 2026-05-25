@@ -165,14 +165,24 @@
 
 ---
 
-## 📈 Compteurs
+## 📈 Compteurs (état final 2026-05-26)
 
-- Total fichiers ingérés : **45**
-- À traiter (refonte) : **42** (après suppression `AAA`, `Suppr_`, et `TS_Maintenance_Prédictive` ancienne version)
-- Fusions prévues : **2** (`retrieval_BDD_Vectorielle` → `BDD_Vectorielles`, `Preprocessing_Function_Utiles` → ? )
-- Renommages prévus : **~10**
-- Refresh 2026 obligatoire (🌐) : **24 notebooks**
-- Effort cumulé : S=14 · M=15 · L=13 · Total ≈ **~75-100h** de refonte
+- **Notebooks refondus** : **44 / 44** ✅ (tous dans `04_notebooks_finaux/`)
+- Suppressions effectives : 3 (AAA_Test_ML, Suppr_ML_Bench, TS_Maintenance_Prédictive ancien)
+- Fusions effectives : 2 (retrieval_BDD_Vectorielle → BDD_Vectorielles, Preprocessing_Function_Utiles → Preprocessing)
+- Renommages effectués : 10 (Structure_Python, Structure_BDD_DataFrame, ML_Regression_Classification_Multiple, Structure_Generer_Donnees_Classification, Detection_Outliers, NLP_Classification_Supervisee, DL_KAN_Kolmogorov_Arnold, TdS_Introduction_Traitement_Signal, TS_Maintenance_Predictive, TS_ARIMA)
+- Vagues complétées : **9 / 9** (NLP, Vector DBs, MLOps, TS, EDA, ML core, DL frameworks, Structures, Apps)
+
+## 🆕 Nouveaux notebooks proposés
+
+- **24 plans détaillés** dans `05_nouveaux_notebooks/` couvrant DS / DE / AIE / MLE / MLOps
+- Voir [`00_sujets_nouveaux.md`](00_sujets_nouveaux.md) pour la justification
+- Voir [`00_critique.md`](00_critique.md) pour les axes d'amélioration des 44 existants
+
+## 🚀 Améliorations implémentées (post-livraison)
+
+- **`scripts/download_data.sh`** : script de download datasets (NYC Taxi, Turbofan README, PDFs sample)
+- **`apps/`** : Flask, FastAPI, Streamlit en fichiers `.py` exécutables (vs pseudo-code dans les notebooks)
 
 ## 🗓️ Ordre de traitement suggéré
 
