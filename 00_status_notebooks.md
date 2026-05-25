@@ -89,10 +89,10 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 8 | `EDA_Visualisation_Introduction.md` | 📥 ingéré | TUTO | S | 🌐 | Pure code-dump 20+ viz (sns/plt). Aucune structure pédagogique. Renommer `Seaborn_Matplotlib_Basics` + ajouter plotly. |
-| 9 | `EDA_Analyse_Multivarié.md` | 📥 ingéré | WIKI + TUTO | L | 🌐 | Riche : régression, PCA (sklearn/Prince/Fanalysis), CA, MCA, FAMD, Procuste. **Migrer Prince/Fanalysis vers alternatives maintenues**. Ajouter matrice choix-méthode. |
-| 10 | `EDA_Stats_Analyse_Desc_Visual.md` | 📥 ingéré | WIKI | M | | Stats desc, distributions, multivariée (qual/quant). Bon squelette. Candidat fusion partielle avec `EDA_Visualisation`. |
-| 11 | `Détection D_outliers.md` | 📥 ingéré | TUTO + WIKI | M | | Elliptic envelope, OC-SVM, LOF, Isolation Forest. Manque DBSCAN, decision tree de choix. **Renommer `Detection_Outliers`**. |
+| 8 | `EDA_Visualisation_Introduction.md` | ✅ fait | CS + TUTO | S | 🌐 | Refonte cheat-sheet : matplotlib (bases), seaborn (catalogue 12 fonctions), plotly (interactif), heatmap correl, pairplot, bonnes pratiques (couleur, échelle log, dpi, pièges pie chart). |
+| 9 | `EDA_Analyse_Multivarie.md` (renommé) | ✅ fait | WIKI + TUTO | L | 🌐 | Refonte panorama : PCA (maths + scree + cercle correl), MCA (qual), FAMD (mixte), CA (contingence), UMAP/tSNE/PaCMAP (non-linéaire), clustering renvoi, régression multivariée (statsmodels). |
+| 10 | `EDA_Stats_Analyse_Desc_Visual.md` | ✅ fait | WIKI | M | 🌐 | Workflow EDA standardisé : univariée num (skew/kurt/QQ + Shapiro), univariée cat (entropie), bivariée num×num (Pearson+Spearman), cat×cat (chi²+Cramer V), cat×num (ANOVA+Kruskal), AutoEDA (ydata-profiling). Smoke chi² OK p=1e-58. |
+| 11 | `Detection_Outliers.md` (renommé) | ✅ fait | WIKI + TUTO | M | | Refonte decision tree : stats univariées (Z/IQR/MAD), Elliptic Envelope, LOF, **Isolation Forest** (go-to), OCSVM, autoencoders, TS spécialisé (STUMPY/Merlion/River), PyOD panoramique. Smoke 4 algos = 11 flagged chacun. |
 
 ## ML — généraliste
 
