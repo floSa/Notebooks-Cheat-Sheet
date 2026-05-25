@@ -170,13 +170,12 @@ def get_batches(X, y, batch_size: int, key):
 ## 7. Loss & Optimisation (Optax)
 <!-- #endregion -->
 
-```python
-"""
+<!-- #region -->
+````python
 import optax
 
 # Loss : combine softmax + CE
 def cross_entropy_loss(logits, labels):
-    # one-hot
     one_hot = jax.nn.one_hot(labels, num_classes=logits.shape[-1])
     return -jnp.mean(jnp.sum(jax.nn.log_softmax(logits) * one_hot, axis=-1))
 
@@ -184,8 +183,8 @@ def cross_entropy_loss(logits, labels):
 # Optimiseur Optax
 optimizer = optax.adamw(learning_rate=1e-2, weight_decay=1e-4)
 opt_state = optimizer.init(params)
-"""
-```
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 8. Boucle d'entraînement — pattern fonctionnel

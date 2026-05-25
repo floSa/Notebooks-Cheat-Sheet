@@ -12,29 +12,19 @@ jupyter:
 ---
 
 <!-- #region -->
-# 🕰️ NER avec BiLSTM-CRF (Wiki historique)
+# 🕰️ NER avec BiLSTM-CRF (Wiki + implémentation)
 <!-- #endregion -->
 
 <!-- #region -->
-**⚠️ Méthode historique** (état de l'art 2016-2019, dépassée par les transformers depuis 2019).
+**Méthode historique** (état de l'art 2016-2019), dépassée par les transformers depuis 2019. **Toujours pertinente** pour :
 
-Ce notebook est conservé comme **référence pédagogique et historique** sur l'architecture qui a dominé la NER pendant 4 ans avant l'avènement de BERT. Pour la NER en production en 2026, voir le notebook **`NLP_NER`** (transformers + GLiNER).
+1. **Pédagogie** — comprendre la CRF reste utile (parsing, segmentation, alignement).
+2. **Légèreté** — ~10-50 MB, tourne CPU, déployable edge.
+3. **Domaines low-resource** — peut rivaliser avec un transformer mal fine-tuné quand on a < 1000 exemples annotés.
 
-**Pourquoi continuer à comprendre BiLSTM-CRF en 2026 ?**
+Pour la NER en production en 2026, voir **`NLP_NER`** (transformers + GLiNER).
 
-1. **Pédagogie** — comprendre la **CRF** (Conditional Random Field) reste utile : on retrouve l'idée dans d'autres structures (parsing, segmentation, alignement).
-2. **Légèreté** — un BiLSTM-CRF tourne sans GPU, fait <50 MB, peut être déployé sur edge.
-3. **Domaines low-resource** — sur des langues/domaines très spécifiques avec peu de data, un BiLSTM-CRF custom peut encore rivaliser avec un transformer fine-tuné mal.
-4. **Comprendre la littérature** — la moitié des papers NER pré-2020 utilisent cette archi.
-
-Couverture :
-1. Rappel : le problème NER (renvoi au notebook principal).
-2. **Embeddings de tokens** : word embeddings vs character-level.
-3. **BiLSTM** : architecture, intuition.
-4. **CRF** : la formulation mathématique et pourquoi c'est mieux qu'une softmax token-par-token.
-5. **BiLSTM-CRF** : l'assemblage.
-6. Implémentation PyTorch minimale.
-7. Bilan : forces, limites, alternatives 2026.
+Ce notebook **implémente vraiment** une BiLSTM-CRF avec `pytorch-crf` sur un mini-dataset NER synthétique (proxy CoNLL-2003).
 <!-- #endregion -->
 
 <!-- #region -->
@@ -117,7 +107,7 @@ $$
 <!-- #endregion -->
 
 <!-- #region -->
-## 5. BiLSTM-CRF : l'assemblage
+## 5. BiLSTM-CRF — l'assemblage
 <!-- #endregion -->
 
 <!-- #region -->
@@ -135,57 +125,315 @@ Entraînement par **maximum de vraisemblance** : on minimise `-log P(y_gold | s)
 <!-- #endregion -->
 
 <!-- #region -->
-## 6. Implémentation PyTorch minimale
+## 6. Implémentation PyTorch avec pytorch-crf
 <!-- #endregion -->
 
 <!-- #region -->
-En 2026, on **n'écrit plus la CRF à la main** — on utilise une lib comme **`torchcrf`** (`pip install pytorch-crf`) ou **TorchCRF**. L'archi globale fait moins de 50 lignes.
+On utilise la lib **`pytorch-crf`** (`pip install pytorch-crf`) qui implémente la CRF linear-chain avec forward/backward optimisés et décodage Viterbi.
 
-> Pour reproduire ce notebook, ajouter `pytorch-crf` à l'env. Code ci-dessous fourni comme **pseudo-code éducatif** (non exécuté pour éviter d'alourdir les deps).
+L'archi globale fait moins de 50 lignes. On va l'entraîner sur un mini-dataset NER synthétique (3 entités : PER, LOC, ORG).
+<!-- #endregion -->
+
+<!-- #region -->
+### 6.1 Mini dataset NER synthétique
 <!-- #endregion -->
 
 ```python
-# Pseudo-code BiLSTM-CRF (référence — à activer avec pytorch-crf installé)
-"""
+import random
+import numpy as np
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
 from torchcrf import CRF
 
+random.seed(42)
+np.random.seed(42)
+torch.manual_seed(42)
 
+# Mini vocab d'entités
+NAMES = ["Alice", "Bob", "Marie", "Jean", "Pierre", "Sophie", "Thomas", "Claire"]
+LOCS = ["Paris", "Lyon", "Berlin", "Tokyo", "Madrid", "Roma", "Londres", "Geneve"]
+ORGS = ["Apple", "Google", "Microsoft", "Sony", "Meta", "OpenAI", "Anthropic", "Tesla"]
+OTHER = ["lives", "works", "at", "in", "for", "the", "and", "or", "with", "near"]
+
+# Schémas de phrases template
+TEMPLATES = [
+    "{PER} lives in {LOC}",
+    "{PER} works at {ORG}",
+    "{PER} works for {ORG} in {LOC}",
+    "{ORG} is based in {LOC}",
+    "{PER} and {PER} work at {ORG}",
+]
+
+
+def make_sentence() -> tuple[list[str], list[str]]:
+    """Génère une phrase + tags IOB2."""
+    tmpl = random.choice(TEMPLATES)
+    tokens = []
+    tags = []
+    for word in tmpl.split():
+        if word == "{PER}":
+            n = random.choice(NAMES)
+            tokens.append(n); tags.append("B-PER")
+        elif word == "{LOC}":
+            n = random.choice(LOCS)
+            tokens.append(n); tags.append("B-LOC")
+        elif word == "{ORG}":
+            n = random.choice(ORGS)
+            tokens.append(n); tags.append("B-ORG")
+        else:
+            tokens.append(word); tags.append("O")
+    return tokens, tags
+
+
+# Génération du dataset
+TRAIN = [make_sentence() for _ in range(500)]
+TEST = [make_sentence() for _ in range(100)]
+print(f"Train : {len(TRAIN)} phrases | Test : {len(TEST)}")
+print(f"Exemple : {TRAIN[0]}")
+```
+
+<!-- #region -->
+### 6.2 Vocabulaire + mapping label
+<!-- #endregion -->
+
+```python
+from collections import Counter
+
+# Vocab : tous les tokens du train, + <PAD> et <UNK>
+counter = Counter()
+for tokens, _ in TRAIN:
+    counter.update(tokens)
+
+PAD_TOKEN = "<PAD>"
+UNK_TOKEN = "<UNK>"
+word2idx = {PAD_TOKEN: 0, UNK_TOKEN: 1}
+for word, _ in counter.most_common():
+    word2idx[word] = len(word2idx)
+print(f"Vocab size : {len(word2idx)}")
+
+LABELS = ["O", "B-PER", "I-PER", "B-LOC", "I-LOC", "B-ORG", "I-ORG"]
+label2idx = {l: i for i, l in enumerate(LABELS)}
+idx2label = {i: l for l, i in label2idx.items()}
+print(f"Labels : {LABELS}")
+```
+
+<!-- #region -->
+### 6.3 Dataset PyTorch avec padding et masque
+<!-- #endregion -->
+
+```python
+class NERDataset(Dataset):
+    """Dataset NER : encode tokens et tags en indices entiers."""
+
+    def __init__(self, samples: list[tuple[list[str], list[str]]]):
+        self.samples = samples
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
+        tokens, tags = self.samples[idx]
+        token_ids = torch.tensor([word2idx.get(t, word2idx[UNK_TOKEN]) for t in tokens], dtype=torch.long)
+        tag_ids = torch.tensor([label2idx[t] for t in tags], dtype=torch.long)
+        return token_ids, tag_ids
+
+
+def collate_batch(batch: list[tuple[torch.Tensor, torch.Tensor]]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Pad les séquences à la longueur max de la batch + masque pour la CRF."""
+    token_seqs, tag_seqs = zip(*batch)
+    max_len = max(t.size(0) for t in token_seqs)
+    batch_size = len(batch)
+
+    padded_tokens = torch.zeros(batch_size, max_len, dtype=torch.long)  # PAD = 0
+    padded_tags = torch.zeros(batch_size, max_len, dtype=torch.long)     # tag 0 (O) en padding
+    mask = torch.zeros(batch_size, max_len, dtype=torch.bool)
+
+    for i, (toks, tags) in enumerate(zip(token_seqs, tag_seqs)):
+        n = toks.size(0)
+        padded_tokens[i, :n] = toks
+        padded_tags[i, :n] = tags
+        mask[i, :n] = True
+
+    return padded_tokens, padded_tags, mask
+
+
+train_ds = NERDataset(TRAIN)
+test_ds = NERDataset(TEST)
+train_loader = DataLoader(train_ds, batch_size=16, shuffle=True, collate_fn=collate_batch)
+test_loader = DataLoader(test_ds, batch_size=16, shuffle=False, collate_fn=collate_batch)
+
+# Vérification
+xb, yb, m = next(iter(train_loader))
+print(f"Batch shapes : tokens={xb.shape} tags={yb.shape} mask={m.shape}")
+```
+
+<!-- #region -->
+### 6.4 Modèle BiLSTM-CRF
+<!-- #endregion -->
+
+```python
 class BiLSTMCRF(nn.Module):
-    def __init__(self, vocab_size: int, embed_dim: int, hidden_dim: int, num_tags: int):
+    """BiLSTM + CRF pour token classification."""
+
+    def __init__(
+        self,
+        vocab_size: int,
+        num_tags: int,
+        embed_dim: int = 64,
+        hidden_dim: int = 64,
+        dropout: float = 0.3,
+        padding_idx: int = 0,
+    ):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
+        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=padding_idx)
+        self.dropout = nn.Dropout(dropout)
         self.bilstm = nn.LSTM(
-            embed_dim, hidden_dim, bidirectional=True, batch_first=True,
+            embed_dim, hidden_dim,
+            bidirectional=True, batch_first=True,
         )
         self.hidden2tag = nn.Linear(2 * hidden_dim, num_tags)
         self.crf = CRF(num_tags, batch_first=True)
 
-    def forward(self, input_ids: torch.Tensor, mask: torch.Tensor):
-        emb = self.embedding(input_ids)                # (B, T, E)
-        lstm_out, _ = self.bilstm(emb)                 # (B, T, 2H)
-        emissions = self.hidden2tag(lstm_out)          # (B, T, num_tags)
-        return emissions, mask
+    def _emissions(self, input_ids: torch.Tensor) -> torch.Tensor:
+        """Forward jusqu'aux scores d'émission par token."""
+        emb = self.dropout(self.embedding(input_ids))   # (B, T, E)
+        lstm_out, _ = self.bilstm(emb)                   # (B, T, 2H)
+        return self.hidden2tag(lstm_out)                 # (B, T, num_tags)
 
-    def loss(self, input_ids, tags, mask):
-        emissions, mask = self.forward(input_ids, mask)
-        # CRF.forward renvoie log-likelihood (à maximiser, donc -log_lik à minimiser)
-        return -self.crf(emissions, tags, mask=mask.bool(), reduction='mean')
+    def loss(self, input_ids: torch.Tensor, tags: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        """Negative log-likelihood (à minimiser)."""
+        emissions = self._emissions(input_ids)
+        # CRF.forward renvoie le log-likelihood (positif) → negate pour loss
+        return -self.crf(emissions, tags, mask=mask, reduction="mean")
 
-    def decode(self, input_ids, mask):
-        emissions, mask = self.forward(input_ids, mask)
-        return self.crf.decode(emissions, mask=mask.bool())  # liste de listes de tag ids
+    def predict(self, input_ids: torch.Tensor, mask: torch.Tensor) -> list[list[int]]:
+        """Viterbi decode : meilleure séquence de tags par batch."""
+        emissions = self._emissions(input_ids)
+        return self.crf.decode(emissions, mask=mask)
 
 
-# Training loop minimal
-# for input_ids, tags, mask in dataloader:
-#     loss = model.loss(input_ids, tags, mask)
-#     loss.backward()
-#     optimizer.step()
-#     optimizer.zero_grad()
-"""
-print("Pseudo-code BiLSTM-CRF — voir docstring pour la structure complète.")
+model = BiLSTMCRF(vocab_size=len(word2idx), num_tags=len(LABELS), embed_dim=32, hidden_dim=32)
+n_params = sum(p.numel() for p in model.parameters())
+print(f"Modèle BiLSTM-CRF : {n_params:,} paramètres")
+```
+
+<!-- #region -->
+### 6.5 Boucle d'entraînement
+<!-- #endregion -->
+
+```python
+import torch.optim as optim
+
+optimizer = optim.AdamW(model.parameters(), lr=5e-3, weight_decay=1e-4)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
+losses_per_epoch = []
+for epoch in range(15):
+    model.train()
+    total_loss = 0.0
+    n_samples = 0
+    for tokens, tags, mask in train_loader:
+        tokens, tags, mask = tokens.to(device), tags.to(device), mask.to(device)
+        optimizer.zero_grad()
+        loss = model.loss(tokens, tags, mask)
+        loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        optimizer.step()
+        total_loss += loss.item() * tokens.size(0)
+        n_samples += tokens.size(0)
+    avg = total_loss / n_samples
+    losses_per_epoch.append(avg)
+    if (epoch + 1) % 3 == 0:
+        print(f"Epoch {epoch+1:2d}  loss = {avg:.4f}")
+```
+
+<!-- #region -->
+### 6.6 Évaluation entity-level avec seqeval
+<!-- #endregion -->
+
+```python
+from seqeval.metrics import classification_report, f1_score, precision_score, recall_score
+
+model.eval()
+all_true: list[list[str]] = []
+all_pred: list[list[str]] = []
+
+with torch.no_grad():
+    for tokens, tags, mask in test_loader:
+        tokens, mask = tokens.to(device), mask.to(device)
+        preds = model.predict(tokens, mask)  # list of list (variable length)
+
+        for i in range(tokens.size(0)):
+            true_seq = []
+            pred_seq = []
+            n_valid = int(mask[i].sum().item())
+            for j in range(n_valid):
+                true_seq.append(idx2label[int(tags[i, j].item())])
+                pred_seq.append(idx2label[int(preds[i][j])])
+            all_true.append(true_seq)
+            all_pred.append(pred_seq)
+
+f1 = f1_score(all_true, all_pred)
+p = precision_score(all_true, all_pred)
+r = recall_score(all_true, all_pred)
+print(f"Entity-level F1 (seqeval)  : {f1:.4f}")
+print(f"Precision                   : {p:.4f}")
+print(f"Recall                      : {r:.4f}")
+print()
+print(classification_report(all_true, all_pred, digits=3))
+```
+
+<!-- #region -->
+### 6.7 Inspection des transitions apprises par la CRF
+<!-- #endregion -->
+
+```python
+# La matrice de transition CRF apprise — révèle les "règles" implicites
+transitions = model.crf.transitions.detach().cpu().numpy()
+
+import pandas as pd
+
+trans_df = pd.DataFrame(
+    transitions,
+    index=[f"from_{l}" for l in LABELS],
+    columns=[f"to_{l}" for l in LABELS],
+)
+print("Matrice de transition CRF (logits) :")
+print(trans_df.round(2))
+print()
+print("Note : transitions interdites en IOB2 (O→I-X, B-X→I-Y) ont des scores très négatifs.")
+```
+
+<!-- #region -->
+### 6.8 Prédiction sur de nouvelles phrases
+<!-- #endregion -->
+
+```python
+def predict_tags(sentence: str) -> list[tuple[str, str]]:
+    """Tokenize + prédit les tags pour une phrase."""
+    tokens = sentence.split()
+    ids = torch.tensor(
+        [[word2idx.get(t, word2idx[UNK_TOKEN]) for t in tokens]],
+        dtype=torch.long,
+    ).to(device)
+    mask = torch.ones(1, len(tokens), dtype=torch.bool).to(device)
+
+    model.eval()
+    with torch.no_grad():
+        preds = model.predict(ids, mask)[0]
+
+    return list(zip(tokens, [idx2label[i] for i in preds]))
+
+
+# Test sur des phrases jamais vues
+for sentence in [
+    "Alice works at OpenAI",
+    "Bob lives in Berlin",
+    "Sophie and Thomas work at Tesla in Madrid",
+]:
+    print(predict_tags(sentence))
 ```
 
 <!-- #region -->
@@ -199,7 +447,7 @@ print("Pseudo-code BiLSTM-CRF — voir docstring pour la structure complète.")
 <!-- #region -->
 - Léger : ~10-50 MB sur disque, ~50 MB RAM, tourne CPU 30-100 tokens/ms.
 - Pas besoin de pré-entraînement massif — tourne sur quelques milliers d'exemples annotés.
-- Architecture **interprétable** (matrice de transition observable).
+- Architecture **interprétable** (matrice de transition observable, cf section 6.7).
 <!-- #endregion -->
 
 <!-- #region -->

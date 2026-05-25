@@ -593,17 +593,22 @@ from sklearn.metrics import classification_report, confusion_matrix
 ### 5.6 Sauvegarde et rechargement
 <!-- #endregion -->
 
-```python
-# Sauvegarde modèle + tokenizer dans le même dossier (format safetensors par défaut depuis v5)
-# trainer.save_model("./_artifacts/distilbert-20news-final")
-# tokenizer.save_pretrained("./_artifacts/distilbert-20news-final")
+<!-- #region -->
+Workflow save/load à exécuter **après** `trainer.train()` :
 
-# Rechargement plus tard :
-# from transformers import pipeline
-# clf = pipeline("text-classification", model="./_artifacts/distilbert-20news-final")
-# print(clf("My graphics card is overheating when I play games."))
+````python
+# Sauvegarde modèle + tokenizer dans le même dossier
+# (format safetensors par défaut depuis transformers v5)
+trainer.save_model("./_artifacts/distilbert-20news-final")
+tokenizer.save_pretrained("./_artifacts/distilbert-20news-final")
+
+# Rechargement plus tard (n'importe où) :
+from transformers import pipeline
+clf = pipeline("text-classification", model="./_artifacts/distilbert-20news-final")
+print(clf("My graphics card is overheating when I play games."))
 # → [{'label': 'comp.graphics', 'score': 0.95}]
-```
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 6. Fine-tuning paramétrique-efficace : LoRA / PEFT
@@ -726,19 +731,25 @@ Pour faire tenir un gros modèle en mémoire :
 - **GGUF** : format llama.cpp pour exécution CPU/Mac/edge.
 <!-- #endregion -->
 
-```python
-# Exemple chargement 4-bit (décommenter sur GPU compatible)
-# from transformers import BitsAndBytesConfig
-# bnb_config = BitsAndBytesConfig(
-#     load_in_4bit=True,
-#     bnb_4bit_compute_dtype=torch.bfloat16,
-#     bnb_4bit_quant_type="nf4",
-# )
-# model = AutoModelForCausalLM.from_pretrained(
-#     "meta-llama/Llama-3.2-3B-Instruct",
-#     quantization_config=bnb_config,
-# )
-```
+<!-- #region -->
+Chargement 4-bit avec `bitsandbytes` (nécessite GPU compatible CUDA + `pip install bitsandbytes`) :
+
+````python
+from transformers import BitsAndBytesConfig, AutoModelForCausalLM
+import torch
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_quant_type="nf4",
+)
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.2-3B-Instruct",
+    quantization_config=bnb_config,
+    device_map="auto",
+)
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ### 8.2 Serving en prod

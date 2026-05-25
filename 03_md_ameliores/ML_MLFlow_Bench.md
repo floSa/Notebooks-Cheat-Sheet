@@ -156,10 +156,14 @@ with mlflow.start_run(run_name="ridge-baseline") as run:
 <!-- #endregion -->
 
 ```python
-# Décommenter pour activer autolog
-# mlflow.autolog()
-# with mlflow.start_run(run_name="auto-ridge"):
-#     Ridge(alpha=0.5).fit(X_train, y_train)  # log auto de tout
+# Autolog : MLflow logue automatiquement params, métriques, modèle pour les libs supportées
+mlflow.sklearn.autolog(log_models=True, log_input_examples=False)
+
+with mlflow.start_run(run_name="auto-ridge"):
+    Ridge(alpha=0.5).fit(X_train, y_train)   # tout est loggué automatiquement
+
+mlflow.sklearn.autolog(disable=True)         # désactive ensuite (on reprend contrôle manuel)
+print("Autolog OK — voir la run 'auto-ridge' dans le tracking URI.")
 ```
 
 <!-- #region -->

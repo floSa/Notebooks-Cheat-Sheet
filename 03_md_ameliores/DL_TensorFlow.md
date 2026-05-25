@@ -266,12 +266,25 @@ es = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=5, restore_be
 ## 14. Visualisation — TensorBoard
 <!-- #endregion -->
 
-```python
-# Natif et excellent en TF
-# tb = tf.keras.callbacks.TensorBoard(log_dir="logs/", histogram_freq=1)
-# model.fit(..., callbacks=[tb])
-# Lancer : tensorboard --logdir logs
-```
+<!-- #region -->
+TensorBoard est natif et excellent dans TF :
+
+````python
+import tensorflow as tf
+
+tb = tf.keras.callbacks.TensorBoard(
+    log_dir="logs/",
+    histogram_freq=1,        # log des poids/biais tous les epochs
+    write_graph=True,
+    profile_batch="500,510",  # profiling de 10 batchs
+)
+model.fit(X, y, epochs=10, callbacks=[tb])
+
+# Lancer :
+#   tensorboard --logdir logs
+# puis ouvrir http://localhost:6006
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 15. Cas réel — Classification MNIST (digits 8x8)

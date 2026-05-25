@@ -111,16 +111,36 @@ duckdb.sql("SELECT AVG(a), STDDEV(b), MAX(c) FROM df_np").show()
 ```
 
 ```python
-# Depuis CSV (sans le charger en RAM d'abord)
-# duckdb.sql("SELECT * FROM read_csv_auto('data.csv') WHERE age > 30").df()
+# Depuis un CSV qu'on génère à la volée (démo exécutable end-to-end)
+import tempfile, os
+from pathlib import Path
 
-# Depuis Parquet (encore plus rapide grâce au pushdown)
-# duckdb.sql("SELECT col1, col2 FROM read_parquet('data/*.parquet') WHERE date >= '2025-01-01'").df()
+tmp_csv = Path(tempfile.gettempdir()) / "duckdb_demo_users.csv"
+pd.DataFrame({
+    "name": ["Alice", "Bob", "Charlie", "Dave", "Eve"],
+    "age": [25, 35, 28, 42, 19],
+    "city": ["Paris", "Lyon", "Paris", "Marseille", "Lyon"],
+}).to_csv(tmp_csv, index=False)
 
-# Depuis S3 (avec extension httpfs)
-# duckdb.sql("INSTALL httpfs; LOAD httpfs;")
-# duckdb.sql("SELECT * FROM 's3://bucket/path/*.parquet' WHERE country = 'FR'").df()
+# DuckDB lit le CSV directement (sans le charger en RAM avant)
+duckdb.sql(f"SELECT name, age FROM read_csv_auto('{tmp_csv}') WHERE age > 25 ORDER BY age").show()
+
+# Aggrégation directe sur CSV
+duckdb.sql(f"SELECT city, COUNT(*) AS n, AVG(age) AS mean_age FROM read_csv_auto('{tmp_csv}') GROUP BY city ORDER BY n DESC").show()
 ```
+
+<!-- #region -->
+**Pour Parquet et S3** (nécessitent fichiers / config) :
+
+````python
+# Parquet — encore plus rapide grâce au pushdown des filtres
+duckdb.sql("SELECT col1, col2 FROM read_parquet('data/*.parquet') WHERE date >= '2025-01-01'").df()
+
+# S3 via extension httpfs (à activer une fois)
+duckdb.sql("INSTALL httpfs; LOAD httpfs;")
+duckdb.sql("SELECT * FROM 's3://bucket/path/*.parquet' WHERE country = 'FR'").df()
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 4. SQL moderne — features avancées

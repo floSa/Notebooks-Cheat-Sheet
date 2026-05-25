@@ -211,36 +211,54 @@ print(f"Eval : loss={loss:.4f}  acc={acc:.3f}")
 ## 12. Gestion du déséquilibre
 <!-- #endregion -->
 
-```python
-# class_weight ou sample_weight directement à fit
-# model.fit(X, y, class_weight={0: 1.0, 1: 5.0})
-# model.fit(X, y, sample_weight=weights)
-```
+<!-- #region -->
+Keras accepte `class_weight` ou `sample_weight` directement dans `fit` :
+
+````python
+# Pondération par classe (clé = label entier, valeur = poids)
+model.fit(X, y, class_weight={0: 1.0, 1: 5.0})
+
+# Pondération par échantillon (array de même longueur que y)
+import numpy as np
+weights = np.where(y == 1, 5.0, 1.0)
+model.fit(X, y, sample_weight=weights)
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 13. Régularisation
 <!-- #endregion -->
 
-```python
-# Dropout : layers.Dropout(rate)
-# BatchNorm : layers.BatchNormalization()
-# LayerNorm : layers.LayerNormalization()
-# L2 sur poids : layers.Dense(64, kernel_regularizer=keras.regularizers.L2(1e-4))
-# Early stopping : keras.callbacks.EarlyStopping(...)
-```
+<!-- #region -->
+- **Dropout** : `layers.Dropout(rate)` au sein du modèle.
+- **BatchNorm** : `layers.BatchNormalization()`.
+- **LayerNorm** : `layers.LayerNormalization()` (standard dans les Transformers).
+- **L2 sur poids** : `layers.Dense(64, kernel_regularizer=keras.regularizers.L2(1e-4))`.
+- **Early stopping** : `keras.callbacks.EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True)` passé à `model.fit(..., callbacks=[es])`.
+<!-- #endregion -->
 
 <!-- #region -->
 ## 14. Visualisation — TensorBoard / callbacks
 <!-- #endregion -->
 
-```python
-# TensorBoard callback portable
-# tb = keras.callbacks.TensorBoard(log_dir="logs/")
-# Reduce LR on plateau
-# rlr = keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=3)
-# ModelCheckpoint
-# cp = keras.callbacks.ModelCheckpoint("best.keras", monitor="val_loss", save_best_only=True)
-```
+<!-- #region -->
+Callbacks Keras portables (peu importe le backend) :
+
+````python
+import keras
+
+# TensorBoard (logs dans logs/, visualisable via `tensorboard --logdir logs`)
+tb = keras.callbacks.TensorBoard(log_dir="logs/")
+
+# Réduit le LR quand la val_loss stagne
+rlr = keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=3)
+
+# Sauvegarde le meilleur modèle uniquement
+cp = keras.callbacks.ModelCheckpoint("best.keras", monitor="val_loss", save_best_only=True)
+
+model.fit(X_train, y_train, validation_split=0.1, epochs=50, callbacks=[tb, rlr, cp])
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 15. Cas réel — Classification MNIST (digits 8x8)

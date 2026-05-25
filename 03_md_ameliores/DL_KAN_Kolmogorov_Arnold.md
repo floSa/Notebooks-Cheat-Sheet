@@ -144,22 +144,32 @@ vs MLP : `Σ nl · nl+1` poids + biais.
 <!-- #endregion -->
 
 <!-- #region -->
-### Avantages claimés
+### 5.1 Avantages claimés
+<!-- #endregion -->
 
+<!-- #region -->
 - **Interprétabilité** : on peut **visualiser** chaque fonction `φ` apprise et parfois la "lire" comme une formule symbolique (mode `prune + symbolize` de pykan).
 - **Continual learning** : KAN serait moins sujet au **catastrophic forgetting** car les B-splines sont locales (modifier un coefficient n'affecte qu'une région).
 - **Convergence sur tâches symboliques / scientific ML** : retrouve parfois la formule analytique d'une PDE.
+<!-- #endregion -->
 
-### Limites (consensus 2024-2026)
+<!-- #region -->
+### 5.2 Limites (consensus 2024-2026)
+<!-- #endregion -->
 
+<!-- #region -->
 - **Lent à entraîner** : 5-10× plus lent qu'un MLP équivalent (calcul des splines coûteux).
 - **Pas SOTA sur les tâches DL standards** (images, NLP, RL) — les MLP/Transformers gagnent toujours.
 - **Hyperparamètres délicats** : taille grille G, ordre k, mise à jour adaptive de la grille.
 - **Adoption modeste** : peu de papers majeurs utilisent KAN en backbone (vs Mamba qui a explosé).
 - **Bibliothèques moins matures** que torch.nn.
+<!-- #endregion -->
 
-### Verdict 2026
+<!-- #region -->
+### 5.3 Verdict 2026
+<!-- #endregion -->
 
+<!-- #region -->
 KAN est **intéressant pour la recherche en interprétabilité et scientific ML** (découverte de lois physiques), mais **pas un remplaçant général** des MLPs en production. À considérer si :
 
 - Tu fais du **symbolic regression** (retrouver une formule depuis des données).
@@ -174,41 +184,48 @@ Sinon, MLP / Transformer restent les choix sûrs.
 <!-- #endregion -->
 
 <!-- #region -->
-### Bibliothèques
+### 6.1 Bibliothèques 2026
+<!-- #endregion -->
 
+<!-- #region -->
 - **`pykan`** — la lib officielle des auteurs (Liu et al.). PyTorch-based. Features : visualisation des `φ`, pruning, symbolisation (extraire une formule symbolique).
 - **`efficient-kan`** — réimplémentation optimisée (open source). Beaucoup plus rapide que pykan.
 - **`Convolutional KAN`** — extension aux couches conv (KAN-CNN).
 - **`KAN-Transformers`** — remplacer les MLP des Transformer par des KAN.
+<!-- #endregion -->
 
-### Exemple pykan (pseudo-code)
+<!-- #region -->
+### 6.2 Exemple pykan — symbolic regression
+<!-- #endregion -->
 
-```python
-"""
+<!-- #region -->
+L'exemple suivant nécessite `pip install pykan` (lib non installée par défaut ici).
+Workflow type :
+
+````python
 from kan import KAN, create_dataset
 import torch
 
-# 1. Dataset (symbolic : y = sin(πx + y))
+# 1. Dataset symbolique : y = sin(πx_1 + x_2)
 dataset = create_dataset(
     f=lambda x: torch.sin(torch.pi * x[:, [0]] + x[:, [1]]),
     n_var=2, train_num=1000, test_num=200,
 )
 
-# 2. KAN architecture
-model = KAN(width=[2, 5, 1], grid=5, k=3)  # 2→5→1, G=5, spline order 3
+# 2. KAN architecture : 2 inputs → 5 hidden → 1 output, G=5 grid points, k=3 spline order
+model = KAN(width=[2, 5, 1], grid=5, k=3)
 
-# 3. Train
+# 3. Train avec L-BFGS (KAN converge mieux avec second-order optim)
 results = model.train(dataset, opt="LBFGS", steps=50)
 
-# 4. Visualiser les φ apprises
+# 4. Visualiser les φ apprises (un graphe par arête)
 model.plot()
 
-# 5. Tenter de symboliser (retrouver la formule)
+# 5. Tenter de symboliser : retrouver la formule analytique
 model.auto_symbolic()
 formula = model.symbolic_formula()[0][0]
-print(formula)  # Espère obtenir quelque chose comme : sin(π*x_1 + x_2)
-"""
-```
+print(formula)  # Devrait afficher : sin(π·x_1 + x_2) ou proche
+````
 <!-- #endregion -->
 
 <!-- #region -->

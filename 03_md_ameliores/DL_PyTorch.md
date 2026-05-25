@@ -284,15 +284,27 @@ print(f"Class weights : {class_weights.tolist()}")
 ## 14. Visualisation — TensorBoard
 <!-- #endregion -->
 
-```python
-# TensorBoard natif via SummaryWriter
-# from torch.utils.tensorboard import SummaryWriter
-# writer = SummaryWriter(log_dir="runs/exp1")
-# writer.add_scalar("loss/train", loss.item(), step)
-# writer.add_histogram("weights/layer0", model.net[0].weight, step)
-# writer.close()
-# Lancer ensuite : tensorboard --logdir runs
-```
+<!-- #region -->
+PyTorch a un support natif TensorBoard via `torch.utils.tensorboard.SummaryWriter` :
+
+````python
+from torch.utils.tensorboard import SummaryWriter
+
+writer = SummaryWriter(log_dir="runs/exp1")
+
+# Dans la boucle d'entraînement :
+writer.add_scalar("loss/train", loss.item(), step)
+writer.add_scalar("acc/val", val_acc, step)
+writer.add_histogram("weights/layer0", model.net[0].weight, step)
+writer.add_graph(model, sample_input)        # archi visualisable
+
+writer.close()
+
+# Lancer ensuite :
+#   tensorboard --logdir runs
+# puis ouvrir http://localhost:6006
+````
+<!-- #endregion -->
 
 <!-- #region -->
 ## 15. Cas réel — Classification MNIST

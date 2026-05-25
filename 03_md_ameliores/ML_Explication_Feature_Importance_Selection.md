@@ -158,12 +158,27 @@ print(shap_imp.round(3))
 <!-- #endregion -->
 
 ```python
-# Décommenter pour les figures interactives (long sur grand X)
-# shap.summary_plot(shap_values, X_te.iloc[:200])
-# shap.waterfall_plot(shap.Explanation(values=shap_values[0],
-#                                     base_values=explainer.expected_value,
-#                                     data=X_te.iloc[0].values,
-#                                     feature_names=X.columns.tolist()))
+import matplotlib.pyplot as plt
+
+# Summary plot — vue d'ensemble : importance + direction de l'effet par feature
+shap.summary_plot(shap_values, X_te.iloc[:200], show=False)
+plt.tight_layout()
+plt.show()
+```
+
+```python
+# Waterfall plot — décomposition d'UNE prédiction individuelle
+shap.waterfall_plot(
+    shap.Explanation(
+        values=shap_values[0],
+        base_values=explainer.expected_value,
+        data=X_te.iloc[0].values,
+        feature_names=X.columns.tolist(),
+    ),
+    show=False,
+)
+plt.tight_layout()
+plt.show()
 ```
 
 <!-- #region -->
