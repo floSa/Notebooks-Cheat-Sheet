@@ -39,12 +39,14 @@
 ### Décisions stratégiques actées (2026-05-25)
 
 **Stack DL — split par framework + comparatif** (au lieu de `DL_Tensorflow_Keras` monolithique) :
-- `DL_TensorFlow.md` (nouveau) — tuto framework TF
-- `DL_Keras.md` (nouveau) — tuto Keras 3 multi-backend
-- `DL_JAX.md` (nouveau) — tuto JAX (découverte)
-- `DL_PyTorch.md` (existant) — enrichi
-- `DL_Frameworks_Comparatif.md` (nouveau) — comparatif sur **le même jeu de données** (à choisir : MNIST/CIFAR-10/tabulaire ?)
-- → `DL_Tensorflow_Keras.md` est éclaté/supprimé
+- `DL_PyTorch.md` (existant) — refonte selon blueprint
+- `DL_TensorFlow.md` (nouveau) — selon blueprint
+- `DL_Keras.md` (nouveau) — selon blueprint (Keras 3 multi-backend)
+- `DL_JAX.md` (nouveau) — selon blueprint (via Flax/Optax/Orbax)
+- `DL_Frameworks_Comparatif.md` (nouveau) — sections 15-16 du blueprint rejouées en 4 versions parallèles + benchmarks (LoC, temps, mémoire, métriques)
+- → `DL_Tensorflow_Keras.md` est éclaté/supprimé (ses techniques avancées — batch équilibré, class/sample weights, SHAP — sont absorbées dans le blueprint commun)
+- **Blueprint détaillé : [`00_blueprint_DL_frameworks.md`](00_blueprint_DL_frameworks.md)** (16 sections + cas comparatif)
+- **Datasets imposés** : MNIST (classif) + California Housing (régression) + XOR continu (toy)
 
 **Stack Web API — dual + comparatif** :
 - `Flask_API.md` (existant) — refonte en tutoriel complet (prise en main, bonnes pratiques, envoi de différents types de données : JSON / form / file upload / streaming)
