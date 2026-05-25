@@ -123,7 +123,7 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 27 | `NLP_Transformers.md` | 📥 ingéré | TUTO | L | 🌐 | Fragmenté (RoBERTa, configs Colab). **Refonte massive** : Hugging Face 2026, LLMs, instruction-tuning, modèles open-source. |
+| 27 | `NLP_Transformers.md` | ✅ fait | TUTO + WIKI | L | 🌐 | Refonte complète Hugging Face 5.x (2026) : briques de base, familles (ModernBERT/Llama/T5/multimodaux), pipelines, fine-tuning Trainer sur 20 Newsgroups, PEFT/LoRA, génération chat templates, bonnes pratiques (quantization/serving/eval). Smoke test imports + APIs OK. |
 | 28 | `NLP_NER.md` | 📥 ingéré | TUTO | M | 🌐 | Formats IOB/BILOU/IOBES + LSTM/CRF. Pivoter vers HF transformers-NER, garder formats. |
 | 29 | `NLP_NER_BiLSTM_CRF.md` | 📥 ingéré | WIKI historique | M | | GMB dataset + BiLSTM-CRF TF. **Conserver comme référence historique** avec disclaimer + lien vers NER moderne. |
 | 30 | `NLP_Classification_Smote.md` | 📥 ingéré | TUTO | L | 🌐 | LSTM IMDB + BoW/TF-IDF + NB/SVM/LR/RF. **SMOTE annoncé mais absent** → ajouter ou renommer. Ajouter DistilBERT. |

@@ -38,6 +38,38 @@ Avant de toucher un notebook, identifier dans le plan de refonte quel(s) rôle(s
 
 - **Tous les titres** (`#`, `##`, `###`, …) sont **seuls dans leur cellule MD**. Pas de titre + texte dans la même cellule.
 - **Entre une cellule de code et un titre**, il y a **toujours** une cellule MD `description` qui prépare le terrain.
+
+### Implémentation jupytext (très important)
+
+Dans le format `.md` jupytext, **plusieurs blocs markdown consécutifs sont fusionnés en 1 seule cellule** par défaut. Pour que les titres restent seuls dans leur cellule, chaque bloc markdown doit être encadré par des marqueurs de région :
+
+```markdown
+<!-- #region -->
+# Titre principal
+<!-- #endregion -->
+
+<!-- #region -->
+Description du notebook.
+<!-- #endregion -->
+
+<!-- #region -->
+## Section 1
+<!-- #endregion -->
+
+<!-- #region -->
+Description avant le code.
+<!-- #endregion -->
+
+` ` `python
+import x
+` ` `
+
+<!-- #region -->
+Description après le code.
+<!-- #endregion -->
+```
+
+Test round-trip : `uv run jupytext --to ipynb fichier.md` produit bien 1 cellule par région.
 - La cellule `description` peut contenir, au choix selon pertinence :
   - **Ce que fait** le code ci-dessous
   - **Pourquoi / dans quel cas** on l'utilise
