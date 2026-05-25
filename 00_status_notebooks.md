@@ -103,7 +103,7 @@
 | 14 | `ML_Bagging_Boosting.md` | 📥 ingéré | TUTO | M | 🌐 | Bias-variance, bagging vs boosting, RF, Extra-Trees. **XGBoost/LightGBM/CatBoost manquants** — à ajouter. |
 | 15 | `ML_Optimisation_de_Modèles.md` | 📥 ingéré | TUTO | M | 🌐 | Optuna multi-framework (sklearn/XGB/CatBoost/LGBM/Keras). Très complet. Manque visualisation Optuna 2026 + Hyperopt vraies recettes. |
 | 16 | `ML_Explication_Feature_Importance_Selection.md` | 📥 ingéré | WIKI | L | 🌐 | **Exhaustif** : RFECV, SelectFromModel, GB/RF importance, Eli5, Boruta, **SHAP** (RF/XGB/CB/Ensemble), LIME, DL, Display API. Refresh SHAP ecosystem. |
-| 17 | `ML_MLFlow_Bench.md` | 📥 ingéré | WIKI | S | 🌐 | **Bugué** (if incomplet ligne 146). À reprendre de zéro avec MLFlow 2.x : Model Registry, Deployments, intégrations 2026. |
+| 17 | `ML_MLFlow_Bench.md` | ✅ fait | WIKI + TUTO | M | 🌐 | Refonte from scratch MLflow 3.x : tracking (params/metrics/artifacts/signature), bench multi-modèles (5 algos sur California Housing), Model Registry avec **aliases @champion/@challenger** (stages deprecated), deployment local/Docker, MLflow LLM 3.x (tracing langchain/openai), prod setup (Postgres+S3+CI/CD). Smoke test OK RMSE=0.7455. |
 | 18 | `ML_Apprentissage_par_Renforcement.md` | 📥 ingéré | TUTO | S | | Bandits (UCB, Thompson). **30% du sujet seulement** — ajouter Q-learning, DQN, policy gradient, Gymnasium ? Ou recadrer titre. |
 | 19 | `Test_données_manquante_modèles.md` | 📥 ingéré | TUTO | S | | Expé SimpleImputer vs KNNImputer + RF/XGB. Manque conclusion/analyse. À compléter ou intégrer dans Preprocessing. |
 | 20 | `Suppr_ML_Bench_Regression_Classification(A finir).md` | 🗑️ supprimer | — | — | | Brouillon inachevé, code incomplet. Préfixe `Suppr_` confirme. |
