@@ -1,0 +1,23 @@
+[project]
+name = "notebooks-refonte"
+version = "0.1.0"
+description = "Refonte qualité des notebooks personnels (cheat-sheets / tutos / wikis techniques)"
+readme = "00_consignes.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupytext>=1.16",
+    "jupyter>=1.1",
+    "ipykernel>=6.29",
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+]
+
+[tool.jupytext]
+formats = "ipynb,md"
+notebook_metadata_filter = "-jupytext.text_representation.jupytext_version"
+
+[tool.uv]
+package = false

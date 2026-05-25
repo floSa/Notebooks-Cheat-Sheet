@@ -1,0 +1,37 @@
+# ── Exclusion fichiers méta IA / agents (règle perso) ──
+CLAUDE.md
+**/CLAUDE.md
+claude.md
+**/claude.md
+.claude/
+**/.claude/
+*claude*
+*CLAUDE*
+*anthropic*
+*ANTHROPIC*
+
+# ── Env UV ──
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ── Outputs intermédiaires lourds ──
+scripts/_sandbox/
+*.tmp
+
+# ── Artefacts reproductibles (à régénérer via scripts/) ──
+# 01 = dézip du zip source, 02 = jupytext conversion. Trop lourds (~90MB) et reproductibles.
+01_notebooks_originaux/
+02_md_originaux/
+
+# ── Données volumineuses (à committer au cas par cas) ──
+# data/
+
+# ── OS / éditeurs ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
