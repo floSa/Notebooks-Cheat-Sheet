@@ -36,6 +36,23 @@
 | `NLP_NER` + `NLP_NER_BiLSTM_CRF` | **Garder les 2** : NER devient tutoriel transformers-first, BiLSTM_CRF devient wiki historique avec disclaimer |
 | `TS_Time_Series_Intro` + `TS_Time_Series_Overview` | **Garder les 2** : Intro = tutoriel débutant, Overview = wiki de référence |
 
+### Décisions stratégiques actées (2026-05-25)
+
+**Stack DL — split par framework + comparatif** (au lieu de `DL_Tensorflow_Keras` monolithique) :
+- `DL_TensorFlow.md` (nouveau) — tuto framework TF
+- `DL_Keras.md` (nouveau) — tuto Keras 3 multi-backend
+- `DL_JAX.md` (nouveau) — tuto JAX (découverte)
+- `DL_PyTorch.md` (existant) — enrichi
+- `DL_Frameworks_Comparatif.md` (nouveau) — comparatif sur **le même jeu de données** (à choisir : MNIST/CIFAR-10/tabulaire ?)
+- → `DL_Tensorflow_Keras.md` est éclaté/supprimé
+
+**Stack Web API — dual + comparatif** :
+- `Flask_API.md` (existant) — refonte en tutoriel complet (prise en main, bonnes pratiques, envoi de différents types de données : JSON / form / file upload / streaming)
+- `FastAPI_API.md` (nouveau) — tutoriel complet équivalent
+- Comparatif Flask vs FastAPI consolidé dans l'un des deux (section dédiée) ou notebook séparé `APIs_Comparatif.md` (à décider en cours)
+
+**Ordre de traitement validé** : par sujets fast-moving d'abord (vague NLP/RAG → vague Vector DB → vague MLOps), puis le reste.
+
 ### Renommages proposés (typos / caractères problématiques)
 | Avant | Après |
 |---|---|
