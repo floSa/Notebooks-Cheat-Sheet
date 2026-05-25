@@ -146,8 +146,8 @@
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
 | 39 | `BDD_DuckDB.md` | 📥 ingéré | TUTO | S | | DuckDB vs pandas/SQLite. À structurer + ajouter cas d'usage réels. |
-| 40 | `BDD_Vectorielles.md` | 📥 ingéré | TUTO | M | 🌐 | SentenceTransformer + FAISS (Flat/IVF/HNSW) + Weaviate partiel. Ajouter **Qdrant, LanceDB, pgvector**. **Fusionner avec retrieval_BDD_Vectorielle**. |
-| 41 | `retrieval_BDD_Vectorielle.md` | 🔀 fusionner → 40 | WIKI | L | 🌐 | Forte duplication avec `BDD_Vectorielles`. Consolider en 1 référentiel. |
+| 40 | `BDD_Vectorielles.md` | ✅ fait (fusion 40+41) | TUTO + WIKI | L | 🌐 | Fusion des 2 notebooks origine + refonte 2026 : théorie kNN/ANN, métriques (cosine/L2/dot), matrice de décision 9 vector DBs (FAISS/Qdrant/LanceDB/pgvector/Weaviate/Milvus/Chroma/Pinecone/Vespa), FAISS détaillé (Flat/IVF/HNSW + persistance), LanceDB hands-on, Qdrant + pgvector code, bonnes pratiques (choix d'index par N, dimensionnalité, Matryoshka, métadonnées, quantization). Smoke test FAISS+LanceDB OK. Le parsing PDF (qui était mélangé) renvoie à `DE_Docling`. |
+| 41 | `retrieval_BDD_Vectorielle.md` | 🔀 fusionné → 40 | — | — | | Contenu absorbé dans `BDD_Vectorielles.md`. |
 
 ## Traitement du signal
 
