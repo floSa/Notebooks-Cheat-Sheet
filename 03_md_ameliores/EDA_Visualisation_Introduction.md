@@ -309,14 +309,14 @@ plt.tight_layout(); plt.show()
 <!-- #region -->
 Le **boxplot** affiche médiane, quartiles, moustaches (1.5×IQR), outliers. Le **boxenplot** ajoute des quantiles supplémentaires — utile pour distributions à queues lourdes (ex : `fare`).
 
-Couleur `mauvais` car `fare` Titanic est très déséquilibrée (queue droite = "anomalie tarifaire").
+Même variable représentée 2 manières → **même couleur** `primary_1` (règle "univarié = 1 couleur").
 <!-- #endregion -->
 
 ```python
 fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-sns.boxplot(y=df["fare"], color=CHART["mauvais"], ax=axes[0])
+sns.boxplot(y=df["fare"], color=CHART["primary_1"], ax=axes[0])
 axes[0].set_title("sns.boxplot — fare")
-sns.boxenplot(y=df["fare"], color=CHART["mauvais"], ax=axes[1])
+sns.boxenplot(y=df["fare"], color=CHART["primary_1"], ax=axes[1])
 axes[1].set_title("sns.boxenplot — fare (queues lourdes)")
 plt.tight_layout(); plt.show()
 ```
@@ -335,8 +335,8 @@ La **KDE** est l'alternative continue à l'histogramme (moins biaisée par le ch
 
 ```python
 fig, ax = plt.subplots(figsize=(10, 4))
-sns.kdeplot(df["fare"].dropna(), fill=True, color=CHART["moyen"], ax=ax, alpha=0.5)
-sns.rugplot(df["fare"].dropna(), color=CHART["accent_dark"], ax=ax, height=0.05)
+sns.kdeplot(df["fare"].dropna(), fill=True, color=CHART["primary_1"], ax=ax, alpha=0.4)
+sns.rugplot(df["fare"].dropna(), color=CHART["primary_1"], ax=ax, height=0.05)
 ax.set_title("KDE + rugplot — fare")
 plt.tight_layout(); plt.show()
 ```
@@ -350,24 +350,26 @@ Pour petits échantillons (n < 50), préférer hist + rug ; pour grands, KDE seu
 <!-- #endregion -->
 
 <!-- #region -->
-Pour 1 catégorielle : **comptage par modalité**. Toujours **trier par fréquence** sauf si un ordre métier existe. Pattern utile : highlight de la modalité modale en couleur primaire, les autres en `beige` (neutre).
+Pour 1 catégorielle : **comptage par modalité**. Toujours **trier par fréquence** sauf si un ordre métier existe.
+
+**Règle couleur** : "soit 1 couleur uniforme, soit N couleurs distinctes (palette dans l'ordre)". Pas de panachage 1+beige+beige. Ici 3 modalités → 3 couleurs `palette[:3]` = `[primary_1, mauvais, moyen]`.
 <!-- #endregion -->
 
 ```python
+palette3 = PALETTE[:3]  # [primary_1, mauvais, moyen]
+
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 order_emb = df["embarked"].value_counts().index.tolist()
-sns.countplot(x="embarked", data=df, order=order_emb, ax=axes[0],
-              palette=[CHART["primary_1"], CHART["beige"], CHART["beige"]])
-axes[0].set_title("countplot — embarked (modale en primary_1, autres en beige)")
+sns.countplot(x="embarked", data=df, order=order_emb, ax=axes[0], palette=palette3)
+axes[0].set_title("countplot — embarked (3 modalités, palette[:3] dans l'ordre)")
 order_pcl = df["pclass"].value_counts().index.tolist()
-sns.countplot(x="pclass", data=df, order=order_pcl, ax=axes[1],
-              palette=[CHART["primary_1"], CHART["beige"], CHART["beige"]])
+sns.countplot(x="pclass", data=df, order=order_pcl, ax=axes[1], palette=palette3)
 axes[1].set_title("countplot — pclass")
 plt.tight_layout(); plt.show()
 ```
 
 <!-- #region -->
-Pattern **highlight modale** : barre principale en `primary_1`, les autres en `beige` neutre. L'œil va directement à l'info principale.
+Les couleurs sémantiques (`mauvais`, `moyen`) ne portent **pas** ici de sens "bad/medium" — c'est juste l'ordre du palette pour 3 modalités sans hiérarchie naturelle. Pour un ordre sémantique réel (ex: `pclass 1<2<3`), voir sections 8 et 10.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -497,8 +499,8 @@ Combinés pour `sex × pclass` : effectifs + taux de survie par croisement.
 ```python
 fig, axes = plt.subplots(1, 2, figsize=(13, 4))
 sns.countplot(data=df, x="sex", hue="pclass",
-              palette=[CHART["primary_1"], CHART["moyen"], CHART["mauvais"]], ax=axes[0])
-axes[0].set_title("countplot — sex × pclass (effectifs)")
+              palette=[CHART["accent"], CHART["moyen"], CHART["mauvais"]], ax=axes[0])
+axes[0].set_title("countplot — sex × pclass (pclass ordonné accent/moyen/mauvais)")
 pivot = df.pivot_table(index="sex", columns="pclass", values="survived", aggfunc="mean")
 sns.heatmap(pivot, annot=True, fmt=".2%", cmap="RdBu_r", center=0.5, vmin=0, vmax=1,
             linewidths=0.5, linecolor="white", ax=axes[1])
@@ -530,13 +532,13 @@ Matrice de scatters bivariés + distributions univariées en diagonale.
 
 ```python
 g = sns.pairplot(df[["age", "fare", "sibsp", "survived"]].dropna(),
-                 hue="survived", palette=[CHART["mauvais"], CHART["primary_1"]], height=2.2)
+                 hue="survived", palette=[CHART["mauvais"], CHART["accent"]], height=2.2)
 g.fig.suptitle("pairplot — age/fare/sibsp colorés par survived", y=1.02)
 plt.show()
 ```
 
 <!-- #region -->
-`mauvais` = mort, `primary_1` = survivant. L'**encodage sémantique** parle : rouge = "mauvaise issue" pour le passager.
+`mauvais` (rouge) = 0 = mort, `accent` (vert) = 1 = survivant. L'**encodage sémantique** parle : rouge = "mauvaise issue", vert = "bonne issue". Convention bad→good.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -649,7 +651,7 @@ Encodage couleur sémantique : `primary_1` pour la 1ère classe, `moyen` pour la
 
 ```python
 fig, axes = plt.subplots(len(pclass_order), 1, figsize=(11, 7), sharex=True)
-subplot_colors = [CHART["primary_1"], CHART["moyen"], CHART["mauvais"]]
+subplot_colors = [CHART["accent"], CHART["moyen"], CHART["mauvais"]]  # pclass 1<2<3 ordonné bon→moyen→mauvais
 for i, pc in enumerate(pclass_order):
     sub = df_clean[df_clean["pclass"] == pc]["embarked"].value_counts().reindex(emb_order, fill_value=0)
     axes[i].bar(sub.index, sub.values, color=subplot_colors[i], label=f"pclass {pc}")

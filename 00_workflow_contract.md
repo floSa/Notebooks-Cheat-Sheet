@@ -126,7 +126,33 @@ Le temps n'est pas le problème. Le respect du workflow et l'honnêteté du rapp
 
 ---
 
-## 6. Kernel Jupyter (à ré-enregistrer après tout `uv sync` qui recrée `.venv`)
+## 6. UV / venv : **utiliser exclusivement UV côté WSL** sur ce projet
+
+Le projet vit dans WSL (`/home/florian/mes_projets/Notebooks_convertion`).
+
+**Piège** : créer le `.venv` avec **UV Windows** (depuis MSYS, PowerShell, ou via `\\wsl.localhost\...`) produit un venv avec des binaires Windows + symlink Linux `lib64` qui :
+
+- N'est **pas utilisable depuis WSL** (pas de Python ELF natif).
+- Casse le kernel Jupyter quand VSCode est en mode Remote-WSL.
+- Casse `uv sync` au run suivant (UV Windows ne sait pas supprimer le symlink Linux et plante avec `error: failed to remove file ...lib64`).
+
+**Règle** : **installer UV dans WSL** (une seule fois) puis exécuter **tous** les `uv sync`, `uv run`, `uv add`, `ipykernel install` via WSL.
+
+```bash
+# Install one-time (au choix)
+wsl -d ubuntu-24.04 -- bash -lc "curl -LsSf https://astral.sh/uv/install.sh | sh"
+# ou (sans curl|sh) :
+wsl -d ubuntu-24.04 -- bash -lc "sudo apt update && sudo apt install -y pipx && pipx ensurepath && pipx install uv"
+
+# Setup venv + kernel (à refaire si .venv supprimé)
+wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && rm -rf .venv && uv sync && uv run python -m ipykernel install --user --name=notebooks-refonte --display-name='Python (notebooks-refonte)'"
+```
+
+Si tu te retrouves avec un `.venv` cassé Windows ↔ WSL : `wsl -d ubuntu-24.04 -- bash -c "rm -rf .venv"` puis re-créer côté WSL.
+
+---
+
+## 7. Kernel Jupyter (à ré-enregistrer après tout `uv sync` qui recrée `.venv`)
 
 Si le `.venv` est supprimé/recréé (par exemple parce que `uv sync` a échoué et il a fallu `rm -rf .venv` côté WSL), le kernel Jupyter `notebooks-refonte` pointe vers un chemin disparu et Jupyter/VSCode affichera :
 
@@ -142,7 +168,7 @@ C'est idempotent — peut être lancé sans risque même si le kernel existe dé
 
 ---
 
-## 7. État actuel du projet
+## 8. État actuel du projet
 
 - **0 notebook** ne passe les 5 critères au moment où ce contrat est écrit.
 - Les 44 fichiers dans `04_notebooks_finaux/` sont au mieux des 🟡 v0.
@@ -151,7 +177,28 @@ C'est idempotent — peut être lancé sans risque même si le kernel existe dé
 - Env UV fonctionnel, scripts de conversion OK.
 - Script `scripts/check_format.py` opérationnel (testé et trouvant des issues réelles).
 
-## 8. Pour reprendre proprement
+## 9. Règles couleurs dans les notebooks de viz / EDA
+
+Pour éviter les "12000 styles différents" :
+
+| Cas | Règle |
+|---|---|
+| **Variable univariée** (1 var représentée 1+ fois) | **1 seule couleur** = `primary_1` partout. Pas de variation hist/box/KDE en couleurs différentes. |
+| **Multi-catégorie sans ordre naturel** (ex: `embarked` S/C/Q) | **Soit 1 couleur uniforme, soit N couleurs distinctes**. Pas de panachage 1+beige+beige. Pour N : utiliser `PALETTE[:N]` dans l'ordre. |
+| **Multi-catégorie avec ordre sémantique bon→mauvais** (ex: `pclass 1<2<3`, `survived 0/1`) | `[accent, moyen, mauvais]` pour 3 niveaux ; `[accent, mauvais]` pour binaire (good/bad). |
+| **Highlight d'une modalité spécifique** (ex: la max) | La modalité d'intérêt en `accent_dark`, les autres en `primary_1` (ou `beige` si on veut estomper). |
+| **Séries continues neutres** (capteurs, métriques sans good/bad) | Couleurs neutres de la palette : `primary_1`, `lavender`, `dusty_rose`, `beige`. |
+| **Heatmap continue** (corrélations, taux) | Cmap matplotlib divergente (`RdBu_r` centré sur 0 / 0.5) — pas la palette CHART. |
+
+La palette CHART est :
+```
+PALETTE = [primary_1, mauvais, moyen, accent, accent_dark, lavender, dusty_rose, beige]
+            #00798c   #d1495b   #edae49 #66a182  #2e4057    #9d83b8   #b8848e    #c9b78b
+```
+
+---
+
+## 10. Pour reprendre proprement
 
 1. Lire ce contrat (tu le lis).
 2. Lire `00_consignes.md` (règles de format) et `00_status_notebooks.md` (état).
