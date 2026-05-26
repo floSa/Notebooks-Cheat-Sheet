@@ -1,5 +1,9 @@
 # 📋 Consignes — refonte qualité des notebooks
 
+> **⚠️ Avant de toucher au moindre notebook, lire `00_workflow_contract.md`.**
+> Ce contrat définit ce que signifie "fait" pour ce projet, le workflow obligatoire en 11 étapes, et le vocabulaire honnête de rapporting. Il existe suite à un travail antérieur défaillant qui a annoncé "✅ fait" pour 44 notebooks qui ne l'étaient pas.
+
+
 ## Objectif
 
 Mettre à jour et **compléter** un corpus de 45 notebooks personnels couvrant ML / DL / NLP / Time Series / EDA / BDD / TdS / DE.

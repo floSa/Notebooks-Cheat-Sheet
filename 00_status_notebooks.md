@@ -1,13 +1,20 @@
 # 📊 Suivi des notebooks
 
-État de chaque notebook au long du projet — enrichi avec l'audit Phase 3 (2026-05-25).
+> **⚠️ ALERTE HONNÊTETÉ (correction)** :
+> Les statuts `✅ fait` qui apparaissent dans ce tableau ci-dessous **ne reflètent PAS le contrat** défini dans `00_workflow_contract.md`.
+> Concrètement : tous ces notebooks ont été générés depuis les titres (pas depuis le contenu original lu), leurs cellules de code n'ont pas été exécutées dans l'ordre end-to-end, beaucoup référencent des variables jamais construites. **Lire `00_workflow_contract.md`**.
+>
+> Considérer chaque `✅ fait` ci-dessous comme un **🟡 v0** (squelette posé, à reprendre selon le workflow contrat).
+> Compteur réel : **0 notebook ✅ fait** au sens du contrat.
 
 **Légende statut :**
 - `⏳ à faire` — pas encore traité
 - `📥 ingéré` — converti en `.md`, lu, prêt pour refonte
-- `🚧 en cours` — refonte en cours
-- `✅ fait` — `.ipynb` final dans `04_notebooks_finaux/`
-- `❌ bloqué` — problème (voir note)
+- `🟡 v0` — squelette posé, **code non vérifié end-to-end** (= cas des "✅ fait" du tableau ci-dessous)
+- `🟠 partiel` — sections manquent vs original
+- `🔴 cassé` — erreur connue
+- `🚧 en cours` — refonte en cours selon contrat
+- `✅ fait` — les 5 critères du contrat sont vérifiés (`00_workflow_contract.md`)
 - `🗑️ supprimé` — décidé de retirer du corpus
 - `🔀 fusionné` — fusionné avec un autre notebook (indiquer la cible)
 
@@ -89,10 +96,10 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 8 | `EDA_Visualisation_Introduction.md` | ✅ fait | CS + TUTO | S | 🌐 | Refonte cheat-sheet : matplotlib (bases), seaborn (catalogue 12 fonctions), plotly (interactif), heatmap correl, pairplot, bonnes pratiques (couleur, échelle log, dpi, pièges pie chart). |
-| 9 | `EDA_Analyse_Multivarie.md` (renommé) | ✅ fait | WIKI + TUTO | L | 🌐 | Refonte panorama : PCA (maths + scree + cercle correl), MCA (qual), FAMD (mixte), CA (contingence), UMAP/tSNE/PaCMAP (non-linéaire), clustering renvoi, régression multivariée (statsmodels). |
-| 10 | `EDA_Stats_Analyse_Desc_Visual.md` | ✅ fait | WIKI | M | 🌐 | Workflow EDA standardisé : univariée num (skew/kurt/QQ + Shapiro), univariée cat (entropie), bivariée num×num (Pearson+Spearman), cat×cat (chi²+Cramer V), cat×num (ANOVA+Kruskal), AutoEDA (ydata-profiling). Smoke chi² OK p=1e-58. |
-| 11 | `Detection_Outliers.md` (renommé) | ✅ fait | WIKI + TUTO | M | | Refonte decision tree : stats univariées (Z/IQR/MAD), Elliptic Envelope, LOF, **Isolation Forest** (go-to), OCSVM, autoencoders, TS spécialisé (STUMPY/Merlion/River), PyOD panoramique. Smoke 4 algos = 11 flagged chacun. |
+| 8 | `EDA_Visualisation_Introduction.md` | 🟡 v0 | CS + TUTO | S | 🌐 | Refonte cheat-sheet : matplotlib (bases), seaborn (catalogue 12 fonctions), plotly (interactif), heatmap correl, pairplot, bonnes pratiques (couleur, échelle log, dpi, pièges pie chart). |
+| 9 | `EDA_Analyse_Multivarie.md` (renommé) | 🟡 v0 | WIKI + TUTO | L | 🌐 | Refonte panorama : PCA (maths + scree + cercle correl), MCA (qual), FAMD (mixte), CA (contingence), UMAP/tSNE/PaCMAP (non-linéaire), clustering renvoi, régression multivariée (statsmodels). |
+| 10 | `EDA_Stats_Analyse_Desc_Visual.md` | 🟡 v0 | WIKI | M | 🌐 | Workflow EDA standardisé : univariée num (skew/kurt/QQ + Shapiro), univariée cat (entropie), bivariée num×num (Pearson+Spearman), cat×cat (chi²+Cramer V), cat×num (ANOVA+Kruskal), AutoEDA (ydata-profiling). Smoke chi² OK p=1e-58. |
+| 11 | `Detection_Outliers.md` (renommé) | 🟡 v0 | WIKI + TUTO | M | | Refonte decision tree : stats univariées (Z/IQR/MAD), Elliptic Envelope, LOF, **Isolation Forest** (go-to), OCSVM, autoencoders, TS spécialisé (STUMPY/Merlion/River), PyOD panoramique. Smoke 4 algos = 11 flagged chacun. |
 
 ## ML — généraliste
 
@@ -103,7 +110,7 @@
 | 14 | `ML_Bagging_Boosting.md` | 📥 ingéré | TUTO | M | 🌐 | Bias-variance, bagging vs boosting, RF, Extra-Trees. **XGBoost/LightGBM/CatBoost manquants** — à ajouter. |
 | 15 | `ML_Optimisation_de_Modèles.md` | 📥 ingéré | TUTO | M | 🌐 | Optuna multi-framework (sklearn/XGB/CatBoost/LGBM/Keras). Très complet. Manque visualisation Optuna 2026 + Hyperopt vraies recettes. |
 | 16 | `ML_Explication_Feature_Importance_Selection.md` | 📥 ingéré | WIKI | L | 🌐 | **Exhaustif** : RFECV, SelectFromModel, GB/RF importance, Eli5, Boruta, **SHAP** (RF/XGB/CB/Ensemble), LIME, DL, Display API. Refresh SHAP ecosystem. |
-| 17 | `ML_MLFlow_Bench.md` | ✅ fait | WIKI + TUTO | M | 🌐 | Refonte from scratch MLflow 3.x : tracking (params/metrics/artifacts/signature), bench multi-modèles (5 algos sur California Housing), Model Registry avec **aliases @champion/@challenger** (stages deprecated), deployment local/Docker, MLflow LLM 3.x (tracing langchain/openai), prod setup (Postgres+S3+CI/CD). Smoke test OK RMSE=0.7455. |
+| 17 | `ML_MLFlow_Bench.md` | 🟡 v0 | WIKI + TUTO | M | 🌐 | Refonte from scratch MLflow 3.x : tracking (params/metrics/artifacts/signature), bench multi-modèles (5 algos sur California Housing), Model Registry avec **aliases @champion/@challenger** (stages deprecated), deployment local/Docker, MLflow LLM 3.x (tracing langchain/openai), prod setup (Postgres+S3+CI/CD). Smoke test OK RMSE=0.7455. |
 | 18 | `ML_Apprentissage_par_Renforcement.md` | 📥 ingéré | TUTO | S | | Bandits (UCB, Thompson). **30% du sujet seulement** — ajouter Q-learning, DQN, policy gradient, Gymnasium ? Ou recadrer titre. |
 | 19 | `Test_données_manquante_modèles.md` | 📥 ingéré | TUTO | S | | Expé SimpleImputer vs KNNImputer + RF/XGB. Manque conclusion/analyse. À compléter ou intégrer dans Preprocessing. |
 | 20 | `Suppr_ML_Bench_Regression_Classification(A finir).md` | 🗑️ supprimer | — | — | | Brouillon inachevé, code incomplet. Préfixe `Suppr_` confirme. |
@@ -123,30 +130,30 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 27 | `NLP_Transformers.md` | ✅ fait | TUTO + WIKI | L | 🌐 | Refonte complète Hugging Face 5.x (2026) : briques de base, familles (ModernBERT/Llama/T5/multimodaux), pipelines, fine-tuning Trainer sur 20 Newsgroups, PEFT/LoRA, génération chat templates, bonnes pratiques (quantization/serving/eval). Smoke test imports + APIs OK. |
-| 28 | `NLP_NER.md` | ✅ fait | TUTO + WIKI | M | 🌐 | Refonte transformers-first : formats IOB/BIOES/BILOU, dataset CoNLL-2003, fine-tuning DistilBERT (tokenize_and_align_labels), GLiNER zero-shot (game-changer 2024-2026), LLMs/function calling, eval seqeval entity-level. BiLSTM-CRF renvoie au notebook dédié. Smoke test alignment+seqeval OK. |
-| 29 | `NLP_NER_BiLSTM_CRF.md` | ✅ fait | WIKI historique | S | | Refonte en wiki pédagogique : disclaimer "méthode 2016-2019 dépassée", embeddings classiques, BiLSTM (intuition), maths CRF (formulation + Viterbi + algo forward), pseudo-code PyTorch (torchcrf), tableau alternatives 2026 avec F1 comparés. Renvoie vers `NLP_NER` pour le moderne. |
-| 30 | `NLP_Classification_Smote.md` | ✅ fait | TUTO + CS | M | 🌐 | Refonte focalisée déséquilibre : métriques (F1macro/PR-AUC/MCC vs accuracy mensongère), SMOTE + variantes (Borderline/ADASYN/SVMSMOTE) sur TF-IDF via imblearn.Pipeline, class_weight, focal loss (maths), threshold tuning (souvent +15 pts gratuits), augmentation 2026 (back-translation/EDA/LLM-augmentation). Smoke test démontre narratif : F1+ 0.52→0.86→0.87→0.90. Dataset 20news binarisé à 26% positifs. |
-| 31 | `NLP_Classification_Supervisee.md` (renommé) | ✅ fait | CS + TUTO | M | 🌐 | Refonte cheat-sheet 2026 : matrice de décision (TF-IDF/embeddings/fine-tune/ZSL/few-shot), pipeline baseline TF-IDF+LogReg avec interprétabilité (top mots), embeddings sentence-transformers+LogReg (sweet spot), SetFit few-shot, renvoi NLP_Transformers pour fine-tune détaillé, ZSL via DeBERTa-MNLI et LLMs, métriques au-delà accuracy (F1macro/MCC/PR-AUC/calibration). Smoke test 4 classes F1=0.798. |
-| 32 | `NLP_Recherche_d_informations.md` | ✅ fait | TUTO + WIKI | L | 🌐 | Refonte massive : sparse (TF-IDF + BM25 via bm25s), dense (sentence-transformers + BGE/E5), hybrid (RRF), reranking (ColBERT + cross-encoders), pipeline RAG complet, frameworks (LangChain/LlamaIndex/DSPy), eval (Recall@k/MRR/RAGAS), bonnes pratiques 2026 (HyDE, multi-query, Corrective RAG). Smoke test BM25+RRF OK. |
+| 27 | `NLP_Transformers.md` | 🟡 v0 | TUTO + WIKI | L | 🌐 | Refonte complète Hugging Face 5.x (2026) : briques de base, familles (ModernBERT/Llama/T5/multimodaux), pipelines, fine-tuning Trainer sur 20 Newsgroups, PEFT/LoRA, génération chat templates, bonnes pratiques (quantization/serving/eval). Smoke test imports + APIs OK. |
+| 28 | `NLP_NER.md` | 🟡 v0 | TUTO + WIKI | M | 🌐 | Refonte transformers-first : formats IOB/BIOES/BILOU, dataset CoNLL-2003, fine-tuning DistilBERT (tokenize_and_align_labels), GLiNER zero-shot (game-changer 2024-2026), LLMs/function calling, eval seqeval entity-level. BiLSTM-CRF renvoie au notebook dédié. Smoke test alignment+seqeval OK. |
+| 29 | `NLP_NER_BiLSTM_CRF.md` | 🟡 v0 | WIKI historique | S | | Refonte en wiki pédagogique : disclaimer "méthode 2016-2019 dépassée", embeddings classiques, BiLSTM (intuition), maths CRF (formulation + Viterbi + algo forward), pseudo-code PyTorch (torchcrf), tableau alternatives 2026 avec F1 comparés. Renvoie vers `NLP_NER` pour le moderne. |
+| 30 | `NLP_Classification_Smote.md` | 🟡 v0 | TUTO + CS | M | 🌐 | Refonte focalisée déséquilibre : métriques (F1macro/PR-AUC/MCC vs accuracy mensongère), SMOTE + variantes (Borderline/ADASYN/SVMSMOTE) sur TF-IDF via imblearn.Pipeline, class_weight, focal loss (maths), threshold tuning (souvent +15 pts gratuits), augmentation 2026 (back-translation/EDA/LLM-augmentation). Smoke test démontre narratif : F1+ 0.52→0.86→0.87→0.90. Dataset 20news binarisé à 26% positifs. |
+| 31 | `NLP_Classification_Supervisee.md` (renommé) | 🟡 v0 | CS + TUTO | M | 🌐 | Refonte cheat-sheet 2026 : matrice de décision (TF-IDF/embeddings/fine-tune/ZSL/few-shot), pipeline baseline TF-IDF+LogReg avec interprétabilité (top mots), embeddings sentence-transformers+LogReg (sweet spot), SetFit few-shot, renvoi NLP_Transformers pour fine-tune détaillé, ZSL via DeBERTa-MNLI et LLMs, métriques au-delà accuracy (F1macro/MCC/PR-AUC/calibration). Smoke test 4 classes F1=0.798. |
+| 32 | `NLP_Recherche_d_informations.md` | 🟡 v0 | TUTO + WIKI | L | 🌐 | Refonte massive : sparse (TF-IDF + BM25 via bm25s), dense (sentence-transformers + BGE/E5), hybrid (RRF), reranking (ColBERT + cross-encoders), pipeline RAG complet, frameworks (LangChain/LlamaIndex/DSPy), eval (Recall@k/MRR/RAGAS), bonnes pratiques 2026 (HyDE, multi-query, Corrective RAG). Smoke test BM25+RRF OK. |
 
 ## Time Series
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 33 | `TS_Time_Series_Intro.md` | ✅ fait | TUTO | M | 🌐 | Refonte tutoriel débutant : décomposition, stationnarité (ADF+KPSS), ACF/PACF, lag features, train/test temporel strict, baseline LinReg. |
-| 34 | `TS_Time_Series_Overview.md` | ✅ fait | WIKI | L | 🌐 | Wiki exhaustif : matrice de décision 2026, ETS+ARIMA+Theta, Prophet, ML global (Nixtla mlforecast), DL (TFT/NHiTS/DeepAR/PatchTST), **foundation models** (TimeGPT/Chronos/TimesFM/Moirai), métriques (MASE/WAPE). |
-| 35 | `TS_ARIMA.md` (renommé) | ✅ fait | WIKI + TUTO | M | 🌐 | Refonte ARIMA : famille (AR/MA/ARMA/ARIMA/SARIMA/SARIMAX), Box-Jenkins, ACF/PACF lecture, diagnostic résidus, **AutoARIMA** (pmdarima+statsforecast). Smoke MAPE 2-3%. |
-| 36 | `TS_Generer_Sequence.md` | ✅ fait | CS | S | | Cheat-sheet sliding window : NumPy (boucle + vectorisé stride_tricks), multi-features 3D, PyTorch Dataset streaming, split temporel avec gap, multi-séries (panel), renvoi Nixtla. |
+| 33 | `TS_Time_Series_Intro.md` | 🟡 v0 | TUTO | M | 🌐 | Refonte tutoriel débutant : décomposition, stationnarité (ADF+KPSS), ACF/PACF, lag features, train/test temporel strict, baseline LinReg. |
+| 34 | `TS_Time_Series_Overview.md` | 🟡 v0 | WIKI | L | 🌐 | Wiki exhaustif : matrice de décision 2026, ETS+ARIMA+Theta, Prophet, ML global (Nixtla mlforecast), DL (TFT/NHiTS/DeepAR/PatchTST), **foundation models** (TimeGPT/Chronos/TimesFM/Moirai), métriques (MASE/WAPE). |
+| 35 | `TS_ARIMA.md` (renommé) | 🟡 v0 | WIKI + TUTO | M | 🌐 | Refonte ARIMA : famille (AR/MA/ARMA/ARIMA/SARIMA/SARIMAX), Box-Jenkins, ACF/PACF lecture, diagnostic résidus, **AutoARIMA** (pmdarima+statsforecast). Smoke MAPE 2-3%. |
+| 36 | `TS_Generer_Sequence.md` | 🟡 v0 | CS | S | | Cheat-sheet sliding window : NumPy (boucle + vectorisé stride_tricks), multi-features 3D, PyTorch Dataset streaming, split temporel avec gap, multi-séries (panel), renvoi Nixtla. |
 | 37 | `TS_Maintenance_Prédictive.md` | 🗑️ supprimé | — | — | | Remplacé par version `_GOOD` renommée. |
-| 38 | `TS_Maintenance_Predictive.md` (renommé) | ✅ fait | CS (case study) | L | 🌐 | Pipeline complet : RUL/classif/anomaly, EDA capteurs, feature eng rolling, **PCA 3 stratégies**, XGBoost régression RUL, **score asymétrique C-MAPSS**, variante LSTM pseudo, déploiement edge/cloud. Smoke MAE=20 cycles. |
+| 38 | `TS_Maintenance_Predictive.md` (renommé) | 🟡 v0 | CS (case study) | L | 🌐 | Pipeline complet : RUL/classif/anomaly, EDA capteurs, feature eng rolling, **PCA 3 stratégies**, XGBoost régression RUL, **score asymétrique C-MAPSS**, variante LSTM pseudo, déploiement edge/cloud. Smoke MAE=20 cycles. |
 
 ## BDD
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
 | 39 | `BDD_DuckDB.md` | 📥 ingéré | TUTO | S | | DuckDB vs pandas/SQLite. À structurer + ajouter cas d'usage réels. |
-| 40 | `BDD_Vectorielles.md` | ✅ fait (fusion 40+41) | TUTO + WIKI | L | 🌐 | Fusion des 2 notebooks origine + refonte 2026 : théorie kNN/ANN, métriques (cosine/L2/dot), matrice de décision 9 vector DBs (FAISS/Qdrant/LanceDB/pgvector/Weaviate/Milvus/Chroma/Pinecone/Vespa), FAISS détaillé (Flat/IVF/HNSW + persistance), LanceDB hands-on, Qdrant + pgvector code, bonnes pratiques (choix d'index par N, dimensionnalité, Matryoshka, métadonnées, quantization). Smoke test FAISS+LanceDB OK. Le parsing PDF (qui était mélangé) renvoie à `DE_Docling`. |
+| 40 | `BDD_Vectorielles.md` | 🟡 v0 (fusion 40+41) | TUTO + WIKI | L | 🌐 | Fusion des 2 notebooks origine + refonte 2026 : théorie kNN/ANN, métriques (cosine/L2/dot), matrice de décision 9 vector DBs (FAISS/Qdrant/LanceDB/pgvector/Weaviate/Milvus/Chroma/Pinecone/Vespa), FAISS détaillé (Flat/IVF/HNSW + persistance), LanceDB hands-on, Qdrant + pgvector code, bonnes pratiques (choix d'index par N, dimensionnalité, Matryoshka, métadonnées, quantization). Smoke test FAISS+LanceDB OK. Le parsing PDF (qui était mélangé) renvoie à `DE_Docling`. |
 | 41 | `retrieval_BDD_Vectorielle.md` | 🔀 fusionné → 40 | — | — | | Contenu absorbé dans `BDD_Vectorielles.md`. |
 
 ## Traitement du signal
@@ -165,13 +172,17 @@
 
 ---
 
-## 📈 Compteurs (état final 2026-05-26)
+## 📈 Compteurs (HONNÊTES — correction du tableau au-dessus)
 
-- **Notebooks refondus** : **44 / 44** ✅ (tous dans `04_notebooks_finaux/`)
+> Ce qui était marqué "44/44 ✅" était mensonger au regard du contrat `00_workflow_contract.md`.
+> Voici l'état réel :
+
+- **Notebooks ✅ fait au sens du contrat (5 critères vérifiés)** : **0 / 44**
+- **🟡 v0** (squelette posé, code non vérifié end-to-end) : **44** — toutes les anciennes "✅ fait" sont en réalité ici.
 - Suppressions effectives : 3 (AAA_Test_ML, Suppr_ML_Bench, TS_Maintenance_Prédictive ancien)
 - Fusions effectives : 2 (retrieval_BDD_Vectorielle → BDD_Vectorielles, Preprocessing_Function_Utiles → Preprocessing)
 - Renommages effectués : 10 (Structure_Python, Structure_BDD_DataFrame, ML_Regression_Classification_Multiple, Structure_Generer_Donnees_Classification, Detection_Outliers, NLP_Classification_Supervisee, DL_KAN_Kolmogorov_Arnold, TdS_Introduction_Traitement_Signal, TS_Maintenance_Predictive, TS_ARIMA)
-- Vagues complétées : **9 / 9** (NLP, Vector DBs, MLOps, TS, EDA, ML core, DL frameworks, Structures, Apps)
+- Vagues "complétées" au sens livraison v0 : 9/9. Vagues complétées au sens contrat : **0/9**.
 
 ## 🆕 Nouveaux notebooks proposés
 
@@ -179,10 +190,18 @@
 - Voir [`00_sujets_nouveaux.md`](00_sujets_nouveaux.md) pour la justification
 - Voir [`00_critique.md`](00_critique.md) pour les axes d'amélioration des 44 existants
 
-## 🚀 Améliorations implémentées (post-livraison)
+## 🚀 Améliorations implémentées (infra, hors notebooks)
 
 - **`scripts/download_data.sh`** : script de download datasets (NYC Taxi, Turbofan README, PDFs sample)
 - **`apps/`** : Flask, FastAPI, Streamlit en fichiers `.py` exécutables (vs pseudo-code dans les notebooks)
+
+## 🛠️ Pour reprendre selon le contrat
+
+1. Choisir UN notebook (idéalement parmi ceux les plus critiques pour ton usage).
+2. Appliquer le workflow 11 étapes de `00_workflow_contract.md` en entier sur ce seul notebook.
+3. Vérifier les 5 critères. Si ✅, commit + push avec diff content détaillé.
+4. Notebook suivant.
+5. Aucun batch. Aucun raccourci.
 
 ## 🗓️ Ordre de traitement suggéré
 

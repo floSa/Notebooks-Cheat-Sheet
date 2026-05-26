@@ -1,5 +1,7 @@
 # 🗺️ Plan d'exécution
 
+> **⚠️ Voir aussi `00_workflow_contract.md`** pour la définition binding de "✅ fait" et le workflow obligatoire en 11 étapes. Ce plan est conservé comme repère historique, mais les Phases 4/5 sont remplacées en pratique par le workflow du contrat.
+
 Ce document décrit, étape par étape, ce qui va être fait. Aucune étape ne démarre tant que les documents (`00_consignes.md`, ce plan, `00_status_notebooks.md`) ne sont pas validés.
 
 ---
