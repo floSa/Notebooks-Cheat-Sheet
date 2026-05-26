@@ -126,7 +126,23 @@ Le temps n'est pas le problème. Le respect du workflow et l'honnêteté du rapp
 
 ---
 
-## 6. État actuel du projet
+## 6. Kernel Jupyter (à ré-enregistrer après tout `uv sync` qui recrée `.venv`)
+
+Si le `.venv` est supprimé/recréé (par exemple parce que `uv sync` a échoué et il a fallu `rm -rf .venv` côté WSL), le kernel Jupyter `notebooks-refonte` pointe vers un chemin disparu et Jupyter/VSCode affichera :
+
+> `The kernel failed to start as the Python Environment 'notebooks-refonte' is no longer available.`
+
+**Fix systématique** après tout `uv sync` qui recrée l'environnement :
+
+```bash
+uv run python -m ipykernel install --user --name=notebooks-refonte --display-name="Python (notebooks-refonte)"
+```
+
+C'est idempotent — peut être lancé sans risque même si le kernel existe déjà. À intégrer aussi dans tout script de setup qui réinstalle l'env.
+
+---
+
+## 7. État actuel du projet
 
 - **0 notebook** ne passe les 5 critères au moment où ce contrat est écrit.
 - Les 44 fichiers dans `04_notebooks_finaux/` sont au mieux des 🟡 v0.
@@ -135,7 +151,7 @@ Le temps n'est pas le problème. Le respect du workflow et l'honnêteté du rapp
 - Env UV fonctionnel, scripts de conversion OK.
 - Script `scripts/check_format.py` opérationnel (testé et trouvant des issues réelles).
 
-## 7. Pour reprendre proprement
+## 8. Pour reprendre proprement
 
 1. Lire ce contrat (tu le lis).
 2. Lire `00_consignes.md` (règles de format) et `00_status_notebooks.md` (état).
