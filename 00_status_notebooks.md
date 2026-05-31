@@ -121,7 +121,7 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 23 | `DL_Deep_Learning_Maths.md` | 📥 ingéré | TUTO | M | 🌐 | Gradient descent, overflow, généralisation N couches. Manque chapitre intro, momentum/Adam, régularisation. Ajouter JAX/autograd moderne. |
+| 23 | `DL_Deep_Learning_Maths.md` | ✅ fait | TUTO + WIKI | M | | Réseau de neurones from scratch (numpy) : neurone/régression logistique → réseau 2 couches → généralisation N couches → §4 implémentée (ReLU+He, Momentum/Adam, L2+Dropout, mini-autograd reverse-mode). Formules en LaTeX (ex-images), 2 schémas réseau conservés. Dataset Colab perdu remplacé par load_digits. 5 critères contrat OK (sandbox + code extrait du .ipynb exit 0, check_format vert). |
 | 24 | `DL_Tensorflow_Keras.md` | 📥 ingéré | TUTO | M | 🌐 | ANN, batch, régularisation, weights, SHAP. **Décision stratégique** : migrer vers Keras 3 (multi-backend) ou archiver et basculer sur PyTorch. |
 | 25 | `DL_PyTorch.md` | 📥 ingéré | TUTO | L | | **Excellent** (13 MB, 12+ sections : tenseurs, GPU, Dataset/Loader, training, eval, régression, classif, TensorBoard, ROC/AUC). Ajouter ViT, autograd hooks, distributed. |
 | 26 | `KAN (Kolmogorov-Arnold Networks).md` | 📥 ingéré | WIKI | S | 🌐 | Théorème KA, contribution, avantages/limites. Compléter avec impl pratique (pykan/torch-kan), benchmarks 2024-2026. **Renommer**. |
