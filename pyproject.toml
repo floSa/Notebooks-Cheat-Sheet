@@ -47,6 +47,8 @@ dependencies = [
     "prince>=0.19.0",
     "umap-learn>=0.5.12",
     "pacmap>=0.9.1",
+    "ydata-profiling>=4.18.4",
+    "sweetviz>=2.3.3",
 ]
 
 [tool.jupytext]

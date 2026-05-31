@@ -1310,43 +1310,161 @@ fig_par.show()
 <!-- #endregion -->
 
 <!-- #region -->
-En 2026, plusieurs libs génèrent un **rapport HTML complet** en 1 ligne. Panorama rapide :
+Plusieurs libs génèrent un **rapport HTML complet** en 1 appel, calculé directement depuis un DataFrame. Le rapport contient typiquement : aperçu / missing / distribution univariée / corrélations / interactions / alertes (duplicats, déséquilibre, outliers).
+
+**Quand utiliser** : POC, prise en main d'un dataset inconnu, audit rapide en début de projet, comparaison train/test.
+
+**Quand NE PAS** : pour publier — le rapport sent toujours le défaut de personnalisation. Préférer une viz manuelle ciblée (= les recettes des sections 2 et 3 de ce notebook).
+
+Panorama des libs maintenues en 2026 :
 
 | Lib | Forces | Faiblesses |
 |---|---|---|
-| **ydata-profiling** (ex pandas-profiling) | Très complet, rapport HTML interactif, intégrations BI | Lent sur >100k lignes |
-| **sweetviz** | Comparaison train/test out-of-the-box, target analysis | Moins de stats |
-| **dataprep.eda** | Très rapide grâce à Dask | Moins d'options |
+| **ydata-profiling** (ex `pandas-profiling`) | Très complet, alertes auto (skewed/missing/zeros), rapport HTML interactif | Lent sur >100k lignes. **Rename annoncé fin 2025 → `fg-data-profiling`** |
+| **sweetviz** | Comparaison train/test out-of-the-box (`sv.compare`), target analysis | Moins de stats, pas d'interactions |
+| **dataprep.eda** | Rapide grâce à Dask | Moins d'options, API moins stable |
 | **autoviz** | Génère plein de graphes à la volée | Brut, pas de narratif |
-| **lux** | Suggestions de viz dans le notebook | Maintenance ralentie |
+| **lux** | Suggestions de viz directement dans le notebook | Maintenance ralentie |
 
-**Quand les utiliser** : POC, découverte d'un nouveau dataset, audit rapide en début de projet.
-
-**Quand NE PAS** : pour publier — préférer un travail manuel choisi avec soin (les rapports AutoEDA "sentent" toujours le défaut de personnalisation).
-
-Pseudo-code typique :
-
-    from ydata_profiling import ProfileReport
-    profile = ProfileReport(df_tips, title="Tips EDA", minimal=True)
-    profile.to_file("eda_tips.html")
+Dans la suite on utilise les 2 outils les plus solides en 2026 : `ydata-profiling` (panorama) et `sweetviz` (panorama + comparaison train/test).
 <!-- #endregion -->
 
 <!-- #region -->
-## 6. Workflow recommandé EDA (2026)
+### 5.1 `ydata-profiling` — rapport HTML complet
 <!-- #endregion -->
 
 <!-- #region -->
-1. **Charger** + `.shape`, `.dtypes`, `.head()`.
-2. **Missing** : `df.isna().sum()` + heatmap des NaN si nombreux.
-3. **AutoEDA** rapide (ydata-profiling) pour vue d'ensemble en 1 minute.
-4. **Univariée numérique** : describe étendu (+ skew/kurtosis), histo + box + QQ pour les variables clés.
-5. **Univariée catégorielle** : `value_counts`, fréquences, regroupement des modalités rares.
-6. **Bivariée num × num** : matrice de corr (Pearson + Spearman), pairplot pour les vars clés.
-7. **Cat × Num** : box / violin / swarm + ANOVA / Kruskal-Wallis selon normalité.
-8. **Cat × Cat** : table de contingence + chi² + Cramer's V.
-9. **Multivariée** : PCA / MCA / FAMD → voir `EDA_Analyse_Multivarie`.
-10. **Outliers** : voir `Detection_Outliers`.
-11. **Documenter** les findings en cellule MD au fur et à mesure — un notebook EDA sans commentaire est inutilisable 3 mois plus tard.
+`ProfileReport(df, minimal=True)` génère un rapport HTML autonome en ~1 seconde sur un petit dataset. Mode `minimal=True` désactive les analyses lourdes (interactions, correlations pairwise sur >X colonnes) — c'est l'option à utiliser par défaut.
+
+**Note 2026** : la lib est en cours de rename vers `fg-data-profiling`. L'API reste identique pendant la phase de transition ; un `DeprecationWarning` apparaît à l'import. Pour migrer plus tard : `pip install fg-data-profiling` + `import data_profiling`.
+<!-- #endregion -->
+
+```python
+from ydata_profiling import ProfileReport
+
+profile = ProfileReport(
+    df_tips,
+    title="Tips — AutoEDA (ydata-profiling)",
+    minimal=True,
+    progress_bar=False,
+)
+profile.to_file("eda_tips_ydata.html")
+```
+
+<!-- #region -->
+### 5.2 `sweetviz` — panorama autonome
+<!-- #endregion -->
+
+<!-- #region -->
+`sv.analyze(df)` produit un rapport HTML autonome avec un layout 2 colonnes : statistiques + mini-graphes par variable. Cible 1 variable (`target_feat=`) si tu veux une analyse supervisée (corrélations avec la cible mises en évidence).
+
+`pairwise_analysis="off"` évite la matrice de corrélation pairwise (lourde) — utile si on veut juste les distributions et stats univariées.
+<!-- #endregion -->
+
+```python
+import sweetviz as sv
+
+report_sv = sv.analyze(df_tips, pairwise_analysis="off")
+report_sv.show_html(
+    filepath="eda_tips_sweetviz.html",
+    open_browser=False,
+    layout="vertical",
+)
+```
+
+<!-- #region -->
+### 5.3 `sweetviz` — comparaison train / test
+<!-- #endregion -->
+
+<!-- #region -->
+La fonction killer de sweetviz : `sv.compare([df1, label1], [df2, label2])` met en regard les distributions de **2 DataFrames** côte à côte. Cas d'usage typiques :
+
+- **Train vs test** : détecter un data leak ou un décalage de distribution avant entraînement.
+- **Avant / après preprocessing** : vérifier que l'imputation ou la transformation n'a pas tordu une distribution.
+- **2 cohortes** : groupe contrôle vs traité, période A vs période B.
+
+Ici split aléatoire 70 / 30 reproductible pour démo.
+<!-- #endregion -->
+
+```python
+rng = np.random.default_rng(42)
+mask = rng.random(len(df_tips)) < 0.7
+df_train = df_tips[mask].reset_index(drop=True)
+df_test = df_tips[~mask].reset_index(drop=True)
+print(f"train n={len(df_train)} / test n={len(df_test)}")
+
+report_cmp = sv.compare(
+    [df_train, "Train"],
+    [df_test, "Test"],
+    pairwise_analysis="off",
+)
+report_cmp.show_html(
+    filepath="eda_tips_sweetviz_compare.html",
+    open_browser=False,
+    layout="vertical",
+)
+```
+
+<!-- #region -->
+## 6. Quel graphique pour quelle question ?
+<!-- #endregion -->
+
+<!-- #region -->
+Une fois l'AutoEDA digérée, on revient toujours à du **manuel ciblé** : "j'ai cette question précise, quel graphique + quelle stat ?". Cette section condense les recettes du notebook en une **matrice décisionnelle**, plus quelques pièges fréquents.
+<!-- #endregion -->
+
+<!-- #region -->
+### 6.1 Matrice décisionnelle
+<!-- #endregion -->
+
+<!-- #region -->
+| Question | Type variables | Graphe recommandé | Stat associée | Recette de ce notebook |
+|---|---|---|---|---|
+| Quelle est la distribution de cette variable ? | 1 quanti | Histogramme + KDE + boxplot | mean / median / std / **skew / kurtosis** | §2.4 — `sns.histplot(kde=True)` |
+| Y a-t-il des outliers visibles ? | 1 quanti | Boxplot, histo log, QQ-plot | IQR, Z-score | §2.6 — quantile clip |
+| Quelle est la fréquence des modalités ? | 1 quali | Pie (≤ 7 mod) ou barplot trié | mode, entropie | §2.5 — `value_counts().plot.pie` |
+| Y a-t-il des modalités rares à regrouper ? | 1 quali long-tail | Pie après regroupement | seuil de fréquence | §2.7 — `pies_modalites_rares` |
+| Y a-t-il une corrélation linéaire ? | 2 quanti | Heatmap | **Pearson** | §2.8 — `df.corr(numeric_only=True)` |
+| Y a-t-il une relation monotone non-linéaire ? | 2 quanti | Scatter + LOWESS | **Spearman**, Kendall | §3.2 — `lmplot(lowess=True)` |
+| Une 3ᵉ variable explique-t-elle la dispersion ? | 2 quanti + 1 quali | Scatter coloré, `lmplot(hue=)`, `relplot` | corr par groupe | §3.3.a / §3.3.c |
+| Les groupes ont-ils des distributions différentes ? | 1 quali × 1 quanti | Box, violin, swarm | **ANOVA** (si normal), **Kruskal-Wallis** (sinon) | §3.3.b |
+| Les 2 variables catégorielles sont-elles liées ? | 2 quali | Table de contingence, heatmap | **chi²** (signif.), **Cramer's V** (effet) | §3.1.b–c |
+| Quelles modalités contribuent à 80 % du volume ? | 1 quali | **Pareto** (bars + ligne cumulée) | règle 80/20 | §4 — `plot_pareto` (Plotly) |
+| Combien de points coïncident exactement ? | 2 quanti répétés | Counts plot (sizes ∝ overlap) | — | §3.3.j |
+| Comparer 2 cohortes globalement | 1 df vs 1 df | AutoEDA `sv.compare` | tous tests par variable | §5.3 |
+<!-- #endregion -->
+
+<!-- #region -->
+### 6.2 Ordre d'attaque conseillé
+<!-- #endregion -->
+
+<!-- #region -->
+1. **`shape` / `dtypes` / `head`** : combien de lignes, combien de quanti vs quali, quel mix (§ 0–1).
+2. **NaN** : `df.isna().sum().sort_values(ascending=False)` — décider drop vs impute *avant* de tracer quoi que ce soit.
+3. **AutoEDA `minimal=True`** (§5) : vue d'ensemble en 30 s, surtout pour repérer les **alertes** (duplicats, déséquilibre, constance).
+4. **Univariée numérique** (§2.3–2.4) : describe étendu + histo + box pour les variables-clés. Bascule en log si skew > 2.
+5. **Univariée catégorielle** (§2.5–2.7) : value_counts + pie si peu de modalités, sinon regroupement.
+6. **Matrice de corrélation** (§2.8) : Pearson + Spearman, on cherche les divergences (non-linéarités).
+7. **Cat × Num** ciblé (§3.3.b) : box ou violin sur les vars d'intérêt + ANOVA/Kruskal pour quantifier.
+8. **Cat × Cat** ciblé (§3.1.b–c) : crosstab + chi² + Cramer's V pour les paires hypothèse.
+9. **Multivariée** (PCA / MCA / FAMD) : passer à `EDA_Analyse_Multivarie`.
+10. **Outliers** dédié : passer à `Detection_Outliers`.
+11. **Documenter** : 1 cellule MD courte par finding au fur et à mesure. Un notebook EDA sans commentaire est inutilisable 3 mois plus tard.
+<!-- #endregion -->
+
+<!-- #region -->
+### 6.3 Pièges fréquents
+<!-- #endregion -->
+
+<!-- #region -->
+- **Pie chart > 7 modalités** : illisible. Bascule en barplot trié (`value_counts().sort_values().plot.barh()`).
+- **Heatmap sans `numeric_only=True`** : pandas 2.x lève une erreur ou (pire) renvoie des résultats partiels — toujours expliciter.
+- **Heatmap divergente sans `center=0`** : le cmap divergent (`RdBu_r`, `coolwarm`) n'a aucun sens sans centre fixé sur 0 ou 0.5 (cf §2.8).
+- **`sns.countplot(palette=…)` sans `hue=`** : `FutureWarning` en seaborn ≥ 0.13. Soit on passe un `hue=` (avec `legend=False` si redondant), soit on enlève la palette.
+- **Annoter via `patches` sur un `FacetGrid`** : il faut passer par `g.ax.patches` (ou `g.axes.flat`), pas `g.patches` (cf §3.1.f variante 2).
+- **Pearson sur des variables fortement asymétriques** : trompeur ; toujours regarder **Spearman en parallèle**, le désaccord = non-linéarité ou outliers (§3.2 et §2.8).
+- **chi² sans Cramer's V** : on conclut à un effet "significatif" sans connaître sa force. Sur n grand, tout est significatif → l'effet `V` est ce qui compte (§3.1.c).
+- **Réécrire `df` en silence** : très fréquent dans les notebooks de catalogue. Préférer `df_tips`, `df_synth`, `iris`, `dfWIM`... pour ne pas perdre le fil (le notebook d'origine ré-écrasait `df` 4 fois — corrigé ici).
 <!-- #endregion -->
 
 <!-- #region -->
