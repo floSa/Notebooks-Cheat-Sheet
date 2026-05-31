@@ -62,6 +62,10 @@ dependencies = [
     "pyod>=3.5.2",
     "stumpy>=1.14.1",
     "pykan>=0.2.8",
+    "docling>=2.96.0",
+    "docling-core>=2.78.0",
+    "pymupdf>=1.27.2.3",
+    "rich>=15.0.0",
 ]
 
 [tool.jupytext]
