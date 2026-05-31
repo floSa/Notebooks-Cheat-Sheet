@@ -173,6 +173,18 @@ wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_converti
 
 Si l'assistant se retrouve avec un `.venv` cassé Windows ↔ WSL (`error: failed to remove file ...lib64`) : c'est qu'il a accidentellement lancé UV Windows. Fix : `wsl -d ubuntu-24.04 -- bash -c "rm -rf ~/mes_projets/Notebooks_convertion/.venv"` puis re-sync via WSL.
 
+### Piège du kernel fantôme (doublon homonyme)
+
+Lancer `ipykernel install` **depuis Windows** (`uv run python -m ipykernel install ...` en MSYS) enregistre un kernel dans `C:\Users\FLORIAN\AppData\Roaming\jupyter\kernels\notebooks-refonte` pointant vers `.venv\Scripts\python.exe` (chemin Windows). Comme le venv réel est Linux (`.venv/bin/python3`), ce kernel est **cassé** et apparaît dans VSCode comme `notebooks-refonte (broken) (Python 3.12.10)` — **avec le même nom** que le bon kernel Linux, donc indistinguable dans le sélecteur. VSCode tourne en boucle si l'utilisateur sélectionne le mauvais.
+
+**Règle** : `ipykernel install` se lance **uniquement via WSL** (comme tout `uv ...`). Le bon kernel vit à `~/.local/share/jupyter/kernels/notebooks-refonte/` côté Linux.
+
+**Fix si le doublon existe** : supprimer le fantôme Windows :
+```bash
+rm -rf "C:/Users/FLORIAN/AppData/Roaming/jupyter/kernels/notebooks-refonte"
+```
+Puis recharger VSCode et re-sélectionner le kernel (il n'en reste qu'un, le Linux).
+
 ---
 
 ## 7. Kernel Jupyter (à ré-enregistrer après tout `uv sync` qui recrée `.venv`)
