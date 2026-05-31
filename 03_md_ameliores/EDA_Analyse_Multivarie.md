@@ -65,9 +65,10 @@ import seaborn as sns
 import prince
 import statsmodels.api as sm
 import umap
+import pacmap
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA as SkPCA
-from sklearn.decomposition import KernelPCA
+from sklearn.decomposition import FactorAnalysis, KernelPCA
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.manifold import MDS, TSNE, Isomap, LocallyLinearEmbedding
 from sklearn.metrics import adjusted_rand_score
@@ -668,6 +669,40 @@ plt.show()
 ```
 
 <!-- #region -->
+#### 3.2.8 PCA vs Factor Analysis (FA)
+<!-- #endregion -->
+
+<!-- #region -->
+On confond souvent PCA et **analyse factorielle (FA)**, mais ce sont deux modèles
+distincts :
+
+- **PCA** — purement géométrique : décompose la **variance totale** en axes orthogonaux.
+  Pas de modèle probabiliste.
+- **FA** — modèle **à variables latentes** : suppose que les variables observées sont
+  générées par quelques **facteurs cachés** + un **bruit spécifique** à chaque variable.
+  $x = \mathbf{L}f + \varepsilon$. Idéale quand on cherche à *interpréter* des facteurs
+  sous-jacents (psychométrie, questionnaires). La rotation **varimax** rend les loadings
+  plus lisibles (chaque variable « charge » surtout un facteur).
+<!-- #endregion -->
+
+```python
+X_std_fa = StandardScaler().fit_transform(iris_num.to_numpy())
+fa = FactorAnalysis(n_components=2, rotation="varimax", random_state=42).fit(X_std_fa)
+fa_loadings = pd.DataFrame(fa.components_.T, index=var_names, columns=["Facteur 1", "Facteur 2"])
+print(fa_loadings.round(3))
+fa_scores = fa.transform(X_std_fa)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 5.5))
+for i, lvl in enumerate(iris_species.unique()):
+    m = pd.Categorical(iris_species).codes == i
+    a1.scatter(scores.iloc[:, 0][m], scores.iloc[:, 1][m], color=PALETTE[i], s=25, label=lvl)
+    a2.scatter(fa_scores[m, 0], fa_scores[m, 1], color=PALETTE[i], s=25, label=lvl)
+a1.set_title("PCA (variance)")
+a2.set_title("Factor Analysis (facteurs latents + bruit)")
+a1.legend(title="espèce")
+plt.show()
+```
+
+<!-- #region -->
 ### 3.3 AFC / CA — table de contingence (2 variables catégorielles)
 <!-- #endregion -->
 
@@ -966,7 +1001,9 @@ X_iris = iris_num.to_numpy()
 
 
 def reduce(method: str, X: np.ndarray) -> np.ndarray:
-    """Réduit X à 2D selon la méthode demandée (sklearn manifold + umap)."""
+    """Réduit X à 2D selon la méthode demandée (sklearn manifold + umap + pacmap)."""
+    if method == "PaCMAP":
+        return np.asarray(pacmap.PaCMAP(n_components=2, random_state=42).fit_transform(X, init="pca"))
     reducers = {
         "PCA": SkPCA(n_components=2),
         "Isomap": Isomap(n_neighbors=10, n_components=2),
@@ -987,23 +1024,24 @@ def reduce(method: str, X: np.ndarray) -> np.ndarray:
 - **MDS** — préserve au mieux les **distances deux-à-deux** (minimise le *stress*).
 - **t-SNE** — préserve les **voisinages** locaux (divergence KL) ; superbe pour visualiser des clusters.
 - **UMAP** — graphe flou de voisinage ; **rapide**, préserve mieux la structure globale que t-SNE. Standard 2026.
+- **PaCMAP** — méthode 2026 qui **équilibre structures locale et globale** via 3 types de paires (voisins / mi-distance / lointains) ; souvent plus fidèle que t-SNE/UMAP et peu sensible à l'init.
 <!-- #endregion -->
 
 ```python
-methods = ["PCA", "Isomap", "LLE", "MDS", "t-SNE", "UMAP"]
+methods = ["PCA", "Isomap", "LLE", "MDS", "t-SNE", "UMAP", "PaCMAP"]
 embeddings = {m: reduce(m, X_iris) for m in methods}
 {m: emb.shape for m, emb in embeddings.items()}
 ```
 
 <!-- #region -->
-Grille comparative : `setosa` (teal) toujours isolée ; t-SNE et UMAP séparent
+Grille comparative : `setosa` (teal) toujours isolée ; t-SNE, UMAP et PaCMAP séparent
 nettement les trois espèces, là où les méthodes linéaires laissent
 `versicolor`/`virginica` se chevaucher.
 <!-- #endregion -->
 
 ```python
 species_codes = pd.Categorical(iris_species).codes
-fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+fig, axes = plt.subplots(2, 4, figsize=(18, 9))
 for ax, m in zip(axes.ravel(), methods):
     emb = embeddings[m]
     for i, lvl in enumerate(iris_species.unique()):
@@ -1012,8 +1050,10 @@ for ax, m in zip(axes.ravel(), methods):
     ax.set_title(m)
     ax.set_xticks([])
     ax.set_yticks([])
+for ax in axes.ravel()[len(methods):]:
+    ax.set_visible(False)
 axes.ravel()[0].legend(title="espèce", fontsize=8)
-fig.suptitle("Réduction de dimension d'iris — 6 méthodes", weight="bold")
+fig.suptitle("Réduction de dimension d'iris — 7 méthodes", weight="bold")
 plt.show()
 ```
 
@@ -1063,13 +1103,14 @@ plt.show()
 | Comparer des moyennes (1 var.) entre groupes | ANOVA | 2.3 |
 | Comparer des moyennes (≥2 var.) entre groupes | MANOVA | 2.4 |
 | Résumer des variables **numériques** | **PCA** | 3.2 |
+| Interpréter des **facteurs latents** (+ bruit) | **Factor Analysis** | 3.2.8 |
 | Associer 2 variables **catégorielles** (contingence) | **CA** | 3.3 |
 | Cartographier **≥2 variables catégorielles** | **MCA** | 3.4 |
 | Variables numériques en **groupes** | **MFA** | 3.5 |
 | Données **mixtes** (num + cat) | **FAMD** | 3.6 |
 | Aligner des **formes** | **GPA** | 3.7 |
 | Capturer du **non-linéaire** en gardant l'esprit PCA | **Kernel PCA** | 3.8 |
-| Visualiser des clusters **non-linéaires** | t-SNE / UMAP | 4 |
+| Visualiser des clusters **non-linéaires** | t-SNE / UMAP / PaCMAP | 4 |
 | **Regrouper** après réduction | PCA + KMeans (HCPC) | 3.2.7 |
 
 **Bonnes pratiques transverses** : choisir le nombre d'axes (Kaiser / coude / 80 %, §3.2.3),
