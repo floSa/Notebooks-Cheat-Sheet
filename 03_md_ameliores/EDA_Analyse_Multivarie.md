@@ -65,9 +65,12 @@ import seaborn as sns
 import prince
 import statsmodels.api as sm
 import umap
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA as SkPCA
+from sklearn.decomposition import KernelPCA
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.manifold import MDS, TSNE, Isomap, LocallyLinearEmbedding
+from sklearn.metrics import adjusted_rand_score
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from statsmodels.formula.api import ols
 from statsmodels.multivariate.manova import MANOVA
@@ -535,6 +538,136 @@ plt.show()
 ```
 
 <!-- #region -->
+#### 3.2.3 Combien d'axes retenir ?
+<!-- #endregion -->
+
+<!-- #region -->
+Trois critères usuels pour choisir le nombre de composantes :
+
+- **Kaiser** : garder les axes de **valeur propre > 1** (sur données standardisées ;
+  un axe doit porter plus qu'une variable d'origine). Souvent **trop sévère**.
+- **Coude (scree)** : couper là où l'éboulis « décroche » (cf. graphe ci-dessus).
+- **Seuil de variance cumulée** : garder assez d'axes pour atteindre p. ex. **80 %**.
+<!-- #endregion -->
+
+```python
+eigvals = prince_pca.eigenvalues_
+cumpov = np.cumsum(prince_pca.percentage_of_variance_)
+n_kaiser = int((np.asarray(eigvals) > 1).sum())
+n_seuil80 = int(np.argmax(cumpov >= 80) + 1)
+print(f"Kaiser (valeur propre > 1) : {n_kaiser} axe(s)")
+print(f"Seuil 80% variance cumulée : {n_seuil80} axe(s)")
+print(f"Variance cumulée : {np.round(cumpov, 1)}")
+```
+
+<!-- #region -->
+#### 3.2.4 cos² — qualité de représentation
+<!-- #endregion -->
+
+<!-- #region -->
+Le **cos²** d'un individu sur un axe mesure **à quel point il est bien projeté** :
+proche de 1, le point est fidèlement représenté ; proche de 0, il « vit » sur d'autres
+axes et son interprétation sur ce plan est trompeuse. On colore le nuage par la qualité
+sur le plan 1-2 (somme des cos² des deux axes).
+<!-- #endregion -->
+
+```python
+pc_coords = prince_pca.row_coordinates(iris_num)
+cos2 = prince_pca.row_cosine_similarities(iris_num)
+quality = cos2[0] + cos2[1]  # qualité sur le plan factoriel 1-2
+fig, ax = plt.subplots(figsize=(7, 6))
+sc = ax.scatter(pc_coords[0], pc_coords[1], c=quality, cmap="viridis", s=40)
+fig.colorbar(sc, ax=ax, label="cos² (qualité plan 1-2)")
+ax.axhline(0, color="grey", lw=0.6)
+ax.axvline(0, color="grey", lw=0.6)
+ax.set(title="PCA iris — individus colorés par qualité (cos²)", xlabel="Axe 1", ylabel="Axe 2")
+plt.show()
+```
+
+<!-- #region -->
+#### 3.2.5 Biplot
+<!-- #endregion -->
+
+<!-- #region -->
+Le **biplot** superpose sur un même plan les **individus** (points) et les **variables**
+(flèches = loadings). On lit d'un coup d'œil quelles variables « tirent » quels individus :
+ici `petal_length`/`petal_width` pointent vers `virginica`, `sepal_width` vers le haut.
+<!-- #endregion -->
+
+```python
+def biplot(scores: pd.DataFrame, loadings: np.ndarray, var_names: list[str],
+           labels: pd.Series | None = None, ax: plt.Axes | None = None) -> plt.Axes:
+    """Biplot PCA : individus (points) + variables (flèches) sur le même plan."""
+    if ax is None:
+        _, ax = plt.subplots(figsize=(7, 7))
+    plot_factor_map(scores, labels, title="Biplot PCA", ax=ax)
+    scale = np.abs(scores.iloc[:, :2].to_numpy()).max() / np.abs(loadings).max()
+    for i, name in enumerate(var_names):
+        ax.arrow(0, 0, loadings[i, 0] * scale, loadings[i, 1] * scale,
+                 color=CHART["accent_dark"], head_width=0.08, alpha=0.8)
+        ax.text(loadings[i, 0] * scale * 1.1, loadings[i, 1] * scale * 1.1,
+                name, color=CHART["accent_dark"], weight="bold")
+    return ax
+
+
+loadings = sk_pca.components_[:2].T  # (n_vars, 2)
+fig, ax = plt.subplots(figsize=(7, 7))
+biplot(scores, loadings, var_names, iris_species, ax=ax)
+plt.show()
+```
+
+<!-- #region -->
+#### 3.2.6 Variables et individus supplémentaires
+<!-- #endregion -->
+
+<!-- #region -->
+Un atout des méthodes factorielles : projeter des **individus supplémentaires** (ou des
+variables) **a posteriori**, sans qu'ils n'influencent la construction des axes. Utile
+pour positionner de nouvelles observations dans un repère figé. Ici on ajuste la PCA sur
+135 fleurs et on **projette** les 15 restantes via `row_coordinates`.
+<!-- #endregion -->
+
+```python
+rng_sup = np.random.RandomState(1)
+sup_idx = rng_sup.choice(iris_num.index, size=15, replace=False)
+train_idx = iris_num.index.difference(sup_idx)
+pca_train = prince.PCA(n_components=2, random_state=42).fit(iris_num.loc[train_idx])
+coords_train = pca_train.row_coordinates(iris_num.loc[train_idx])
+coords_sup = pca_train.row_coordinates(iris_num.loc[sup_idx])  # projection sans réajuster
+fig, ax = plt.subplots(figsize=(7, 6))
+ax.scatter(coords_train[0], coords_train[1], color=CHART["beige"], s=30, label="actifs")
+ax.scatter(coords_sup[0], coords_sup[1], color=CHART["mauvais"], s=70,
+           marker="*", label="supplémentaires")
+ax.axhline(0, color="grey", lw=0.6)
+ax.axvline(0, color="grey", lw=0.6)
+ax.set(title="PCA — individus supplémentaires (projetés a posteriori)",
+       xlabel="Axe 1", ylabel="Axe 2")
+ax.legend()
+plt.show()
+```
+
+<!-- #region -->
+#### 3.2.7 Clustering sur les composantes
+<!-- #endregion -->
+
+<!-- #region -->
+Workflow classique (esprit **HCPC** de FactoMineR) : **réduire** d'abord avec une PCA,
+**puis regrouper** sur les premières composantes (débruitées). On compare le KMeans aux
+espèces réelles via l'**ARI** (Adjusted Rand Index, 1 = identique). Pour le clustering
+approfondi (silhouette, dendrogrammes, DBSCAN…), voir le notebook dédié.
+<!-- #endregion -->
+
+```python
+km = KMeans(n_clusters=3, random_state=42, n_init=10).fit(pc_coords[[0, 1]])
+ari = adjusted_rand_score(iris_species, km.labels_)
+print(f"KMeans(3) sur axes 1-2 — ARI vs espèces réelles : {ari:.3f}")
+fig, ax = plt.subplots(figsize=(7, 6))
+plot_factor_map(pc_coords, pd.Series(km.labels_, name="cluster"),
+                title=f"KMeans sur composantes PCA (ARI={ari:.2f})", ax=ax)
+plt.show()
+```
+
+<!-- #region -->
 ### 3.3 AFC / CA — table de contingence (2 variables catégorielles)
 <!-- #endregion -->
 
@@ -792,6 +925,34 @@ plt.show()
 ```
 
 <!-- #region -->
+### 3.8 Kernel PCA — PCA non-linéaire
+<!-- #endregion -->
+
+<!-- #region -->
+La **Kernel PCA** applique le *kernel trick* : elle fait une PCA dans un espace de
+dimension supérieure (implicite) pour capturer des structures **non-linéaires** que la
+PCA classique manque. C'est le pont naturel vers la section 4 (manifold learning).
+Le noyau RBF est piloté par `gamma` (à régler).
+<!-- #endregion -->
+
+```python
+X_iris_std = StandardScaler().fit_transform(iris_num.to_numpy())
+kpca = KernelPCA(n_components=2, kernel="rbf", gamma=0.5)
+kpca_emb = kpca.fit_transform(X_iris_std)
+lin_emb = SkPCA(n_components=2).fit_transform(X_iris_std)
+codes = pd.Categorical(iris_species).codes
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 5.5))
+for i, lvl in enumerate(iris_species.unique()):
+    m = codes == i
+    a1.scatter(lin_emb[m, 0], lin_emb[m, 1], color=PALETTE[i], s=25, label=lvl)
+    a2.scatter(kpca_emb[m, 0], kpca_emb[m, 1], color=PALETTE[i], s=25, label=lvl)
+a1.set_title("PCA linéaire")
+a2.set_title("Kernel PCA (RBF)")
+a1.legend(title="espèce")
+plt.show()
+```
+
+<!-- #region -->
 ## 4. Réduction de dimension (manifold learning)
 <!-- #endregion -->
 
@@ -857,6 +1018,40 @@ plt.show()
 ```
 
 <!-- #region -->
+### 4.1 Pièges de t-SNE / UMAP
+<!-- #endregion -->
+
+<!-- #region -->
+Ces méthodes sont superbes pour **visualiser** des clusters, mais traîtres si on
+sur-interprète :
+
+- **Les distances n'ont pas de sens global** : deux clusters éloignés sur le plot ne
+  sont pas forcément « plus différents » que deux proches.
+- **La taille et la densité des clusters sont arbitraires** (t-SNE les égalise).
+- **Forte sensibilité aux hyperparamètres** : `perplexity` (t-SNE) / `n_neighbors` (UMAP)
+  changent radicalement la figure — voir ci-dessous.
+- **Stochastiques** : fixer `random_state` pour la reproductibilité.
+
+Règle : utiliser t-SNE/UMAP pour *explorer*, jamais comme seule preuve d'une structure.
+<!-- #endregion -->
+
+```python
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+for ax, perp in zip(axes, [5, 30, 50]):
+    emb = TSNE(n_components=2, perplexity=perp, max_iter=1000,
+               random_state=42).fit_transform(X_iris)
+    for i, lvl in enumerate(iris_species.unique()):
+        m = codes == i
+        ax.scatter(emb[m, 0], emb[m, 1], color=PALETTE[i], s=20, label=lvl)
+    ax.set_title(f"perplexity = {perp}")
+    ax.set_xticks([])
+    ax.set_yticks([])
+axes[0].legend(title="espèce", fontsize=8)
+fig.suptitle("t-SNE — la forme dépend fortement de perplexity", weight="bold")
+plt.show()
+```
+
+<!-- #region -->
 ## 5. Récapitulatif — quelle méthode choisir
 <!-- #endregion -->
 
@@ -873,7 +1068,12 @@ plt.show()
 | Variables numériques en **groupes** | **MFA** | 3.5 |
 | Données **mixtes** (num + cat) | **FAMD** | 3.6 |
 | Aligner des **formes** | **GPA** | 3.7 |
+| Capturer du **non-linéaire** en gardant l'esprit PCA | **Kernel PCA** | 3.8 |
 | Visualiser des clusters **non-linéaires** | t-SNE / UMAP | 4 |
+| **Regrouper** après réduction | PCA + KMeans (HCPC) | 3.2.7 |
 
+**Bonnes pratiques transverses** : choisir le nombre d'axes (Kaiser / coude / 80 %, §3.2.3),
+vérifier la qualité de projection (**cos²**, §3.2.4), projeter des **individus
+supplémentaires** sans réajuster (§3.2.6), et ne jamais sur-interpréter t-SNE/UMAP (§4.1).
 Garder l'**arbre de décision** de la section 3 comme aide-mémoire principal.
 <!-- #endregion -->
