@@ -1348,8 +1348,16 @@ méthodes dédiées de la section 4.
 <!-- #endregion -->
 
 <!-- #region -->
-Au-delà de la PCA (**linéaire**), les méthodes de **manifold learning** capturent des
-structures **non-linéaires**. On les compare toutes sur iris via un helper unifié.
+**Quand & pourquoi.** Quand le but est de **visualiser** en 2D un nuage à structure
+**non-linéaire** (la PCA aplatirait une spirale). Surtout pour **explorer** et **repérer des
+clusters**, pas pour produire des features interprétables.
+
+**Données.** Numériques (ou une matrice de distances pour MDS/Isomap). Standardiser au préalable.
+
+**Le principe commun.** Toutes ces méthodes préservent une **notion de proximité** : globale
+(distances — PCA, MDS, Isomap) ou locale (voisinages — LLE, t-SNE, UMAP, PaCMAP). Elles
+diffèrent par *quelle* proximité elles cherchent à conserver. On les compare sur iris via un
+helper unifié.
 <!-- #endregion -->
 
 ```python
@@ -1414,6 +1422,18 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** `setosa` (teal) se détache **partout** — c'est le signal robuste.
+Les méthodes **linéaires** (PCA, MDS) laissent `versicolor`/`virginica` se chevaucher ;
+les méthodes **locales non-linéaires** (t-SNE, UMAP, PaCMAP) les **séparent** en amas
+distincts. **LLE** s'effondre quasiment sur une ligne : comportement classique de LLE sur
+iris (sa contrainte de reconstruction locale dégénère ici). À méthode égale, on choisit
+selon le but : **PCA** si on veut interpréter, **UMAP/PaCMAP** si on veut visualiser des clusters.
+
+**À retenir.** Aucune méthode n'est « la meilleure » dans l'absolu ; comparer plusieurs
+projections **évite de conclure sur un artefact** d'une seule.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 4.1 Pièges de t-SNE / UMAP
 <!-- #endregion -->
 
@@ -1473,4 +1493,33 @@ plt.show()
 vérifier la qualité de projection (**cos²**, §3.2.4), projeter des **individus
 supplémentaires** sans réajuster (§3.2.6), et ne jamais sur-interpréter t-SNE/UMAP (§4.1).
 Garder l'**arbre de décision** de la section 3 comme aide-mémoire principal.
+<!-- #endregion -->
+
+<!-- #region -->
+### 5.1 Une fois la méthode choisie — le réflexe de lecture
+<!-- #endregion -->
+
+<!-- #region -->
+Pour **toutes** les méthodes factorielles, lire **dans cet ordre** :
+
+1. **% de variance / inertie par axe** → a-t-on le droit de se limiter à 2 axes ?
+2. **Contributions** → *qui construit chaque axe* → on **nomme** l'axe.
+3. **cos²** → les points/variables sont-ils **bien représentés** sur ce plan ?
+4. **Carte** → seulement maintenant, lire les **proximités et oppositions**.
+<!-- #endregion -->
+
+<!-- #region -->
+### 5.2 Erreurs courantes à éviter
+<!-- #endregion -->
+
+<!-- #region -->
+| Erreur | Pourquoi c'est faux | Le bon réflexe |
+|---|---|---|
+| Faire une PCA **sans standardiser** | une variable à grande échelle capte toute la variance | centrer-réduire (ou `prince`, qui le fait) |
+| Comparer les **% d'inertie** d'une MCA à ceux d'une PCA | l'inertie MCA est mécaniquement gonflée | correction de Benzécri, ou lire les oppositions |
+| Interpréter un point **mal représenté** (cos² faible) | sa position sur le plan est trompeuse | vérifier le cos² avant de commenter |
+| Lire les **distances** sur un plot t-SNE/UMAP | seules les **voisinages locaux** sont fiables | comparer plusieurs hyperparamètres / méthodes |
+| Conclure d'un modèle **non significatif** (régression, ANOVA) | p-value > 0,05 = pas d'effet démontré | rapporter l'absence d'effet honnêtement |
+| Mettre des **comptages négatifs / des moyennes** dans une CA | la CA exige une table de contingence (effectifs ≥ 0) | utiliser la bonne méthode selon le type |
+| Confondre **PCA** et **Factor Analysis** | la FA modélise des facteurs latents + bruit | choisir selon l'objectif (compresser vs expliquer) |
 <!-- #endregion -->
