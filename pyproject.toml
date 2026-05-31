@@ -54,6 +54,13 @@ dependencies = [
     "pymilvus[milvus-lite]>=3.0.0",
     "weaviate-client>=4.21.2",
     "psycopg[binary]>=3.3.4",
+    "duckdb>=1.5.3",
+    "pyarrow>=23.0.1",
+    "polars>=1.41.2",
+    "jupysql>=0.11.1",
+    "duckdb-engine>=0.17.0",
+    "pyod>=3.5.2",
+    "stumpy>=1.14.1",
 ]
 
 [tool.jupytext]

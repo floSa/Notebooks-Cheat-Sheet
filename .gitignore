@@ -29,6 +29,8 @@ scripts/_sandbox/
 
 # ── Données volumineuses (à committer au cas par cas) ──
 # data/
+# BDD_DuckDB : NYC Taxi parquet (~50 MB) + bases .duckdb, régénérés par le notebook
+data/BDD_DuckDB/
 
 # ── OS / éditeurs ──
 .DS_Store
