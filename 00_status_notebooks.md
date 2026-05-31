@@ -124,7 +124,7 @@
 | 23 | `DL_Deep_Learning_Maths.md` | ✅ fait | TUTO + WIKI | M | | Réseau de neurones from scratch (numpy) : neurone/régression logistique → réseau 2 couches → généralisation N couches → §4 implémentée (ReLU+He, Momentum/Adam, L2+Dropout, mini-autograd reverse-mode). Formules en LaTeX (ex-images), 2 schémas réseau conservés. Dataset Colab perdu remplacé par load_digits. 5 critères contrat OK (sandbox + code extrait du .ipynb exit 0, check_format vert). |
 | 24 | `DL_Tensorflow_Keras.md` | 📥 ingéré | TUTO | M | 🌐 | ANN, batch, régularisation, weights, SHAP. **Décision stratégique** : migrer vers Keras 3 (multi-backend) ou archiver et basculer sur PyTorch. |
 | 25 | `DL_PyTorch.md` | 📥 ingéré | TUTO | L | | **Excellent** (13 MB, 12+ sections : tenseurs, GPU, Dataset/Loader, training, eval, régression, classif, TensorBoard, ROC/AUC). Ajouter ViT, autograd hooks, distributed. |
-| 26 | `KAN (Kolmogorov-Arnold Networks).md` | 📥 ingéré | WIKI | S | 🌐 | Théorème KA, contribution, avantages/limites. Compléter avec impl pratique (pykan/torch-kan), benchmarks 2024-2026. **Renommer**. |
+| 26 | `KAN (Kolmogorov-Arnold Networks).md` → `DL_KAN_Kolmogorov_Arnold` | ✅ fait (conforme contrat 5 critères) | WIKI + TUTO | M | 🌐 | **Refonte complète selon workflow** : original lu intégralement (81 l., plan + structure en `scripts/_sandbox/`), sandbox `.py` exécuté end-to-end (exit 0, 5 figures), `check_format --both` vert (55 cellules / 15 code / 40 md). **Supprimé** : le faux KAN numpy de l'original (`psi=sin(x+j)`, `phi=sum(y)+i` — fonctions fixes non apprenables, aucun entraînement, pédagogiquement trompeur) + 3 cellules vides. **Refactoré** : toute la théorie (théorème KA + bornes corrigées, Arnold/Hilbert, avantages/limites actualisés). Clarifie le piège **théorème littéral (profondeur 2) ≠ archi KAN pratique** (Liu et al. 2024) que ratait l'original. **Ajouté** (recherche web 2026) : B-splines (maths + Cox-de Boor), **vraie `KANLayer` PyTorch entraînable** (style efficient-kan), entraînement régression symbolique $\exp(\sin(\pi x_1)+x_2^2)$, **benchmark chiffré KAN vs MLP** (KAN 135 params MSE 8.3e-3 < MLP 337 params MSE 2.0e-2, mais KAN plus lent), interprétabilité (tracé des $\phi$), **pykan auto_symbolic** exécuté, classif `make_moons` (KAN/MLP acc 0.96), état 2026 (FastKAN/FasterKAN/P-KAN, KAN 2.0). Datasets 100% synthétiques. |
 
 ## NLP
 
@@ -177,8 +177,8 @@
 > Ce qui était marqué "44/44 ✅" était mensonger au regard du contrat `00_workflow_contract.md`.
 > Voici l'état réel :
 
-- **Notebooks ✅ fait au sens du contrat (5 critères vérifiés)** : **5 / 44** — EDA_Visualisation_Introduction (#8), EDA_Analyse_Multivarie (#9), EDA_Stats_Analyse_Desc_Visual (#10), Detection_Outliers (#11), BDD_Vectorielles (#40).
-- **🟡 v0** (squelette posé, code non vérifié end-to-end) : **39** — les autres anciennes "✅ fait".
+- **Notebooks ✅ fait au sens du contrat (5 critères vérifiés)** : **6 / 44** — EDA_Visualisation_Introduction (#8), EDA_Analyse_Multivarie (#9), EDA_Stats_Analyse_Desc_Visual (#10), Detection_Outliers (#11), DL_KAN_Kolmogorov_Arnold (#26), BDD_Vectorielles (#40).
+- **🟡 v0** (squelette posé, code non vérifié end-to-end) : **38** — les autres anciennes "✅ fait".
 - Suppressions effectives : 3 (AAA_Test_ML, Suppr_ML_Bench, TS_Maintenance_Prédictive ancien)
 - Fusions effectives : 2 (retrieval_BDD_Vectorielle → BDD_Vectorielles, Preprocessing_Function_Utiles → Preprocessing)
 - Renommages effectués : 10 (Structure_Python, Structure_BDD_DataFrame, ML_Regression_Classification_Multiple, Structure_Generer_Donnees_Classification, Detection_Outliers, NLP_Classification_Supervisee, DL_KAN_Kolmogorov_Arnold, TdS_Introduction_Traitement_Signal, TS_Maintenance_Predictive, TS_ARIMA)

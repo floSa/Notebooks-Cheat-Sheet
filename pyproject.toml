@@ -61,6 +61,7 @@ dependencies = [
     "duckdb-engine>=0.17.0",
     "pyod>=3.5.2",
     "stumpy>=1.14.1",
+    "pykan>=0.2.8",
 ]
 
 [tool.jupytext]
