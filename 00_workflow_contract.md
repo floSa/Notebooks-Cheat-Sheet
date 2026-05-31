@@ -136,19 +136,42 @@ Le projet vit dans WSL (`/home/florian/mes_projets/Notebooks_convertion`).
 - Casse le kernel Jupyter quand VSCode est en mode Remote-WSL.
 - Casse `uv sync` au run suivant (UV Windows ne sait pas supprimer le symlink Linux et plante avec `error: failed to remove file ...lib64`).
 
-**Règle** : **installer UV dans WSL** (une seule fois) puis exécuter **tous** les `uv sync`, `uv run`, `uv add`, `ipykernel install` via WSL.
+### Setup one-time pour un nouveau poste / une nouvelle session WSL
+
+Installer UV dans WSL (au choix) :
 
 ```bash
-# Install one-time (au choix)
-wsl -d ubuntu-24.04 -- bash -lc "curl -LsSf https://astral.sh/uv/install.sh | sh"
-# ou (sans curl|sh) :
-wsl -d ubuntu-24.04 -- bash -lc "sudo apt update && sudo apt install -y pipx && pipx ensurepath && pipx install uv"
+# Officiel
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Setup venv + kernel (à refaire si .venv supprimé)
-wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && rm -rf .venv && uv sync && uv run python -m ipykernel install --user --name=notebooks-refonte --display-name='Python (notebooks-refonte)'"
+# Ou via apt + pipx (sans curl|sh) :
+sudo apt update && sudo apt install -y pipx && pipx ensurepath && pipx install uv
 ```
 
-Si tu te retrouves avec un `.venv` cassé Windows ↔ WSL : `wsl -d ubuntu-24.04 -- bash -c "rm -rf .venv"` puis re-créer côté WSL.
+Puis créer le venv Linux + enregistrer le kernel côté Linux :
+
+```bash
+cd ~/mes_projets/Notebooks_convertion
+rm -rf .venv
+uv sync
+uv run python -m ipykernel install --user --name=notebooks-refonte --display-name="Python (notebooks-refonte)"
+```
+
+Le kernel se retrouve à `~/.local/share/jupyter/kernels/notebooks-refonte/` et pointe sur `.venv/bin/python3` (Linux ELF). VSCode Remote-WSL le voit ; le notebook ouvre sans erreur.
+
+### Règle pour l'assistant (Claude / autre) travaillant depuis Windows / MSYS
+
+**TOUTES** les commandes `uv` doivent passer par `wsl -d ubuntu-24.04 -- bash -lc "..."`. Jamais d'`uv` natif depuis MSYS/PowerShell — ça recréerait un venv Windows et casserait le kernel utilisateur. Exemples :
+
+```bash
+# Depuis MSYS / PowerShell :
+wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv sync"
+wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv add <pkg>"
+wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv run python scripts/_sandbox/notebook_<nom>.py"
+wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv run python scripts/check_format.py --both <md> <ipynb>"
+```
+
+Si l'assistant se retrouve avec un `.venv` cassé Windows ↔ WSL (`error: failed to remove file ...lib64`) : c'est qu'il a accidentellement lancé UV Windows. Fix : `wsl -d ubuntu-24.04 -- bash -c "rm -rf ~/mes_projets/Notebooks_convertion/.venv"` puis re-sync via WSL.
 
 ---
 
