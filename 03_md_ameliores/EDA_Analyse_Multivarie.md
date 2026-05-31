@@ -151,14 +151,26 @@ Avant de *réduire*, on *teste* les relations entre variables. Deux familles :
 <!-- #endregion -->
 
 <!-- #region -->
-On prédit le pourboire (`tip`) du dataset `tips` à partir des autres variables
-numériques. On utilise **deux backends complémentaires** :
+🎯 **Quand & pourquoi.** On veut **expliquer ou prédire une variable numérique
+continue** à partir d'autres variables. Ici : prédire le pourboire (`tip`) à partir
+de la facture et de la taille de la table. Sert aussi à **quantifier l'effet** de
+chaque variable, toutes choses égales par ailleurs.
 
-- **scikit-learn** — orienté *prédiction* (coefficients, R², RMSE).
-- **statsmodels** — orienté *inférence* (p-values, intervalles de confiance, $R^2$ ajusté).
+📊 **Données.** Cible **numérique continue** ; prédicteurs numériques (ou catégoriels
+encodés). On travaille sur les colonnes numériques de `tips`.
 
-$$\hat{y} = \beta_0 + \sum_{j} \beta_j x_j \qquad
-R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$$
+🧮 **Principe & maths.** On cherche les coefficients $\beta$ qui **minimisent la somme
+des carrés des résidus** (moindres carrés ordinaires, OLS) :
+
+$$\hat{y} = \beta_0 + \sum_j \beta_j x_j, \qquad
+\hat{\beta} = \arg\min_\beta \sum_i (y_i - \hat{y}_i)^2 = (X^\top X)^{-1} X^\top y$$
+
+Le coefficient $\beta_j$ se lit : *« +1 unité de $x_j$ ⟹ $+\beta_j$ unités de $y$,
+les autres variables fixées »*. La qualité globale se mesure par le
+$R^2 = 1 - \frac{\sum (y_i-\hat y_i)^2}{\sum (y_i-\bar y)^2}$ (part de variance expliquée).
+
+🔍 **Deux backends complémentaires** : **scikit-learn** (prédiction : coefs, R², RMSE)
+et **statsmodels** (inférence : p-values, IC à 95 %, $R^2$ ajusté).
 <!-- #endregion -->
 
 ```python
@@ -221,15 +233,46 @@ print(ols_res.summary())
 ```
 
 <!-- #region -->
+📖 **Lecture du résultat.**
+
+- **$R^2 = 0{,}47$** : le modèle explique **47 %** de la variabilité du pourboire — correct
+  mais loin d'être parfait (le pourboire dépend aussi de l'humeur, du service…).
+- **`total_bill`** : coefficient $\approx 0{,}09$, **p-value ≈ 0** ⟹ effet **très
+  significatif** : +1 \$ de facture ⟹ +0,09 \$ de pourboire (~9 %, cohérent avec un
+  pourcentage d'usage). **`size`** est significatif aussi (p ≈ 0,02) mais plus faible.
+- **RMSE ≈ 1,0 \$** : erreur typique de prédiction d'environ 1 dollar.
+
+⚠️ **Hypothèses OLS à vérifier** (sinon l'inférence est biaisée) : relation **linéaire**,
+résidus **indépendants**, de **variance constante** (homoscédasticité) et **normaux**.
+Les inspecter via un *residual plot* et un *QQ-plot*.
+
+✅ **À retenir** : la régression linéaire **quantifie un effet** et le **teste** ;
+sklearn pour prédire, statsmodels pour interpréter/justifier.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 2.2 Régression logistique
 <!-- #endregion -->
 
 <!-- #region -->
-Cible **catégorielle** (le sexe du payeur). On modélise la probabilité via la
-fonction logistique. `penalty=None` désactive la régularisation (l'ancien
-`penalty='none'` — une chaîne — est supprimé des versions récentes de scikit-learn).
+🎯 **Quand & pourquoi.** On veut **prédire/expliquer une variable catégorielle**
+(binaire ici : le sexe du payeur). Au lieu d'une valeur continue, on modélise la
+**probabilité** d'appartenir à une classe.
+
+📊 **Données.** Cible **catégorielle** (binaire ou multiclasse) ; prédicteurs numériques
+ou encodés. Ici `total_bill, tip, size` → `sex`.
+
+🧮 **Principe & maths.** On passe la combinaison linéaire dans la **sigmoïde** pour la
+ramener dans $[0,1]$ :
 
 $$P(y=1 \mid x) = \sigma(\beta_0 + \beta^\top x), \qquad \sigma(z) = \frac{1}{1 + e^{-z}}$$
+
+Les coefficients s'interprètent en **log-odds** ; leur exponentielle donne l'**odds-ratio**
+$e^{\beta_j}$ : facteur multiplicatif sur la **cote** $\frac{P(1)}{P(0)}$ quand $x_j$
+augmente de 1. $e^{\beta_j} > 1$ ⟹ augmente la probabilité, $< 1$ ⟹ la diminue.
+
+🔍 `penalty=None` désactive la régularisation (l'ancien `penalty='none'` — une chaîne —
+est supprimé des versions récentes de scikit-learn).
 <!-- #endregion -->
 
 ```python
@@ -258,17 +301,57 @@ print(logit_sm.summary())
 ```
 
 <!-- #region -->
+Les **odds-ratios** ($e^{\beta}$) rendent les coefficients lisibles : un OR de 1,04 sur
+`total_bill` signifie *« +1 \$ de facture multiplie par 1,04 la cote d'être un homme »*.
+<!-- #endregion -->
+
+```python
+odds = pd.DataFrame({
+    "coef (log-odds)": logit_sm.params,
+    "odds-ratio": np.exp(logit_sm.params),
+    "p-value": logit_sm.pvalues,
+}, index=["constante"] + list(X_log.columns))
+odds.round(3)
+```
+
+<!-- #region -->
+📖 **Lecture du résultat.**
+
+- Tous les **odds-ratios ≈ 1** et toutes les **p-values > 0,05** ⟹ aucune variable n'est
+  significative. **Pseudo-$R^2$ de McFadden ≈ 0,02** (très faible : un bon ajustement est
+  plutôt > 0,2).
+- **Conclusion honnête** : facture, pourboire et taille de table **ne permettent pas**
+  de prédire le sexe du payeur — et c'est le **bon** enseignement (ne pas sur-interpréter
+  un modèle non significatif).
+
+⚠️ **Pièges** : la régression logistique suppose une **séparation linéaire en log-odds** ;
+elle est sensible à la **multicolinéarité** (ici `tip` et `total_bill` sont corrélés) et
+au **déséquilibre des classes**.
+
+✅ **À retenir** : lire les coefficients en **odds-ratios**, toujours vérifier la
+**significativité** avant de conclure à un effet.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 2.3 ANOVA — une variable numérique vs un facteur
 <!-- #endregion -->
 
 <!-- #region -->
-L'**ANOVA** décompose la variance totale d'une variable numérique en variance
-**inter-groupes** (expliquée par le facteur) et **intra-groupes** (résiduelle). Le
-test $F$ confronte les deux ; $H_0$ = « toutes les moyennes de groupe sont égales ».
+🎯 **Quand & pourquoi.** Comparer la **moyenne d'une variable numérique** entre **plusieurs
+groupes** définis par une variable catégorielle. Question : *« la longueur du sépale
+diffère-t-elle selon l'espèce ? »* C'est le test de référence pour « 1 numérique × 1 facteur ».
 
-$$F = \frac{\text{SCE}_{\text{inter}} / (k-1)}{\text{SCE}_{\text{intra}} / (n-k)}$$
+📊 **Données.** Une variable **numérique** (cible) + un **facteur catégoriel** (≥ 2 modalités).
 
-Le boxplot ci-dessous montre déjà la séparation des espèces sur `sepal_length`.
+🧮 **Principe & maths.** On **décompose la variance totale** en variance **inter-groupes**
+(expliquée par le facteur) et **intra-groupes** (résiduelle). Le test $F$ confronte les deux ;
+$H_0$ = « toutes les moyennes de groupe sont égales » :
+
+$$F = \frac{\text{SCE}_{\text{inter}} / (k-1)}{\text{SCE}_{\text{intra}} / (n-k)}, \qquad
+\eta^2 = \frac{\text{SCE}_{\text{inter}}}{\text{SCE}_{\text{totale}}} \;(\text{taille d'effet})$$
+
+🔍 Le boxplot ci-dessous **visualise** déjà la séparation : si les boîtes ne se chevauchent
+pas, l'ANOVA sera très significative.
 <!-- #endregion -->
 
 ```python
@@ -291,14 +374,40 @@ print(aov)
 ```
 
 <!-- #region -->
+📖 **Lecture du résultat.**
+
+- **$F \approx 119$**, **p-value $\approx 1{,}7\times10^{-31}$** ⟹ on **rejette $H_0$** sans
+  ambiguïté : l'espèce explique très fortement la longueur du sépale.
+- La taille d'effet $\eta^2 = \frac{63{,}2}{63{,}2 + 39{,}0} \approx 0{,}62$ : **62 %** de la
+  variance de `sepal_length` est portée par l'espèce — effet **massif**.
+
+⚠️ **Hypothèses** : résidus **normaux** dans chaque groupe (Shapiro), **homoscédasticité**
+(test de Levene) et **indépendance**. Si l'homoscédasticité est violée → ANOVA de **Welch**.
+
+✅ **À retenir** : ANOVA = « les moyennes diffèrent-elles ? » ; toujours accompagner la
+p-value d'une **taille d'effet** ($\eta^2$) pour juger de l'**ampleur**, pas que de la significativité.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 2.4 MANOVA — plusieurs variables numériques vs un facteur
 <!-- #endregion -->
 
 <!-- #region -->
-La **MANOVA** généralise l'ANOVA à **plusieurs variables dépendantes simultanément** :
-elle teste l'égalité des *vecteurs* de moyennes entre groupes. Les statistiques
-usuelles (lambda de **Wilks**, trace de **Pillai**) reposent sur les valeurs propres
-de $\mathbf{H}\mathbf{E}^{-1}$ (matrices de covariance inter / intra-groupes).
+🎯 **Quand & pourquoi.** Comme l'ANOVA, mais avec **plusieurs variables numériques
+dépendantes en même temps**. Question : *« les espèces diffèrent-elles sur l'ensemble
+{longueur/largeur sépale + pétale} pris conjointement ? »* Utile quand les variables sont
+**corrélées** (les tester séparément ignorerait leurs liens et gonflerait le risque d'erreur).
+
+📊 **Données.** **Plusieurs** variables **numériques** (cibles) + un **facteur catégoriel**.
+
+🧮 **Principe & maths.** On teste l'égalité des **vecteurs de moyennes** entre groupes. On
+forme les matrices de covariance **inter-groupes** $\mathbf{H}$ et **intra** $\mathbf{E}$,
+et on résume $\mathbf{H}\mathbf{E}^{-1}$ par ses valeurs propres. Les statistiques usuelles :
+
+- **Lambda de Wilks** $\Lambda = \prod \frac{1}{1+\lambda_i} \in [0,1]$ — **proche de 0 = forte séparation**.
+- **Trace de Pillai** — la plus **robuste** aux écarts d'hypothèses.
+
+🔍 On lit la **p-value** associée (via une approximation en $F$).
 <!-- #endregion -->
 
 ```python
@@ -310,6 +419,21 @@ mv = maov.mv_test()
 wilks = mv.results["species"]["stat"].loc["Wilks' lambda"].astype(float)
 print("Wilks' lambda (species):", wilks.round(5).to_dict())
 ```
+
+<!-- #region -->
+📖 **Lecture du résultat.**
+
+- **Wilks $\Lambda \approx 0{,}023$** (très proche de 0) avec **$F \approx 199$** et
+  **p-value $\approx 0$** ⟹ les espèces ont des **profils multivariés radicalement
+  différents** sur les 4 mesures prises ensemble.
+- C'est précisément ce qui rend iris séparable et fait le succès de la PCA en §3.2.
+
+⚠️ **Hypothèses** : **normalité multivariée** et **égalité des matrices de covariance**
+(test de **Box's M**). En cas de doute, préférer la **trace de Pillai**, plus robuste.
+
+✅ **À retenir** : la MANOVA teste les variables **conjointement** ; un $\Lambda$ proche de 0
+signale une forte séparation des groupes dans l'espace multivarié.
+<!-- #endregion -->
 
 <!-- #region -->
 ## 3. Analyse factorielle — réduire et cartographier
@@ -342,25 +466,43 @@ décision ci-dessous (à garder sous le coude) résume la logique :
 <!-- #endregion -->
 
 <!-- #region -->
-Toutes ces méthodes partagent la même mécanique : on construit une matrice
-(individus × variables ou table de contingence), on la **standardise**, puis on
-en extrait les **valeurs/vecteurs propres** (≈ une SVD). Vocabulaire commun :
+**L'idée commune.** Un tableau de données est un **nuage de points** dans un espace à
+$p$ dimensions (une par variable). Ce nuage a une **forme** (sa dispersion = son
+**inertie**). L'analyse factorielle cherche les **directions selon lesquelles le nuage
+s'étire le plus** : on les ordonne, on n'en garde que quelques-unes, et on **projette**
+dessus pour voir l'essentiel en 2D.
 
-- **Inertie** = variance totale du nuage de points. Chaque axe en capte une part.
-- **Valeur propre** $\lambda_k$ = inertie portée par l'axe $k$ ;
-  $\%\text{var}_k = \lambda_k / \sum_j \lambda_j$.
-- **Coordonnées factorielles** = projections des individus / modalités sur les axes.
-- **Contribution** d'un point à un axe = sa part dans l'inertie de l'axe (qui *fait* l'axe).
-- **cos²** = qualité de représentation d'un point sur un axe (proche de 1 = bien projeté).
+**La mécanique (commune à toutes les méthodes).** On construit une matrice (individus ×
+variables, ou table de contingence), on la **standardise/pondère** selon la méthode, puis
+on en extrait les **valeurs et vecteurs propres** — concrètement une **SVD** $X = U\Sigma V^\top$ :
 
-| Méthode | Type de données | Question répondue |
-|---|---|---|
-| **PCA** | numérique | axes de variance maximale |
-| **CA** | table de contingence (2 var. cat.) | associations lignes ↔ colonnes |
-| **MCA** | ≥ 2 variables catégorielles | proximité des modalités |
-| **FAMD** | mixte (num + cat) | PCA ⊕ MCA |
-| **MFA** | numériques en **groupes** | équilibre entre groupes de variables |
-| **GPA** | configurations de **formes** | alignement (rotation/échelle/translation) |
+- les **vecteurs propres** ($V$) donnent les **axes factoriels** (directions d'étirement) ;
+- les **valeurs propres** $\lambda_k = \sigma_k^2$ donnent l'**inertie portée par chaque axe**.
+
+**Vocabulaire et formules à connaître** (pour un individu $i$, un axe $k$) :
+
+- **Inertie** = variance totale du nuage = $\sum_k \lambda_k$. Chaque axe en capte $\lambda_k$.
+- **% de variance** de l'axe $k$ : $\dfrac{\lambda_k}{\sum_j \lambda_j}$ — combien l'axe « résume ».
+- **Coordonnée factorielle** $F_{ik}$ = projection de l'individu sur l'axe (sa position sur la carte).
+- **Contribution** $\text{ctr}_{ik} = \dfrac{m_i\,F_{ik}^2}{\lambda_k}$ : part de l'individu dans
+  l'inertie de l'axe — **qui *construit* l'axe** (à lire pour nommer l'axe).
+- **cos²** $\cos^2_{ik} = \dfrac{F_{ik}^2}{\sum_j F_{ij}^2}$ : **qualité de représentation**
+  (proche de 1 = le point est fidèlement projeté sur cet axe ; proche de 0 = méfiance).
+
+> 💡 **Contribution vs cos²** : la **contribution** dit *qui fait l'axe* (pour l'interpréter) ;
+> le **cos²** dit *si un point est bien représenté* (pour savoir si on peut lui faire confiance).
+
+**Choisir la méthode selon les données** (voir l'arbre ci-dessus) :
+
+| Méthode | Type de données | Question répondue | Inertie totale |
+|---|---|---|---|
+| **PCA** | numériques | axes de variance maximale | $p$ (vars standardisées) |
+| **FA** | numériques | facteurs **latents** + bruit | — (modèle proba) |
+| **CA** | table de contingence (2 var. cat.) | associations lignes ↔ colonnes | $\phi^2 = \chi^2/n$ |
+| **MCA** | ≥ 2 variables catégorielles | proximité des modalités | $\frac{J}{Q}-1$ (gonflée) |
+| **FAMD** | mixte (num + cat) | PCA ⊕ MCA | mixte |
+| **MFA** | numériques en **groupes** | équilibre entre groupes | groupes pondérés |
+| **GPA** | configurations de **formes** | alignement (rotation/échelle/translation) | distance de Procruste |
 <!-- #endregion -->
 
 <!-- #region -->
