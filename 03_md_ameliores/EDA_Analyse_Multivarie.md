@@ -12,7 +12,7 @@ jupyter:
 ---
 
 <!-- #region -->
-# 🔭 Analyse multivariée — méthodes factorielles, tests & réduction de dimension
+# Analyse multivariée — méthodes factorielles, tests & réduction de dimension
 <!-- #endregion -->
 
 <!-- #region -->
@@ -29,7 +29,7 @@ résumer, cartographier et tester un jeu de données décrit par plusieurs varia
 **Choix des libs (2026)** :
 
 - **`prince` 0.19** est le backbone unique des méthodes factorielles (API scikit-learn,
-  couvre PCA/CA/MCA/MFA/FAMD/GPA). ⚠️ Son API a été **entièrement refondue en 2022** —
+  couvre PCA/CA/MCA/MFA/FAMD/GPA). Son API a été **entièrement refondue en 2022** —
   tous les vieux tutos (`plot_row_coordinates`, `mapping`, `explained_inertia_`) sont obsolètes.
 - **`fanalysis`** (utilisé dans la 1ʳᵉ version de ce notebook) est **abandonné** et
   n'installe plus proprement → ses graphes utiles sont **réimplémentés** en helpers matplotlib.
@@ -151,15 +151,15 @@ Avant de *réduire*, on *teste* les relations entre variables. Deux familles :
 <!-- #endregion -->
 
 <!-- #region -->
-🎯 **Quand & pourquoi.** On veut **expliquer ou prédire une variable numérique
+**Quand & pourquoi.** On veut **expliquer ou prédire une variable numérique
 continue** à partir d'autres variables. Ici : prédire le pourboire (`tip`) à partir
 de la facture et de la taille de la table. Sert aussi à **quantifier l'effet** de
 chaque variable, toutes choses égales par ailleurs.
 
-📊 **Données.** Cible **numérique continue** ; prédicteurs numériques (ou catégoriels
+**Données.** Cible **numérique continue** ; prédicteurs numériques (ou catégoriels
 encodés). On travaille sur les colonnes numériques de `tips`.
 
-🧮 **Principe & maths.** On cherche les coefficients $\beta$ qui **minimisent la somme
+**Principe & maths.** On cherche les coefficients $\beta$ qui **minimisent la somme
 des carrés des résidus** (moindres carrés ordinaires, OLS) :
 
 $$\hat{y} = \beta_0 + \sum_j \beta_j x_j, \qquad
@@ -169,7 +169,7 @@ Le coefficient $\beta_j$ se lit : *« +1 unité de $x_j$ ⟹ $+\beta_j$ unités 
 les autres variables fixées »*. La qualité globale se mesure par le
 $R^2 = 1 - \frac{\sum (y_i-\hat y_i)^2}{\sum (y_i-\bar y)^2}$ (part de variance expliquée).
 
-🔍 **Deux backends complémentaires** : **scikit-learn** (prédiction : coefs, R², RMSE)
+**Deux backends complémentaires** : **scikit-learn** (prédiction : coefs, R², RMSE)
 et **statsmodels** (inférence : p-values, IC à 95 %, $R^2$ ajusté).
 <!-- #endregion -->
 
@@ -233,7 +233,7 @@ print(ols_res.summary())
 ```
 
 <!-- #region -->
-📖 **Lecture du résultat.**
+**Lecture du résultat.**
 
 - **$R^2 = 0{,}47$** : le modèle explique **47 %** de la variabilité du pourboire — correct
   mais loin d'être parfait (le pourboire dépend aussi de l'humeur, du service…).
@@ -242,11 +242,11 @@ print(ols_res.summary())
   pourcentage d'usage). **`size`** est significatif aussi (p ≈ 0,02) mais plus faible.
 - **RMSE ≈ 1,0 \$** : erreur typique de prédiction d'environ 1 dollar.
 
-⚠️ **Hypothèses OLS à vérifier** (sinon l'inférence est biaisée) : relation **linéaire**,
+**Hypothèses OLS à vérifier** (sinon l'inférence est biaisée) : relation **linéaire**,
 résidus **indépendants**, de **variance constante** (homoscédasticité) et **normaux**.
 Les inspecter via un *residual plot* et un *QQ-plot*.
 
-✅ **À retenir** : la régression linéaire **quantifie un effet** et le **teste** ;
+**À retenir** : la régression linéaire **quantifie un effet** et le **teste** ;
 sklearn pour prédire, statsmodels pour interpréter/justifier.
 <!-- #endregion -->
 
@@ -255,14 +255,14 @@ sklearn pour prédire, statsmodels pour interpréter/justifier.
 <!-- #endregion -->
 
 <!-- #region -->
-🎯 **Quand & pourquoi.** On veut **prédire/expliquer une variable catégorielle**
+**Quand & pourquoi.** On veut **prédire/expliquer une variable catégorielle**
 (binaire ici : le sexe du payeur). Au lieu d'une valeur continue, on modélise la
 **probabilité** d'appartenir à une classe.
 
-📊 **Données.** Cible **catégorielle** (binaire ou multiclasse) ; prédicteurs numériques
+**Données.** Cible **catégorielle** (binaire ou multiclasse) ; prédicteurs numériques
 ou encodés. Ici `total_bill, tip, size` → `sex`.
 
-🧮 **Principe & maths.** On passe la combinaison linéaire dans la **sigmoïde** pour la
+**Principe & maths.** On passe la combinaison linéaire dans la **sigmoïde** pour la
 ramener dans $[0,1]$ :
 
 $$P(y=1 \mid x) = \sigma(\beta_0 + \beta^\top x), \qquad \sigma(z) = \frac{1}{1 + e^{-z}}$$
@@ -271,7 +271,7 @@ Les coefficients s'interprètent en **log-odds** ; leur exponentielle donne l'**
 $e^{\beta_j}$ : facteur multiplicatif sur la **cote** $\frac{P(1)}{P(0)}$ quand $x_j$
 augmente de 1. $e^{\beta_j} > 1$ ⟹ augmente la probabilité, $< 1$ ⟹ la diminue.
 
-🔍 `penalty=None` désactive la régularisation (l'ancien `penalty='none'` — une chaîne —
+`penalty=None` désactive la régularisation (l'ancien `penalty='none'` — une chaîne —
 est supprimé des versions récentes de scikit-learn).
 <!-- #endregion -->
 
@@ -315,7 +315,7 @@ odds.round(3)
 ```
 
 <!-- #region -->
-📖 **Lecture du résultat.**
+**Lecture du résultat.**
 
 - Tous les **odds-ratios ≈ 1** et toutes les **p-values > 0,05** ⟹ aucune variable n'est
   significative. **Pseudo-$R^2$ de McFadden ≈ 0,02** (très faible : un bon ajustement est
@@ -324,11 +324,11 @@ odds.round(3)
   de prédire le sexe du payeur — et c'est le **bon** enseignement (ne pas sur-interpréter
   un modèle non significatif).
 
-⚠️ **Pièges** : la régression logistique suppose une **séparation linéaire en log-odds** ;
+**Pièges** : la régression logistique suppose une **séparation linéaire en log-odds** ;
 elle est sensible à la **multicolinéarité** (ici `tip` et `total_bill` sont corrélés) et
 au **déséquilibre des classes**.
 
-✅ **À retenir** : lire les coefficients en **odds-ratios**, toujours vérifier la
+**À retenir** : lire les coefficients en **odds-ratios**, toujours vérifier la
 **significativité** avant de conclure à un effet.
 <!-- #endregion -->
 
@@ -337,20 +337,20 @@ au **déséquilibre des classes**.
 <!-- #endregion -->
 
 <!-- #region -->
-🎯 **Quand & pourquoi.** Comparer la **moyenne d'une variable numérique** entre **plusieurs
+**Quand & pourquoi.** Comparer la **moyenne d'une variable numérique** entre **plusieurs
 groupes** définis par une variable catégorielle. Question : *« la longueur du sépale
 diffère-t-elle selon l'espèce ? »* C'est le test de référence pour « 1 numérique × 1 facteur ».
 
-📊 **Données.** Une variable **numérique** (cible) + un **facteur catégoriel** (≥ 2 modalités).
+**Données.** Une variable **numérique** (cible) + un **facteur catégoriel** (≥ 2 modalités).
 
-🧮 **Principe & maths.** On **décompose la variance totale** en variance **inter-groupes**
+**Principe & maths.** On **décompose la variance totale** en variance **inter-groupes**
 (expliquée par le facteur) et **intra-groupes** (résiduelle). Le test $F$ confronte les deux ;
 $H_0$ = « toutes les moyennes de groupe sont égales » :
 
 $$F = \frac{\text{SCE}_{\text{inter}} / (k-1)}{\text{SCE}_{\text{intra}} / (n-k)}, \qquad
 \eta^2 = \frac{\text{SCE}_{\text{inter}}}{\text{SCE}_{\text{totale}}} \;(\text{taille d'effet})$$
 
-🔍 Le boxplot ci-dessous **visualise** déjà la séparation : si les boîtes ne se chevauchent
+Le boxplot ci-dessous **visualise** déjà la séparation : si les boîtes ne se chevauchent
 pas, l'ANOVA sera très significative.
 <!-- #endregion -->
 
@@ -374,17 +374,17 @@ print(aov)
 ```
 
 <!-- #region -->
-📖 **Lecture du résultat.**
+**Lecture du résultat.**
 
 - **$F \approx 119$**, **p-value $\approx 1{,}7\times10^{-31}$** ⟹ on **rejette $H_0$** sans
   ambiguïté : l'espèce explique très fortement la longueur du sépale.
 - La taille d'effet $\eta^2 = \frac{63{,}2}{63{,}2 + 39{,}0} \approx 0{,}62$ : **62 %** de la
   variance de `sepal_length` est portée par l'espèce — effet **massif**.
 
-⚠️ **Hypothèses** : résidus **normaux** dans chaque groupe (Shapiro), **homoscédasticité**
+**Hypothèses** : résidus **normaux** dans chaque groupe (Shapiro), **homoscédasticité**
 (test de Levene) et **indépendance**. Si l'homoscédasticité est violée → ANOVA de **Welch**.
 
-✅ **À retenir** : ANOVA = « les moyennes diffèrent-elles ? » ; toujours accompagner la
+**À retenir** : ANOVA = « les moyennes diffèrent-elles ? » ; toujours accompagner la
 p-value d'une **taille d'effet** ($\eta^2$) pour juger de l'**ampleur**, pas que de la significativité.
 <!-- #endregion -->
 
@@ -393,21 +393,21 @@ p-value d'une **taille d'effet** ($\eta^2$) pour juger de l'**ampleur**, pas que
 <!-- #endregion -->
 
 <!-- #region -->
-🎯 **Quand & pourquoi.** Comme l'ANOVA, mais avec **plusieurs variables numériques
+**Quand & pourquoi.** Comme l'ANOVA, mais avec **plusieurs variables numériques
 dépendantes en même temps**. Question : *« les espèces diffèrent-elles sur l'ensemble
 {longueur/largeur sépale + pétale} pris conjointement ? »* Utile quand les variables sont
 **corrélées** (les tester séparément ignorerait leurs liens et gonflerait le risque d'erreur).
 
-📊 **Données.** **Plusieurs** variables **numériques** (cibles) + un **facteur catégoriel**.
+**Données.** **Plusieurs** variables **numériques** (cibles) + un **facteur catégoriel**.
 
-🧮 **Principe & maths.** On teste l'égalité des **vecteurs de moyennes** entre groupes. On
+**Principe & maths.** On teste l'égalité des **vecteurs de moyennes** entre groupes. On
 forme les matrices de covariance **inter-groupes** $\mathbf{H}$ et **intra** $\mathbf{E}$,
 et on résume $\mathbf{H}\mathbf{E}^{-1}$ par ses valeurs propres. Les statistiques usuelles :
 
 - **Lambda de Wilks** $\Lambda = \prod \frac{1}{1+\lambda_i} \in [0,1]$ — **proche de 0 = forte séparation**.
 - **Trace de Pillai** — la plus **robuste** aux écarts d'hypothèses.
 
-🔍 On lit la **p-value** associée (via une approximation en $F$).
+On lit la **p-value** associée (via une approximation en $F$).
 <!-- #endregion -->
 
 ```python
@@ -421,17 +421,17 @@ print("Wilks' lambda (species):", wilks.round(5).to_dict())
 ```
 
 <!-- #region -->
-📖 **Lecture du résultat.**
+**Lecture du résultat.**
 
 - **Wilks $\Lambda \approx 0{,}023$** (très proche de 0) avec **$F \approx 199$** et
   **p-value $\approx 0$** ⟹ les espèces ont des **profils multivariés radicalement
   différents** sur les 4 mesures prises ensemble.
 - C'est précisément ce qui rend iris séparable et fait le succès de la PCA en §3.2.
 
-⚠️ **Hypothèses** : **normalité multivariée** et **égalité des matrices de covariance**
+**Hypothèses** : **normalité multivariée** et **égalité des matrices de covariance**
 (test de **Box's M**). En cas de doute, préférer la **trace de Pillai**, plus robuste.
 
-✅ **À retenir** : la MANOVA teste les variables **conjointement** ; un $\Lambda$ proche de 0
+**À retenir** : la MANOVA teste les variables **conjointement** ; un $\Lambda$ proche de 0
 signale une forte séparation des groupes dans l'espace multivarié.
 <!-- #endregion -->
 
@@ -489,7 +489,7 @@ on en extrait les **valeurs et vecteurs propres** — concrètement une **SVD** 
 - **cos²** $\cos^2_{ik} = \dfrac{F_{ik}^2}{\sum_j F_{ij}^2}$ : **qualité de représentation**
   (proche de 1 = le point est fidèlement projeté sur cet axe ; proche de 0 = méfiance).
 
-> 💡 **Contribution vs cos²** : la **contribution** dit *qui fait l'axe* (pour l'interpréter) ;
+> **Contribution vs cos²** : la **contribution** dit *qui fait l'axe* (pour l'interpréter) ;
 > le **cos²** dit *si un point est bien représenté* (pour savoir si on peut lui faire confiance).
 
 **Choisir la méthode selon les données** (voir l'arbre ci-dessus) :
@@ -1008,7 +1008,7 @@ La **FAMD** gère un tableau qui mélange variables **numériques et catégoriel
 mathématiquement, **FAMD = PCA (sur le numérique) ⊕ MCA (sur le catégoriel)**, avec
 une pondération qui met les deux types sur un pied d'égalité.
 
-⚠️ Piège pratique : `prince.FAMD` ne reconnaît comme numériques que les colonnes de
+Piège pratique : `prince.FAMD` ne reconnaît comme numériques que les colonnes de
 dtype **`float`** — on caste donc explicitement les colonnes numériques.
 <!-- #endregion -->
 
