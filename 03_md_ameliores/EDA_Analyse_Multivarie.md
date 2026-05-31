@@ -233,21 +233,29 @@ print(ols_res.summary())
 ```
 
 <!-- #region -->
-**Lecture du résultat.**
+**Comment lire (règles générales).**
 
-- **$R^2 = 0{,}47$** : le modèle explique **47 %** de la variabilité du pourboire — correct
-  mais loin d'être parfait (le pourboire dépend aussi de l'humeur, du service…).
-- **`total_bill`** : coefficient $\approx 0{,}09$, **p-value ≈ 0** ⟹ effet **très
-  significatif** : +1 \$ de facture ⟹ +0,09 \$ de pourboire (~9 %, cohérent avec un
-  pourcentage d'usage). **`size`** est significatif aussi (p ≈ 0,02) mais plus faible.
-- **RMSE ≈ 1,0 \$** : erreur typique de prédiction d'environ 1 dollar.
+- **$R^2$** (part de variance expliquée, entre 0 et 1) :
+  - **proche de 1** → le modèle capture presque toute la variabilité de $y$ ;
+  - **0,3 – 0,7** → effet réel mais **partiel** (d'autres facteurs jouent) ;
+  - **proche de 0** → prédicteurs non pertinents, relation **non linéaire**, ou variables manquantes ;
+  - **négatif (en validation)** → le modèle fait **pire que la moyenne** = sur-ajustement.
+- **Coefficient $\beta_j$** : le **signe** donne le sens de l'effet (+ augmente $y$, − le diminue),
+  la **valeur** l'ampleur (en unités de $y$ par unité de $x_j$, autres variables fixées).
+  Ne comparer des $\beta_j$ entre eux que si les $x$ sont à la **même échelle** (sinon standardiser).
+- **p-value du coefficient** : **< 0,05** → effet **significatif** ; **≥ 0,05** → effet **non
+  démontré** (ce n'est *pas* « effet nul », juste pas de preuve).
+- **RMSE** : erreur typique de prédiction dans l'unité de $y$ ; à juger **relativement** à
+  l'écart-type de $y$ (RMSE ≪ écart-type = bon).
 
-**Hypothèses OLS à vérifier** (sinon l'inférence est biaisée) : relation **linéaire**,
-résidus **indépendants**, de **variance constante** (homoscédasticité) et **normaux**.
-Les inspecter via un *residual plot* et un *QQ-plot*.
+**Sur cet exemple** : $R^2 \approx 0{,}47$ (effet partiel), `total_bill` significatif
+(p ≈ 0 ; +1 \$ de facture → +0,09 \$ de pourboire), RMSE ≈ 1 \$.
 
-**À retenir** : la régression linéaire **quantifie un effet** et le **teste** ;
-sklearn pour prédire, statsmodels pour interpréter/justifier.
+**Hypothèses OLS** (sinon l'inférence est biaisée) : relation **linéaire**, résidus
+**indépendants**, **homoscédastiques** et **normaux** — inspecter via *residual plot* + *QQ-plot*.
+
+**À retenir** : la régression linéaire **quantifie** un effet et le **teste** ; lire le triplet
+**(R², signe+ampleur du coef, p-value)** ensemble, jamais isolément.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -315,20 +323,27 @@ odds.round(3)
 ```
 
 <!-- #region -->
-**Lecture du résultat.**
+**Comment lire (règles générales).**
 
-- Tous les **odds-ratios ≈ 1** et toutes les **p-values > 0,05** ⟹ aucune variable n'est
-  significative. **Pseudo-$R^2$ de McFadden ≈ 0,02** (très faible : un bon ajustement est
-  plutôt > 0,2).
-- **Conclusion honnête** : facture, pourboire et taille de table **ne permettent pas**
-  de prédire le sexe du payeur — et c'est le **bon** enseignement (ne pas sur-interpréter
-  un modèle non significatif).
+- **Odds-ratio $e^{\beta_j}$** (effet multiplicatif sur la cote $P(1)/P(0)$ quand $x_j$ +1) :
+  - **> 1** → $x_j$ **augmente** la probabilité de la classe 1 (ex. OR = 1,5 → +50 % de cote) ;
+  - **< 1** → $x_j$ la **diminue** (ex. OR = 0,5 → cote divisée par 2) ;
+  - **≈ 1** → **pas d'effet**. Plus l'OR s'éloigne de 1, plus l'effet est fort.
+- **p-value du coefficient** : **< 0,05** → effet significatif ; **≥ 0,05** → non démontré
+  (un OR « parlant » mais non significatif ne prouve rien).
+- **Pseudo-$R^2$ de McFadden** : **> 0,2–0,4** → bon ajustement ; **0,1–0,2** → modéré ;
+  **< 0,1** → faible pouvoir explicatif.
+- **Matrice de confusion / AUC** (à ajouter en pratique) : pour juger la **qualité de
+  classification**, pas seulement l'ajustement.
 
-**Pièges** : la régression logistique suppose une **séparation linéaire en log-odds** ;
-elle est sensible à la **multicolinéarité** (ici `tip` et `total_bill` sont corrélés) et
-au **déséquilibre des classes**.
+**Sur cet exemple** : tous les OR ≈ 1, p-values > 0,05, pseudo-$R^2 \approx 0{,}02$ →
+facture/pourboire/taille **ne prédisent pas** le sexe. C'est le **bon** enseignement : ne pas
+sur-interpréter un modèle non significatif.
 
-**À retenir** : lire les coefficients en **odds-ratios**, toujours vérifier la
+**Pièges** : suppose une **séparation linéaire en log-odds** ; sensible à la
+**multicolinéarité** (ici `tip`/`total_bill` corrélés) et au **déséquilibre des classes**.
+
+**À retenir** : lire les coefficients en **odds-ratios**, et **toujours** croiser avec la
 **significativité** avant de conclure à un effet.
 <!-- #endregion -->
 
@@ -374,18 +389,27 @@ print(aov)
 ```
 
 <!-- #region -->
-**Lecture du résultat.**
+**Comment lire (règles générales).**
 
-- **$F \approx 119$**, **p-value $\approx 1{,}7\times10^{-31}$** ⟹ on **rejette $H_0$** sans
-  ambiguïté : l'espèce explique très fortement la longueur du sépale.
-- La taille d'effet $\eta^2 = \frac{63{,}2}{63{,}2 + 39{,}0} \approx 0{,}62$ : **62 %** de la
-  variance de `sepal_length` est portée par l'espèce — effet **massif**.
+- **p-value (colonne `PR(>F)`)** : **< 0,05** → on **rejette $H_0$** : au moins une moyenne
+  de groupe diffère ; **≥ 0,05** → pas de différence démontrée.
+- **Statistique $F$** : plus elle est **grande**, plus la variance **inter-groupes** domine
+  la variance **intra** (groupes bien séparés). Un $F$ proche de 1 → groupes indistincts.
+- **Taille d'effet $\eta^2 = \frac{\text{SCE}_{\text{inter}}}{\text{SCE}_{\text{totale}}}$**
+  (conventions de Cohen) : **≈ 0,01** petit · **≈ 0,06** moyen · **≥ 0,14** grand effet.
+  C'est elle qui dit l'**ampleur** ; avec un gros échantillon une p-value peut être minuscule
+  pour un effet trivial.
+- **Significatif globalement ?** → enchaîner avec un **post-hoc** (Tukey) pour savoir
+  *quelles paires* de groupes diffèrent.
 
-**Hypothèses** : résidus **normaux** dans chaque groupe (Shapiro), **homoscédasticité**
-(test de Levene) et **indépendance**. Si l'homoscédasticité est violée → ANOVA de **Welch**.
+**Sur cet exemple** : $F \approx 119$, p $\approx 10^{-31}$, $\eta^2 \approx 0{,}62$ → l'espèce
+explique 62 % de la variance de `sepal_length` : effet **massif**.
 
-**À retenir** : ANOVA = « les moyennes diffèrent-elles ? » ; toujours accompagner la
-p-value d'une **taille d'effet** ($\eta^2$) pour juger de l'**ampleur**, pas que de la significativité.
+**Hypothèses** : résidus **normaux** par groupe (Shapiro), **homoscédasticité** (Levene),
+**indépendance**. Homoscédasticité violée → **ANOVA de Welch**.
+
+**À retenir** : toujours accompagner la **p-value** (« y a-t-il un effet ? ») d'une **taille
+d'effet** (« quelle ampleur ? »).
 <!-- #endregion -->
 
 <!-- #region -->
@@ -421,18 +445,25 @@ print("Wilks' lambda (species):", wilks.round(5).to_dict())
 ```
 
 <!-- #region -->
-**Lecture du résultat.**
+**Comment lire (règles générales).**
 
-- **Wilks $\Lambda \approx 0{,}023$** (très proche de 0) avec **$F \approx 199$** et
-  **p-value $\approx 0$** ⟹ les espèces ont des **profils multivariés radicalement
-  différents** sur les 4 mesures prises ensemble.
-- C'est précisément ce qui rend iris séparable et fait le succès de la PCA en §3.2.
+- **Lambda de Wilks $\Lambda \in [0,1]$** :
+  - **proche de 0** → les groupes ont des **vecteurs de moyennes très différents** (forte séparation) ;
+  - **proche de 1** → moyennes multivariées **quasi identiques** (pas de différence).
+- **p-value** (via l'approximation en $F$) : **< 0,05** → différence multivariée significative.
+- **Plusieurs statistiques** dans la sortie (Wilks, **Pillai**, Hotelling-Lawley, Roy) :
+  elles concordent en général ; en cas de doute (hypothèses limites), se fier à **Pillai**,
+  la plus **robuste**. Roy est la plus puissante mais la moins robuste.
+- **Si significatif** → revenir aux **ANOVA univariées** (par variable) pour localiser
+  *quelles* variables portent la différence.
 
-**Hypothèses** : **normalité multivariée** et **égalité des matrices de covariance**
-(test de **Box's M**). En cas de doute, préférer la **trace de Pillai**, plus robuste.
+**Sur cet exemple** : $\Lambda \approx 0{,}023$ (≈ 0), $F \approx 199$, p $\approx 0$ → les
+espèces ont des profils multivariés radicalement différents — ce qui rend iris si séparable en PCA (§3.2).
 
-**À retenir** : la MANOVA teste les variables **conjointement** ; un $\Lambda$ proche de 0
-signale une forte séparation des groupes dans l'espace multivarié.
+**Hypothèses** : **normalité multivariée** et **égalité des matrices de covariance** (Box's M).
+
+**À retenir** : la MANOVA teste les variables **conjointement** ; un $\Lambda$ proche de 0 =
+forte séparation dans l'espace multivarié.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -698,19 +729,27 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.**
+**Comment lire (règles générales).**
 
-- **Axe 1 = 73 %**, **axe 2 = 23 %** → à eux deux **96 %** de l'information : le plan 1-2
-  suffit largement, on a compressé 4 variables en 2 sans presque rien perdre.
-- Le **cercle** et les **contributions** montrent que `petal_length`/`petal_width`
-  (très corrélées) **construisent l'axe 1**, tandis que `sepal_width` porte l'axe 2.
-  L'axe 1 se **nomme** donc « taille des pétales » — qui sépare justement les espèces.
+- **% de variance de l'axe 1** :
+  - **élevé (> 70 %)** → une **structure dominante** : un seul facteur explique presque tout ;
+  - **réparti** (axes 1 et 2 proches) → information **multidimensionnelle**, il faut plus d'axes ;
+  - **% cumulé du plan 1-2 ≥ 80 %** → le plan suffit ; **< 50 %** → la carte 2D est trompeuse,
+    examiner les axes 3+.
+- **Cercle des corrélations** : une variable dont la **flèche est longue et proche du cercle**
+  est bien représentée ; deux flèches **dans le même sens** = variables corrélées ; à **90°** =
+  indépendantes ; **opposées** = anticorrélées. Une flèche alignée sur un axe **définit** cet axe.
+- **Contributions** : la (les) variable(s) à **forte contribution** *construisent* l'axe → on
+  s'en sert pour **nommer** l'axe.
 
-**Pièges.** PCA = méthode **linéaire** : elle rate les structures courbes (→ Kernel PCA §3.8,
-manifold §4). Sensible aux **outliers** et à l'**absence de standardisation**.
+**Sur cet exemple** : axe 1 = 73 %, axe 2 = 23 % (96 % cumulé → plan suffisant) ;
+`petal_length`/`petal_width` font l'axe 1 (→ « taille des pétales »), `sepal_width` l'axe 2.
 
-**À retenir.** Lire d'abord le **% de variance** (a-t-on le droit de se limiter à 2 axes ?),
-puis **nommer les axes** via les contributions, puis seulement interpréter la carte.
+**Pièges.** PCA **linéaire** : rate les structures courbes (→ Kernel PCA §3.8, manifold §4).
+Sensible aux **outliers** et à l'**absence de standardisation**.
+
+**À retenir.** Lire dans l'ordre : **% variance** → **contributions (nommer les axes)** →
+**cercle** → seulement ensuite la carte des individus.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -737,10 +776,19 @@ print(f"Variance cumulée : {np.round(cumpov, 1)}")
 ```
 
 <!-- #region -->
-**Lecture du résultat.** Les critères **divergent** : Kaiser ne retient qu'**1 axe**
-(seul $\lambda_1 = 2{,}9 > 1$), le seuil 80 % en retient **2** (on atteint 96 % à l'axe 2).
-C'est typique : Kaiser est **conservateur**. En pratique on tranche au **coude** + bon sens
-métier — ici **2 axes** s'imposent (le plan est lisible et capte 96 %).
+**Comment lire (règles générales).**
+
+- **Si les critères concordent** (Kaiser = coude = seuil) → choix **évident**, prendre ce nombre.
+- **Si Kaiser < seuil 80 %** (cas fréquent) → Kaiser est **conservateur** ; privilégier le
+  **coude** et le besoin métier (lisibilité d'une carte 2D, débruitage…).
+- **Si le coude est net** (une marche d'escalier dans l'éboulis) → couper **juste après** ;
+  **s'il n'y a pas de coude** (décroissance régulière) → la variance est diffuse, se rabattre
+  sur le seuil cumulé.
+- Garder **≥ 2 axes** si l'on veut une **carte** ; pour un simple débruitage avant un modèle,
+  garder ce qui atteint le seuil cumulé voulu.
+
+**Sur cet exemple** : Kaiser = **1** ($\lambda_1=2{,}9$ seul > 1), seuil 80 % = **2** ; on retient
+**2 axes** (plan lisible, 96 % capté).
 <!-- #endregion -->
 
 <!-- #region -->
@@ -851,13 +899,23 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** **ARI ≈ 0,62** : le clustering retrouve **partiellement** les
-espèces. `setosa` (bien séparée sur l'axe 1) est parfaitement isolée ; `versicolor` et
-`virginica`, qui se chevauchent, sont en partie confondues — exactement la difficulté vue
-en PCA. Sans connaître les espèces, on aurait quand même découvert **3 groupes plausibles**.
+**Comment lire (règles générales).**
 
-**À retenir.** Réduire **avant** de clusteriser débruite et accélère ; l'**ARI** mesure
-l'accord avec une vérité terrain quand on en a une.
+- **ARI (Adjusted Rand Index, accord avec une vérité terrain)** :
+  - **≈ 1** → clusters quasi identiques aux classes réelles ;
+  - **0,5 – 0,8** → correspondance **partielle** (groupes en partie retrouvés) ;
+  - **≈ 0** → accord **aléatoire** (le clustering ne capte pas les classes) ;
+  - **< 0** → pire que le hasard.
+- **Sans vérité terrain** (cas réel), juger la qualité par la **silhouette** ou l'inertie
+  intra (méthode du coude), pas par l'ARI.
+- **Choix de $k$** : autant de clusters que de structure visible sur la carte ; valider avec
+  silhouette / gap statistic.
+
+**Sur cet exemple** : ARI ≈ 0,62 → `setosa` (isolée) parfaitement retrouvée, `versicolor`/
+`virginica` (chevauchantes) en partie confondues. On aurait quand même découvert 3 groupes plausibles.
+
+**À retenir.** Réduire **avant** de clusteriser débruite et accélère ; l'ARI ne sert que
+**quand on connaît** déjà les vraies classes.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -895,15 +953,21 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** Après rotation varimax, le **Facteur 1** est chargé par
-`sepal_length` (0,99), `petal_length` (0,91) et `petal_width` (0,86) → un facteur latent
-de **« taille générale »** ; le **Facteur 2** est porté par `sepal_width` (−0,67) → la
-**forme du sépale**. Les projections PCA et FA se ressemblent ici (données très corrélées),
-mais l'interprétation FA est **plus explicite** car chaque variable charge surtout un facteur.
+**Comment lire (règles générales).** On lit la **matrice des loadings** (variables × facteurs) :
 
-**Quand préférer FA à la PCA.** Quand on **postule des causes latentes** (traits de
-personnalité, satisfaction…) et qu'on veut les nommer ; la PCA reste préférable pour la
-**compression** pure et la visualisation.
+- un **loading proche de ±1** → la variable **définit** ce facteur (signe = sens) ;
+- un **loading proche de 0** → la variable n'a rien à voir avec ce facteur ;
+- on **nomme** chaque facteur par les variables qui le chargent fortement ;
+- après **varimax**, l'idéal est que **chaque variable charge surtout UN facteur**
+  (structure « simple », facile à interpréter). Si une variable charge fort **deux** facteurs,
+  elle est **ambiguë**.
+
+**Sur cet exemple** : Facteur 1 chargé par `sepal_length` (0,99), `petal_length` (0,91),
+`petal_width` (0,86) → **« taille générale »** ; Facteur 2 par `sepal_width` (−0,67) → **forme
+du sépale**. Projections PCA et FA proches ici (données corrélées), mais la FA est plus explicite.
+
+**Quand préférer FA à la PCA.** Si l'on **postule des causes latentes** (traits, satisfaction)
+et qu'on veut les **nommer** ; PCA pour la **compression** et la visualisation pures.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -974,17 +1038,22 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** L'**axe 1 capte 87 %** de l'inertie : un seul axe résume presque
-tout. Il ordonne un **gradient clair → foncé** : à une extrémité yeux bleus + cheveux blonds
-(`Fair`), à l'autre yeux foncés + cheveux noirs (`Dark`/`Black`). Les modalités yeux et
-cheveux de même « teinte » se retrouvent **côte à côte** = forte association — ce qu'un
-test du $\chi^2$ confirmerait numériquement.
+**Comment lire (règles générales).**
 
-**Pièges.** La CA décrit une **association**, pas une **causalité**. Ne l'appliquer qu'à des
-**comptages** (pas des moyennes ni des valeurs négatives).
+- **% d'inertie de l'axe 1** : **élevé** → association **simple et forte** (un seul gradient
+  structure le tableau) ; **réparti sur plusieurs axes** → associations **multiples/complexes**.
+- **Position d'une modalité** : **loin de l'origine** → profil **atypique** (se démarque) ;
+  **proche du centre** → profil **moyen**, peu informatif.
+- **Proximité ligne ↔ colonne** : une ligne et une colonne **proches et dans la même direction
+  depuis l'origine** → **sur-représentées ensemble** (association positive) ; **opposées** →
+  elles **s'évitent** ; **à 90°** → pas de lien particulier.
 
-**À retenir.** CA = lire les **proximités ligne↔colonne** sur les premiers axes ; un axe 1
-dominant signifie une structure d'association simple et forte.
+**Sur cet exemple** : axe 1 = 87 % (structure simple) ; gradient clair → foncé, `Fair`+yeux
+bleus à une extrémité, `Dark`/`Black`+yeux foncés à l'autre : forte association de teinte.
+
+**Pièges.** La CA décrit une **association**, pas une **causalité** ; uniquement des
+**comptages** (≥ 0). **À retenir.** Lire le % d'inertie (simple vs complexe) puis les
+**proximités ligne↔colonne**.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1029,10 +1098,11 @@ mca.eigenvalues_summary
 ```
 
 <!-- #region -->
-**Lecture des valeurs propres.** L'axe 1 ne capte que **31 %** et l'axe 2 **17 %** : c'est
-**normal en MCA** (inertie diluée par le codage disjonctif), pas un échec. La **correction
-de Benzécri/Greenacre** donnerait des pourcentages bien plus parlants. On lit donc surtout
-les **oppositions** sur la carte, pas les % bruts.
+**Lecture des valeurs propres (règle générale).** En MCA les **% bruts sont toujours faibles**
+(inertie gonflée par le codage disjonctif) : un axe 1 à 20-35 % n'est **pas** un échec, alors
+qu'en PCA ce serait médiocre. **Ne jamais comparer** ces % à ceux d'une PCA ; pour des
+pourcentages comparables, appliquer la **correction de Benzécri/Greenacre**. On se concentre
+donc sur les **oppositions** de modalités, pas sur les % bruts.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1053,17 +1123,21 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** L'**axe 1** oppose **survie / femmes / 1ʳᵉ classe** d'un côté à
-**décès / hommes / 3ᵉ classe** de l'autre : la signature du « women and children first ».
-Les modalités `alive=yes`, `sex=female`, `class=First`, `who=woman` se regroupent ;
-`alive=no`, `sex=male`, `class=Third` s'y opposent. Les modalités centrales (ex. port
-d'embarquement) sont **peu discriminantes**.
+**Comment lire la carte des modalités (règles générales).**
 
-**Pièges.** Ne **jamais** comparer les % d'inertie d'une MCA à ceux d'une PCA. Les modalités
-rares attirent l'œil mais reposent sur peu d'individus → vérifier les effectifs.
+- **Modalités proches** (même zone) → elles **co-occurrent** chez les mêmes individus (profil-type).
+- **Modalités opposées** par rapport à l'origine → elles **s'excluent**.
+- **Modalité loin du centre** → **rare ou très structurante** (à confronter à son effectif) ;
+  **proche du centre** → fréquente / **peu discriminante**.
+- **Nommer chaque axe** par les modalités extrêmes qui le portent (comme pour les variables en PCA).
 
-**À retenir.** MCA = PCA des catégories ; lire les **oppositions** de modalités, pas les
-distances absolues ni les % bruts.
+**Sur cet exemple** : l'axe 1 oppose `alive=yes`/`female`/`First`/`woman` à
+`alive=no`/`male`/`Third` → la signature du « women and children first » ; le port
+d'embarquement, central, est peu discriminant.
+
+**Pièges.** Une modalité **rare** attire l'œil mais repose sur peu d'individus → **vérifier
+les effectifs**. **À retenir.** MCA = PCA des catégories ; lire **oppositions** et
+**co-occurrences**, pas les distances absolues ni les % bruts.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1132,17 +1206,23 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** L'**axe 1 capte 85 %** : les 3 experts s'accordent largement sur un
-**classement principal des vins**. Les **contributions des groupes à l'axe 1** sont
-équilibrées (~0,32–0,34 chacun) — la normalisation MFA a bien empêché qu'un expert domine.
-En revanche l'**axe 2** est porté surtout par l'**Expert 3** (contribution ≈ 0,77) : c'est
-là qu'il se **démarque** des deux autres.
+**Comment lire (règles générales).**
 
-**Pièges.** MFA n'a de sens que si les **groupes sont pertinents** ; des groupes mal définis
-produisent des axes ininterprétables. Données ici minuscules (6 vins) → illustratif.
+- **% d'inertie de l'axe 1** : **élevé** → les groupes **s'accordent** sur une structure
+  commune dominante ; **faible/réparti** → les groupes voient des choses **différentes**.
+- **`group_contributions_` (un groupe × un axe)** :
+  - contributions **équilibrées** sur un axe → tous les groupes **concourent** à cet axe
+    (consensus, la normalisation MFA a empêché qu'un bloc domine) ;
+  - un groupe **nettement plus contributif** sur un axe → cet axe traduit **sa spécificité**
+    (là où ce groupe se démarque).
+- **Coordonnées partielles** d'un individu : si les points des différents groupes sont
+  **proches**, les groupes sont **d'accord** sur cet individu ; **dispersés** → désaccord.
 
-**À retenir.** MFA = PCA **équilibrée entre blocs** ; lire d'abord les **contributions de
-groupes** pour savoir quel bloc fait quel axe.
+**Sur cet exemple** : axe 1 = 85 % avec contributions ~0,32–0,34 (consensus des 3 experts) ;
+axe 2 porté par l'**Expert 3** (≈ 0,77) = là où il se démarque.
+
+**Pièges.** MFA n'a de sens que si les **groupes sont pertinents** ; ici 6 vins → illustratif.
+**À retenir.** Lire d'abord les **contributions de groupes** pour savoir quel bloc fait quel axe.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1201,16 +1281,21 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** Le plan 1-2 capte **87 %** de l'inertie (66 % + 20 %). Coloriés par
-`Oak type`, les vins se **séparent nettement sur l'axe 1** : les deux types de chêne ont des
-profils distincts, et FAMD l'a capté **en combinant** les descripteurs numériques et les
-variables catégorielles `c1/c2/c3`.
+**Comment lire (règles générales).** S'interprète **comme une PCA** :
 
-**Pièges.** Sensible au **déséquilibre** num/cat (beaucoup de modalités rares peuvent
-gonfler la part catégorielle). Vérifier les dtypes (`float` obligatoire pour le numérique).
+- **% d'inertie** du plan → a-t-on capté l'essentiel en 2D ?
+- **carte des individus** → groupes et gradients ; si on dispose d'une variable de coloration
+  (illustrative), **une séparation nette** indique que les axes la capturent.
+- **rôle des variables** : les **numériques** via leurs corrélations aux axes (comme un cercle),
+  les **modalités catégorielles** comme des points (barycentre des individus qui les portent) ;
+  une modalité **excentrée** caractérise un côté de l'axe.
 
-**À retenir.** FAMD = la PCA des **données mixtes** ; pas besoin de tout binariser, la
-pondération interne fait l'équilibre.
+**Sur cet exemple** : plan 1-2 = 87 % (66 % + 20 %) ; coloriés par `Oak type`, les vins se
+séparent nettement sur l'axe 1 → FAMD a combiné numériques **et** catégorielles `c1/c2/c3`.
+
+**Pièges.** Sensible au **déséquilibre** num/cat (beaucoup de modalités rares gonflent la part
+catégorielle) ; dtypes `float` obligatoires pour le numérique. **À retenir.** FAMD = PCA des
+**données mixtes**, la pondération interne fait l'équilibre.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1281,16 +1366,19 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** À **gauche**, les 3 pentagones sont éparpillés (positions, rotations
-et tailles différentes) ; à **droite**, la GPA les a **superposés** : il ne subsiste que le
-**bruit** qu'on avait injecté. C'est exactement le but — neutraliser pose et échelle pour ne
-comparer que la **forme**.
+**Comment lire (règles générales).** On compare les formes **avant** et **après** alignement :
 
-**Pièges.** Exige une **correspondance point-à-point** entre formes (le point $k$ doit
-désigner le même repère partout). Sensible aux **points aberrants**.
+- **si les formes se superposent presque parfaitement** après GPA → elles ont la **même forme**,
+  elles ne différaient que par position/orientation/taille (cas de notre exemple : il ne reste
+  que le bruit injecté) ;
+- **s'il subsiste des écarts structurés** (un sommet systématiquement décalé) → c'est une
+  **vraie différence de forme** = le signal d'intérêt ;
+- l'**écart résiduel moyen** (distance de Procruste) **quantifie** la variabilité de forme ;
+  la **forme moyenne** (consensus) sert de référence.
 
-**À retenir.** GPA = aligner pour **isoler la forme** ; ce qui reste après superposition est
-le seul signal interprétable.
+**Pièges.** Exige une **correspondance point-à-point** (le point $k$ = même repère partout) ;
+sensible aux **points aberrants**. **À retenir.** GPA = aligner pour **isoler la forme** ; ce
+qui **reste** après superposition est le seul signal interprétable.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1333,14 +1421,19 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** Sur iris (déjà presque linéairement séparable), la Kernel PCA RBF
-**courbe** la projection : elle **resserre** chaque espèce en amas plus compacts que la PCA
-linéaire. Le gain est ici modeste, mais sur des structures réellement non-linéaires
-(cercles, croissants) l'écart serait spectaculaire.
+**Comment lire (règles générales).** On compare la projection au **PCA linéaire** :
 
-**À retenir.** Kernel PCA = PCA dans un espace transformé ; puissante mais **non
-interprétable** en variables d'origine et **sensible à `gamma`** — d'où l'intérêt des
-méthodes dédiées de la section 4.
+- **si Kernel PCA sépare nettement mieux** les groupes → il y avait une **structure
+  non-linéaire** que la PCA ratait (gros gain) ;
+- **si les deux se ressemblent** → les données sont **déjà ~linéaires**, la Kernel PCA
+  n'apporte rien (cas d'iris : gain modeste) ;
+- **effet de `gamma`** : trop **grand** → chaque point s'isole (sur-ajustement, amas éclaté) ;
+  trop **petit** → on **retombe sur la PCA linéaire**. Le régler par essais.
+
+Attention : les **axes ne sont pas interprétables** en variables d'origine (espace implicite).
+
+**À retenir.** Kernel PCA = PCA dans un espace transformé ; à comparer **systématiquement** au
+PCA linéaire pour juger si le non-linéaire apporte quelque chose.
 <!-- #endregion -->
 
 <!-- #region -->
@@ -1422,15 +1515,24 @@ plt.show()
 ```
 
 <!-- #region -->
-**Lecture du résultat.** `setosa` (teal) se détache **partout** — c'est le signal robuste.
-Les méthodes **linéaires** (PCA, MDS) laissent `versicolor`/`virginica` se chevaucher ;
-les méthodes **locales non-linéaires** (t-SNE, UMAP, PaCMAP) les **séparent** en amas
-distincts. **LLE** s'effondre quasiment sur une ligne : comportement classique de LLE sur
-iris (sa contrainte de reconstruction locale dégénère ici). À méthode égale, on choisit
-selon le but : **PCA** si on veut interpréter, **UMAP/PaCMAP** si on veut visualiser des clusters.
+**Comment lire (règles générales).**
 
-**À retenir.** Aucune méthode n'est « la meilleure » dans l'absolu ; comparer plusieurs
-projections **évite de conclure sur un artefact** d'une seule.
+- **Un groupe séparé sur (presque) toutes les méthodes** → séparation **robuste et réelle**
+  (ex. `setosa` ici). **Un groupe séparé par une seule méthode** → possible **artefact**, à
+  confirmer.
+- **Méthodes linéaires** (PCA, MDS) **et** non-linéaires donnent la **même image** → la
+  structure est essentiellement **linéaire**. Elles **divergent** → il y a du **non-linéaire**
+  que seules t-SNE/UMAP/PaCMAP capturent.
+- **Une méthode dégénère** (points alignés/écrasés, ex. **LLE** ici) → instabilité de **cette**
+  méthode sur **ces** données, pas une propriété des données : ne pas en tirer de conclusion.
+- **Choix selon le but** : **PCA** si l'on veut interpréter/quantifier ; **UMAP/PaCMAP** si l'on
+  veut *visualiser* des clusters.
+
+**Sur cet exemple** : `setosa` isolée partout (robuste) ; linéaires laissent
+`versicolor`/`virginica` se chevaucher, t-SNE/UMAP/PaCMAP les séparent ; LLE dégénère.
+
+**À retenir.** Aucune méthode n'est « la meilleure » ; **comparer plusieurs projections** évite
+de conclure sur un **artefact** d'une seule.
 <!-- #endregion -->
 
 <!-- #region -->
