@@ -816,6 +816,21 @@ plt.show()
 ```
 
 <!-- #region -->
+**Comment lire (règles générales).**
+
+- **Point à cos² élevé (clair ici, → 1)** → bien représenté sur le plan 1-2 : sa position est
+  **fiable**, on peut l'interpréter.
+- **Point à cos² faible (foncé, → 0)** → mal projeté : il « vit » sur d'**autres axes** ; sa
+  position 2D est **trompeuse**, ne pas conclure sur lui (regarder les axes 3+).
+- **Même logique pour les variables** (cos² des colonnes) : n'interpréter sur le cercle que
+  les variables bien représentées.
+- Règle pratique : avant de commenter un point « extrême » sur une carte, **vérifier son cos²**.
+
+**Sur cet exemple** : la majorité des fleurs ont un cos² proche de 1 (médiane ≈ 0,97) → le
+plan 1-2 est fiable pour presque tous les individus.
+<!-- #endregion -->
+
+<!-- #region -->
 #### 3.2.5 Biplot
 <!-- #endregion -->
 
@@ -848,6 +863,22 @@ plt.show()
 ```
 
 <!-- #region -->
+**Comment lire (règles générales).**
+
+- **Direction d'une flèche** : les individus situés **dans son sens** ont des **valeurs élevées**
+  sur cette variable ; à l'**opposé**, des valeurs faibles.
+- **Longueur de la flèche** : longue → variable **bien représentée** et influente sur le plan ;
+  courte → peu représentée (interpréter avec prudence).
+- **Angle entre deux flèches** : **petit** → variables **corrélées** ; **≈ 90°** → indépendantes ;
+  **≈ 180°** → **anticorrélées**.
+- **Proximité individu ↔ flèche** : un groupe d'individus aligné sur une flèche est
+  **caractérisé** par cette variable.
+
+**Sur cet exemple** : `petal_length`/`petal_width` (flèches longues, même sens) pointent vers
+`virginica` → ces fleurs ont de grands pétales ; `sepal_width` (flèche verticale) structure l'axe 2.
+<!-- #endregion -->
+
+<!-- #region -->
 #### 3.2.6 Variables et individus supplémentaires
 <!-- #endregion -->
 
@@ -876,6 +907,22 @@ ax.set(title="PCA — individus supplémentaires (projetés a posteriori)",
 ax.legend()
 plt.show()
 ```
+
+<!-- #region -->
+**Comment lire (règles générales).**
+
+- **Un individu supplémentaire tombe au milieu d'un groupe d'actifs** → il **ressemble** à ce
+  groupe (mêmes caractéristiques) ; on peut lui attribuer ce profil.
+- **Il tombe loin de tous les groupes / hors du nuage** → profil **atypique** ou
+  **hors-distribution** : le modèle figé le représente mal, prudence.
+- **Variable supplémentaire** (même principe) : sa flèche/position **interprète** les axes sans
+  les avoir construits — utile pour relier les axes à une variable externe (ex. une cible).
+- Intérêt clé : le repère **ne bouge pas** quand on ajoute des points → comparaisons stables
+  dans le temps (scoring de nouvelles observations).
+
+**Sur cet exemple** : les 15 fleurs supplémentaires (étoiles) se projettent **au sein des
+nuages d'actifs** → elles partagent la même structure, le plan généralise bien.
+<!-- #endregion -->
 
 <!-- #region -->
 #### 3.2.7 Clustering sur les composantes
