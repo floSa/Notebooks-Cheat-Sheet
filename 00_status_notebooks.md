@@ -167,7 +167,7 @@
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
 | 43 | `DE_Docling.md` | 📥 ingéré | TUTO | M | 🌐 | Installation, conversion, layout, tables, images. Ajouter comparatifs PyPDF/pdfplumber + OCR scans. Suivre releases mensuelles. |
-| 44 | `Flask_API.md` | 📥 ingéré | TUTO | S | 🌐 | CRUD basique. **Décision stratégique** : migrer vers FastAPI ou maintenir comme legacy + ajouter FastAPI à côté ? |
+| 44 | `Flask_API.md` (Flask + FastAPI + comparatif) | ✅ fait (conforme contrat 5 critères) | TUTO + WIKI + CS | M | 🌐 | **Notebook unique** (décision utilisateur, à renommer) couvrant la prise en main de **Flask** puis **FastAPI** sur la **même API `books`** (3 classiques de l'original préservés), puis comparatif. Original lu intégralement, plan + structure dans `scripts/_sandbox/`, sandbox `.py` exécuté end-to-end (exit 0), `check_format --both` vert (114 cellules / 30 code). **Exécution in-process** via `test_client`/`TestClient` (pas de serveur). **Modernisation 2026** : Pydantic v2, `Query(pattern=)` (pas `regex` déprécié), `lifespan` (pas `on_event`), footgun event-loop, OpenAPI auto. v0 `FastAPI_API.*` absorbé (redondant — à supprimer). |
 | 45 | `Streamlit_brique.md` | 📥 ingéré | TUTO | M | | Async, autocomplete, chatbot, viz, DataFrame. Ajouter caching/perf + déploiement (HF Spaces, Railway). |
 
 ---
