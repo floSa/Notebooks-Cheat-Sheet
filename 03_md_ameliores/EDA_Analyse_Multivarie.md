@@ -588,9 +588,26 @@ def plot_contributions(contrib: pd.DataFrame, axis: int = 0, top: int = 10,
 <!-- #endregion -->
 
 <!-- #region -->
-La **PCA** projette des variables numériques sur des axes orthogonaux de variance
-décroissante. On **centre-réduit** d'abord (sinon les variables à grande échelle
-dominent). Deux vues : scikit-learn (pipeline ML) puis prince (API factorielle).
+**Quand & pourquoi.** Vous avez beaucoup de variables numériques **corrélées** et vous
+voulez (a) **résumer** l'information en 2-3 axes, (b) **visualiser** la structure des
+individus, (c) **débruiter** avant un autre modèle. C'est la méthode de référence du
+tableau « tout numérique ».
+
+**Données.** Uniquement des variables **numériques** (continues). Pré-requis :
+**centrer-réduire** (sinon une variable en kilomètres écrase une variable en grammes).
+
+**Principe & maths.** On cherche les axes orthogonaux qui **maximisent la variance projetée**.
+Le 1ᵉʳ axe est la direction de variance maximale ; le 2ᵉ, orthogonal, capte le maximum du
+reste, etc. Algébriquement : **vecteurs propres de la matrice de corrélation** (données
+standardisées), valeurs propres = variance portée.
+
+$$\text{Axe}_1 = \arg\max_{\|w\|=1}\ \mathrm{Var}(Xw)$$
+
+**Comment lire.** (1) Le **% de variance** par axe dit combien on a « compressé » ;
+(2) le **cercle des corrélations** dit quelles variables font chaque axe ;
+(3) la **carte des individus** montre les groupes ;
+(4) **contributions** (qui fait l'axe) et **cos²** (qualité) affinent l'interprétation.
+On présente deux vues : **scikit-learn** (pipeline ML) puis **prince** (API factorielle complète).
 <!-- #endregion -->
 
 <!-- #region -->
@@ -681,6 +698,22 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.**
+
+- **Axe 1 = 73 %**, **axe 2 = 23 %** → à eux deux **96 %** de l'information : le plan 1-2
+  suffit largement, on a compressé 4 variables en 2 sans presque rien perdre.
+- Le **cercle** et les **contributions** montrent que `petal_length`/`petal_width`
+  (très corrélées) **construisent l'axe 1**, tandis que `sepal_width` porte l'axe 2.
+  L'axe 1 se **nomme** donc « taille des pétales » — qui sépare justement les espèces.
+
+**Pièges.** PCA = méthode **linéaire** : elle rate les structures courbes (→ Kernel PCA §3.8,
+manifold §4). Sensible aux **outliers** et à l'**absence de standardisation**.
+
+**À retenir.** Lire d'abord le **% de variance** (a-t-on le droit de se limiter à 2 axes ?),
+puis **nommer les axes** via les contributions, puis seulement interpréter la carte.
+<!-- #endregion -->
+
+<!-- #region -->
 #### 3.2.3 Combien d'axes retenir ?
 <!-- #endregion -->
 
@@ -702,6 +735,13 @@ print(f"Kaiser (valeur propre > 1) : {n_kaiser} axe(s)")
 print(f"Seuil 80% variance cumulée : {n_seuil80} axe(s)")
 print(f"Variance cumulée : {np.round(cumpov, 1)}")
 ```
+
+<!-- #region -->
+**Lecture du résultat.** Les critères **divergent** : Kaiser ne retient qu'**1 axe**
+(seul $\lambda_1 = 2{,}9 > 1$), le seuil 80 % en retient **2** (on atteint 96 % à l'axe 2).
+C'est typique : Kaiser est **conservateur**. En pratique on tranche au **coude** + bon sens
+métier — ici **2 axes** s'imposent (le plan est lisible et capte 96 %).
+<!-- #endregion -->
 
 <!-- #region -->
 #### 3.2.4 cos² — qualité de représentation
@@ -811,6 +851,16 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** **ARI ≈ 0,62** : le clustering retrouve **partiellement** les
+espèces. `setosa` (bien séparée sur l'axe 1) est parfaitement isolée ; `versicolor` et
+`virginica`, qui se chevauchent, sont en partie confondues — exactement la difficulté vue
+en PCA. Sans connaître les espèces, on aurait quand même découvert **3 groupes plausibles**.
+
+**À retenir.** Réduire **avant** de clusteriser débruite et accélère ; l'**ARI** mesure
+l'accord avec une vérité terrain quand on en a une.
+<!-- #endregion -->
+
+<!-- #region -->
 #### 3.2.8 PCA vs Factor Analysis (FA)
 <!-- #endregion -->
 
@@ -845,14 +895,37 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** Après rotation varimax, le **Facteur 1** est chargé par
+`sepal_length` (0,99), `petal_length` (0,91) et `petal_width` (0,86) → un facteur latent
+de **« taille générale »** ; le **Facteur 2** est porté par `sepal_width` (−0,67) → la
+**forme du sépale**. Les projections PCA et FA se ressemblent ici (données très corrélées),
+mais l'interprétation FA est **plus explicite** car chaque variable charge surtout un facteur.
+
+**Quand préférer FA à la PCA.** Quand on **postule des causes latentes** (traits de
+personnalité, satisfaction…) et qu'on veut les nommer ; la PCA reste préférable pour la
+**compression** pure et la visualisation.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 3.3 AFC / CA — table de contingence (2 variables catégorielles)
 <!-- #endregion -->
 
 <!-- #region -->
-L'**analyse des correspondances** décrit l'association entre les lignes et les
-colonnes d'une **table de contingence**. Elle décompose l'inertie du $\chi^2$ et
-place lignes et colonnes sur un même plan : deux modalités proches sont associées.
-Exemple classique : couleur des **yeux** × couleur des **cheveux**.
+**Quand & pourquoi.** Vous avez **deux variables catégorielles croisées** dans une
+**table de contingence** (effectifs) et vous voulez voir **quelles modalités s'attirent**
+(ex. quel type de client achète quel type de produit). C'est la PCA des tableaux croisés.
+
+**Données.** Une **table de contingence** (comptages ≥ 0), ici couleur des **yeux** ×
+couleur des **cheveux**.
+
+**Principe & maths.** On mesure l'écart à l'**indépendance** via le **$\chi^2$**, et on
+décompose l'**inertie** $\phi^2 = \chi^2/n$ en axes. On compare des **profils** (lignes
+divisées par leur total) avec la **distance du $\chi^2$**. Lignes et colonnes se placent
+sur le **même plan**.
+
+**Comment lire.** Une modalité **loin de l'origine** = profil atypique ; une ligne et une
+colonne **proches et dans la même direction** = **sur-représentées ensemble** (association
+positive) ; **opposées** = elles s'excluent.
 <!-- #endregion -->
 
 ```python
@@ -901,14 +974,41 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** L'**axe 1 capte 87 %** de l'inertie : un seul axe résume presque
+tout. Il ordonne un **gradient clair → foncé** : à une extrémité yeux bleus + cheveux blonds
+(`Fair`), à l'autre yeux foncés + cheveux noirs (`Dark`/`Black`). Les modalités yeux et
+cheveux de même « teinte » se retrouvent **côte à côte** = forte association — ce qu'un
+test du $\chi^2$ confirmerait numériquement.
+
+**Pièges.** La CA décrit une **association**, pas une **causalité**. Ne l'appliquer qu'à des
+**comptages** (pas des moyennes ni des valeurs négatives).
+
+**À retenir.** CA = lire les **proximités ligne↔colonne** sur les premiers axes ; un axe 1
+dominant signifie une structure d'association simple et forte.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 3.4 ACM / MCA — plusieurs variables catégorielles
 <!-- #endregion -->
 
 <!-- #region -->
-La **MCA** étend la CA à **plus de deux variables catégorielles** : c'est une approche
-« datamining » qui cartographie les **modalités** pour repérer celles qui vont ensemble.
-La 1ʳᵉ version de ce notebook lisait un fichier depuis Google Drive (non reproductible) ;
-on le remplace par un sous-ensemble **catégoriel du Titanic** (chargé programmatiquement).
+**Quand & pourquoi.** Vous avez un questionnaire / des données **100 % qualitatives**
+(sondage, profils clients, dossiers codés) et vous voulez repérer les **profils-types** :
+quelles modalités vont ensemble, lesquelles s'opposent. C'est l'équivalent catégoriel de la PCA.
+
+**Données.** **≥ 3 variables catégorielles** (ici `sex, class, embark_town, who, alive` du
+Titanic). Des variables numériques devraient être **discrétisées** au préalable. *(La 1ʳᵉ
+version lisait un fichier Google Drive non reproductible — remplacé par le Titanic chargé
+programmatiquement.)*
+
+**Principe & maths.** On code chaque modalité en indicatrice 0/1 (matrice **disjonctive
+complète**, ou matrice de **Burt** = tous les croisements deux-à-deux), puis on applique une
+CA dessus. L'inertie totale vaut $\frac{J}{Q}-1$ ($J$ modalités, $Q$ variables) — donc
+**mécaniquement gonflée**, d'où des % de variance par axe faibles (ne pas s'en alarmer).
+
+**Comment lire.** Une modalité **proche du centre** = fréquente / peu discriminante ;
+**loin du centre** = rare ou structurante. Deux modalités **proches** co-occurrent ;
+**opposées par rapport à l'origine** = exclusives.
 <!-- #endregion -->
 
 ```python
@@ -929,8 +1029,15 @@ mca.eigenvalues_summary
 ```
 
 <!-- #region -->
-Carte des **modalités** : on retrouve l'opposition survie (`alive=yes` / `no`) corrélée
-au sexe et à la classe — la signature bien connue du naufrage.
+**Lecture des valeurs propres.** L'axe 1 ne capte que **31 %** et l'axe 2 **17 %** : c'est
+**normal en MCA** (inertie diluée par le codage disjonctif), pas un échec. La **correction
+de Benzécri/Greenacre** donnerait des pourcentages bien plus parlants. On lit donc surtout
+les **oppositions** sur la carte, pas les % bruts.
+<!-- #endregion -->
+
+<!-- #region -->
+Carte des **modalités** : chaque point est une modalité ; on cherche les regroupements et
+les oppositions le long des axes.
 <!-- #endregion -->
 
 ```python
@@ -946,14 +1053,39 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** L'**axe 1** oppose **survie / femmes / 1ʳᵉ classe** d'un côté à
+**décès / hommes / 3ᵉ classe** de l'autre : la signature du « women and children first ».
+Les modalités `alive=yes`, `sex=female`, `class=First`, `who=woman` se regroupent ;
+`alive=no`, `sex=male`, `class=Third` s'y opposent. Les modalités centrales (ex. port
+d'embarquement) sont **peu discriminantes**.
+
+**Pièges.** Ne **jamais** comparer les % d'inertie d'une MCA à ceux d'une PCA. Les modalités
+rares attirent l'œil mais reposent sur peu d'individus → vérifier les effectifs.
+
+**À retenir.** MCA = PCA des catégories ; lire les **oppositions** de modalités, pas les
+distances absolues ni les % bruts.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 3.5 AFM / MFA — groupes de variables
 <!-- #endregion -->
 
 <!-- #region -->
-L'**analyse factorielle multiple** traite des variables organisées en **groupes**
-(ici : 3 experts notent 6 vins sur plusieurs descripteurs). Chaque groupe est
-normalisé par sa 1ʳᵉ valeur propre pour qu'**aucun groupe ne domine**, puis on fait
-une PCA globale. On peut lire la contribution de chaque groupe aux axes.
+**Quand & pourquoi.** Vos variables sont **structurées en groupes** mesurant le même objet
+sous plusieurs angles : capteurs par station, blocs d'un questionnaire, **plusieurs experts**
+notant les mêmes produits. On veut une vue **globale** où **aucun groupe n'écrase** les autres.
+
+**Données.** Plusieurs **groupes** de variables (ici numériques : 3 experts × descripteurs
+sensoriels, 6 vins). MFA gère aussi des groupes catégoriels.
+
+**Principe & maths.** Chaque groupe est d'abord analysé par une PCA et **divisé par sa 1ʳᵉ
+valeur propre** $\lambda_1^{(g)}$ : cette normalisation met tous les groupes sur la **même
+échelle d'inertie**. On fait ensuite une PCA pondérée sur l'ensemble. On peut lire la
+**contribution de chaque groupe** à chaque axe et les **coordonnées partielles** (la vision
+d'un groupe pour un individu).
+
+**Comment lire.** `group_contributions_` : un groupe à forte contribution **oriente** l'axe.
+Coordonnées partielles proches entre groupes = les experts sont **d'accord** sur cet individu.
 <!-- #endregion -->
 
 ```python
@@ -1000,16 +1132,41 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** L'**axe 1 capte 85 %** : les 3 experts s'accordent largement sur un
+**classement principal des vins**. Les **contributions des groupes à l'axe 1** sont
+équilibrées (~0,32–0,34 chacun) — la normalisation MFA a bien empêché qu'un expert domine.
+En revanche l'**axe 2** est porté surtout par l'**Expert 3** (contribution ≈ 0,77) : c'est
+là qu'il se **démarque** des deux autres.
+
+**Pièges.** MFA n'a de sens que si les **groupes sont pertinents** ; des groupes mal définis
+produisent des axes ininterprétables. Données ici minuscules (6 vins) → illustratif.
+
+**À retenir.** MFA = PCA **équilibrée entre blocs** ; lire d'abord les **contributions de
+groupes** pour savoir quel bloc fait quel axe.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 3.6 AFDM / FAMD — données mixtes (numérique + catégoriel)
 <!-- #endregion -->
 
 <!-- #region -->
-La **FAMD** gère un tableau qui mélange variables **numériques et catégorielles** :
-mathématiquement, **FAMD = PCA (sur le numérique) ⊕ MCA (sur le catégoriel)**, avec
-une pondération qui met les deux types sur un pied d'égalité.
+**Quand & pourquoi.** Cas le plus fréquent en vrai : un tableau qui **mélange numérique et
+catégoriel** (âge + sexe + revenu + catégorie socio…). On veut une PCA qui traite les deux
+types **équitablement**, sans avoir à tout binariser ou tout discrétiser.
 
-Piège pratique : `prince.FAMD` ne reconnaît comme numériques que les colonnes de
-dtype **`float`** — on caste donc explicitement les colonnes numériques.
+**Données.** Tableau **mixte** : au moins une colonne numérique **et** une catégorielle.
+
+**Principe & maths.** **FAMD = PCA $\oplus$ MCA** : les variables numériques sont
+centrées-réduites (comme en PCA), les catégorielles codées en indicatrices et pondérées
+(comme en MCA), de sorte que **chaque variable apporte la même inertie**. On obtient des
+axes communs aux deux types.
+
+**Comment lire.** Comme une PCA pour les individus ; les variables numériques se lisent via
+un cercle de corrélations, les modalités catégorielles comme des points (barycentres des
+individus qui les portent).
+
+Piège pratique : `prince.FAMD` ne reconnaît comme numériques que les colonnes de dtype
+**`float`** — on caste donc explicitement les colonnes numériques.
 <!-- #endregion -->
 
 ```python
@@ -1044,18 +1201,40 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** Le plan 1-2 capte **87 %** de l'inertie (66 % + 20 %). Coloriés par
+`Oak type`, les vins se **séparent nettement sur l'axe 1** : les deux types de chêne ont des
+profils distincts, et FAMD l'a capté **en combinant** les descripteurs numériques et les
+variables catégorielles `c1/c2/c3`.
+
+**Pièges.** Sensible au **déséquilibre** num/cat (beaucoup de modalités rares peuvent
+gonfler la part catégorielle). Vérifier les dtypes (`float` obligatoire pour le numérique).
+
+**À retenir.** FAMD = la PCA des **données mixtes** ; pas besoin de tout binariser, la
+pondération interne fait l'équilibre.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 3.7 GPA — analyse procustéenne généralisée (formes)
 <!-- #endregion -->
 
 <!-- #region -->
-La **GPA** aligne plusieurs **configurations de points** (formes) en supprimant les
-différences de **translation, rotation et échelle**, pour ne garder que les
-différences de *forme* réelles. Usages : morphométrie, comparaison de capteurs,
-consensus de notations spatiales.
+**Quand & pourquoi.** Cas particulier : vos individus sont des **formes** (jeux de points
+correspondants) et vous voulez les **comparer indépendamment de leur position, orientation
+et taille**. Usages : morphométrie (crânes, visages), alignement de capteurs, consensus de
+plusieurs annotateurs plaçant des points sur une même image.
 
-La 1ʳᵉ version utilisait une implémentation maison incorrecte (rotation 1-D bricolée
-qui mutait le DataFrame en place) ; on la remplace par **`prince.GPA`**. L'entrée est
-un tableau 3D `(n_formes, n_points, n_dimensions)`.
+**Données.** Un ensemble de **configurations de points appariés** : tableau 3D
+`(n_formes, n_points, n_dimensions)`. Les points doivent se **correspondre** d'une forme à l'autre.
+
+**Principe & maths.** On superpose les formes en minimisant la **distance de Procruste** (somme
+des carrés des écarts entre points homologues), par **translation + rotation + mise à l'échelle**
+optimales, itérativement autour d'une **forme moyenne (consensus)**.
+
+$$\min_{\,s,\,R,\,t}\ \sum_k \lVert s\,R\,x_k + t - \bar{x}_k \rVert^2$$
+
+**Comment lire.** Après alignement, ce qu'il **reste** comme écart entre formes = la
+**variabilité de forme réelle** (le signal d'intérêt). *(La 1ʳᵉ version utilisait une
+implémentation maison fausse qui mutait le DataFrame en place ; remplacée par `prince.GPA`.)*
 <!-- #endregion -->
 
 ```python
@@ -1102,14 +1281,38 @@ plt.show()
 ```
 
 <!-- #region -->
+**Lecture du résultat.** À **gauche**, les 3 pentagones sont éparpillés (positions, rotations
+et tailles différentes) ; à **droite**, la GPA les a **superposés** : il ne subsiste que le
+**bruit** qu'on avait injecté. C'est exactement le but — neutraliser pose et échelle pour ne
+comparer que la **forme**.
+
+**Pièges.** Exige une **correspondance point-à-point** entre formes (le point $k$ doit
+désigner le même repère partout). Sensible aux **points aberrants**.
+
+**À retenir.** GPA = aligner pour **isoler la forme** ; ce qui reste après superposition est
+le seul signal interprétable.
+<!-- #endregion -->
+
+<!-- #region -->
 ### 3.8 Kernel PCA — PCA non-linéaire
 <!-- #endregion -->
 
 <!-- #region -->
-La **Kernel PCA** applique le *kernel trick* : elle fait une PCA dans un espace de
-dimension supérieure (implicite) pour capturer des structures **non-linéaires** que la
-PCA classique manque. C'est le pont naturel vers la section 4 (manifold learning).
-Le noyau RBF est piloté par `gamma` (à régler).
+**Quand & pourquoi.** Quand vos données ont une structure **non-linéaire** (spirales,
+cercles concentriques) que la PCA linéaire « aplatit ». La Kernel PCA garde l'esprit PCA
+(axes, projection) mais dans un espace transformé.
+
+**Données.** Numériques, standardisées. Choix d'un **noyau** (RBF, polynomial…) et de ses
+hyperparamètres.
+
+**Principe & maths.** *Kernel trick* : au lieu de calculer les produits scalaires dans
+l'espace d'origine, on les remplace par un **noyau** $k(x,x') = \langle \phi(x),\phi(x')\rangle$
+(ex. RBF $k(x,x')=e^{-\gamma\lVert x-x'\rVert^2}$). On fait alors la PCA dans l'espace
+$\phi$ **sans jamais le calculer explicitement**, via la **matrice de Gram** $K$.
+
+**Comment lire.** Comme une PCA, mais les axes ne sont plus interprétables en termes de
+variables d'origine (l'espace est implicite). `gamma` règle la « courbure » : trop grand →
+sur-ajustement, trop petit → redevient linéaire.
 <!-- #endregion -->
 
 ```python
@@ -1128,6 +1331,17 @@ a2.set_title("Kernel PCA (RBF)")
 a1.legend(title="espèce")
 plt.show()
 ```
+
+<!-- #region -->
+**Lecture du résultat.** Sur iris (déjà presque linéairement séparable), la Kernel PCA RBF
+**courbe** la projection : elle **resserre** chaque espèce en amas plus compacts que la PCA
+linéaire. Le gain est ici modeste, mais sur des structures réellement non-linéaires
+(cercles, croissants) l'écart serait spectaculaire.
+
+**À retenir.** Kernel PCA = PCA dans un espace transformé ; puissante mais **non
+interprétable** en variables d'origine et **sensible à `gamma`** — d'où l'intérêt des
+méthodes dédiées de la section 4.
+<!-- #endregion -->
 
 <!-- #region -->
 ## 4. Réduction de dimension (manifold learning)
