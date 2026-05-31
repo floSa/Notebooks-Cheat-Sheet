@@ -153,7 +153,7 @@
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
 | 39 | `BDD_DuckDB.md` | 📥 ingéré | TUTO | S | | DuckDB vs pandas/SQLite. À structurer + ajouter cas d'usage réels. |
-| 40 | `BDD_Vectorielles.md` | 🟡 v0 (fusion 40+41) | TUTO + WIKI | L | 🌐 | Fusion des 2 notebooks origine + refonte 2026 : théorie kNN/ANN, métriques (cosine/L2/dot), matrice de décision 9 vector DBs (FAISS/Qdrant/LanceDB/pgvector/Weaviate/Milvus/Chroma/Pinecone/Vespa), FAISS détaillé (Flat/IVF/HNSW + persistance), LanceDB hands-on, Qdrant + pgvector code, bonnes pratiques (choix d'index par N, dimensionnalité, Matryoshka, métadonnées, quantization). Smoke test FAISS+LanceDB OK. Le parsing PDF (qui était mélangé) renvoie à `DE_Docling`. |
+| 40 | `BDD_Vectorielles.md` | ✅ fait (fusion 40+41) | TUTO + WIKI | L | 🌐 | **Conforme contrat** (sandbox `.py` exit 0 end-to-end, `check_format --both` vert, plan+structure en sandbox). Refonte 2026 : embeddings (+ tableau modèles 2026 BGE-M3/Qwen3/Jina), métriques L2/IP/**cosinus** + normalisation, FAISS Flat/IVF/HNSW, **benchmark recall@k/latence**, panorama 8 VDB en tableau (+ Pinecone/Vespa), démos **exécutées** Chroma/Qdrant/LanceDB/Milvus-Lite, **Weaviate v4 + pgvector** en cellules gardées (try/except) + docker-compose en md, persistance FAISS, guide de choix. Couvre la partie VDB de l'ex-#41 (le reste, parsing PDF/OCR/stockage objet, relève de `DE_Docling`). Dataset : 20 Newsgroups (sklearn). |
 | 41 | `retrieval_BDD_Vectorielle.md` | 🔀 fusionné → 40 | — | — | | Contenu absorbé dans `BDD_Vectorielles.md`. |
 
 ## Traitement du signal
