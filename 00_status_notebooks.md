@@ -143,7 +143,7 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 33 | `TS_Time_Series_Intro.md` | 🟡 v0 | TUTO | M | 🌐 | Refonte tutoriel débutant : décomposition, stationnarité (ADF+KPSS), ACF/PACF, lag features, train/test temporel strict, baseline LinReg. |
+| 33 | `TS_Time_Series_Intro.md` | ✅ fait | TUTO | M | 🌐 | 5 critères OK. Air Passengers réel (`get_rdataset` + fallback synth offline). Restauré du v0 : heatmap calendaire, décompo add/multi côte-à-côte, section diff dédiée + viz 4 panels, Fourier sin/cos + rolling_std, table anti-patterns. Ajouté : baseline seasonal-naive (Nixtla 2026), section concepts. Sandbox exit 0 (LinReg MAPE 4.1% bat naïf 9.5%), check_format `--both` vert (8 code / 34 md). |
 | 34 | `TS_Time_Series_Overview.md` | 🟡 v0 | WIKI | L | 🌐 | Wiki exhaustif : matrice de décision 2026, ETS+ARIMA+Theta, Prophet, ML global (Nixtla mlforecast), DL (TFT/NHiTS/DeepAR/PatchTST), **foundation models** (TimeGPT/Chronos/TimesFM/Moirai), métriques (MASE/WAPE). |
 | 35 | `TS_ARIMA.md` (renommé) | 🟡 v0 | WIKI + TUTO | M | 🌐 | Refonte ARIMA : famille (AR/MA/ARMA/ARIMA/SARIMA/SARIMAX), Box-Jenkins, ACF/PACF lecture, diagnostic résidus, **AutoARIMA** (pmdarima+statsforecast). Smoke MAPE 2-3%. |
 | 36 | `TS_Generer_Sequence.md` | 🟡 v0 | CS | S | | Cheat-sheet sliding window : NumPy (boucle + vectorisé stride_tricks), multi-features 3D, PyTorch Dataset streaming, split temporel avec gap, multi-séries (panel), renvoi Nixtla. |
@@ -179,8 +179,8 @@
 > Ce qui était marqué "44/44 ✅" était mensonger au regard du contrat `00_workflow_contract.md`.
 > Voici l'état réel :
 
-- **Notebooks ✅ fait au sens du contrat (5 critères vérifiés)** : **10** — EDA_Visualisation_Introduction (#8), EDA_Analyse_Multivarie (#9), EDA_Stats_Analyse_Desc_Visual (#10), Detection_Outliers (#11), ML_Explication_Feature_Importance_Selection (#16), DL_KAN_Kolmogorov_Arnold (#26), BDD_Vectorielles (#40), DE_Docling (#43), DL_Keras (#46), DL_TensorFlow (#47).
-- **🟡 v0** (squelette posé, code non vérifié end-to-end) : **36** — les autres anciennes "✅ fait".
+- **Notebooks ✅ fait au sens du contrat (5 critères vérifiés)** : **11** — EDA_Visualisation_Introduction (#8), EDA_Analyse_Multivarie (#9), EDA_Stats_Analyse_Desc_Visual (#10), Detection_Outliers (#11), ML_Explication_Feature_Importance_Selection (#16), DL_KAN_Kolmogorov_Arnold (#26), BDD_Vectorielles (#40), DE_Docling (#43), DL_Keras (#46), DL_TensorFlow (#47), TS_Time_Series_Intro (#33).
+- **🟡 v0** (squelette posé, code non vérifié end-to-end) : **35** — les autres anciennes "✅ fait".
 - Suppressions effectives : 3 (AAA_Test_ML, Suppr_ML_Bench, TS_Maintenance_Prédictive ancien)
 - Fusions effectives : 2 (retrieval_BDD_Vectorielle → BDD_Vectorielles, Preprocessing_Function_Utiles → Preprocessing)
 - Renommages effectués : 10 (Structure_Python, Structure_BDD_DataFrame, ML_Regression_Classification_Multiple, Structure_Generer_Donnees_Classification, Detection_Outliers, NLP_Classification_Supervisee, DL_KAN_Kolmogorov_Arnold, TdS_Introduction_Traitement_Signal, TS_Maintenance_Predictive, TS_ARIMA)
