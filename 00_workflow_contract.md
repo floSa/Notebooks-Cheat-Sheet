@@ -242,3 +242,30 @@ PALETTE = [primary_1, mauvais, moyen, accent, accent_dark, lavender, dusty_rose,
 5. Quand les 5 critères sont vrais, commit + push + passer au suivant.
 
 Pas de batch. Pas de "je fais la vague NLP en parallèle". **Un. À. La. Fois.**
+
+---
+
+## 11. Git : push via SSH (alias `github.com-perso`)
+
+Le remote `origin` est cloné en **HTTPS** (`https://github.com/floSa/Notebooks-Cheat-Sheet.git`)
+mais **aucun identifiant HTTPS n'est configuré côté WSL** (pas de credential helper, pas de `gh`,
+pas de `~/.git-credentials`). Un `git push` sur l'URL HTTPS **se bloque** en attente d'un login
+interactif — impossible en mode non-interactif (assistant).
+
+**Le push se fait par SSH**, via le bon alias d'hôte (le compte perso `floSa` possède ce repo) :
+
+```bash
+# ~/.ssh/config définit deux alias :
+#   github.com-perso  → clé id_ed25519_github_perso  (compte floSa — CE repo)
+#   github.com-pro    → clé id_ed25519_github_pro     (compte Florian-H-AOSIS)
+
+# Option A (recommandée) — basculer origin en SSH perso une fois pour toutes :
+git remote set-url origin git@github.com-perso:floSa/Notebooks-Cheat-Sheet.git
+git push origin feat/restart-jupytext-workflow
+
+# Vérifier l'auth SSH :
+ssh -T git@github.com-perso   # doit répondre "Hi floSa!"
+```
+
+> ⚠️ Ne **jamais** utiliser `github.com-pro` pour ce repo (compte différent → permission denied).
+> Toujours pousser sur `feat/restart-jupytext-workflow`, jamais sur `main`.
