@@ -1,13 +1,37 @@
-# ⚖️ Contrat de travail — Notebooks_convertion
+# ⚖️ Contrat de travail — Notebooks-Cheat-Sheet
 
 Ce contrat est **binding**. Toute session de travail sur ce repo (humaine ou assistée) doit le respecter.
 
-Il existe parce qu'une session antérieure a livré 44 notebooks annoncés "✅ fait" qui étaient en réalité défaillants :
-- Générés depuis des connaissances générales **sans lire les notebooks d'origine** (juste un `Grep` des titres).
-- Avec des "smoke tests" qui vérifiaient `import` mais **pas l'exécution des cellules dans l'ordre**.
-- Contenant du code qui référence des variables jamais construites (`model.fit(X, y, ...)` sans `model`, `X`, `y`).
-- Avec du contenu original supprimé (ex: TS_Maintenance : 1397 lignes de code original → 93 dans la refonte).
-- Avec ~30 % de cellules code qui finissaient en cellule texte dans l'`.ipynb` (fences mal placées dans des régions).
+Il existe parce que des sessions antérieures ont livré des notebooks annoncés "✅ fait" défaillants :
+- Générés **sans lire les vrais notebooks d'origine** (les originaux n'étaient pas sur la machine ;
+  les sessions lisaient des versions **gutées** — réduites de 200+ à ~20 cellules — venues de `main`).
+- "Smoke tests" qui vérifiaient `import` mais **pas l'exécution des cellules dans l'ordre**.
+- Code référençant des variables jamais construites ; contenu original supprimé ;
+  ~30 % de cellules code finissant en cellule texte (fences mal placées).
+
+Cf. `00_VERIFICATION_BASE.md` (quels refait ont vraiment utilisé l'original) et `00_FAIT_A_FAIRE.md`.
+
+---
+
+## 0. 🎯 RÈGLE D'OR (priorité absolue)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. TOUJOURS se baser sur MES VRAIS ORIGINAUX  →  1_MES_NOTEBOOKS/ipynb/   │
+│    (régénérés via `bash scripts/restore_originaux.sh`)                    │
+│    JAMAIS sur `main` ni sur 3_SESSIONS_RATEES/ (versions gutées à jeter). │
+│                                                                           │
+│ 2. S'INSPIRER de 2_NOUVEAUX/ (travail récent) UNIQUEMENT pour les 24      │
+│    sujets NEUFS (DS_/DE_/AI_/MLE_/MLOps_ — ils n'ont pas d'original).     │
+│    Pour tout notebook qui A un original, 2_NOUVEAUX/ n'est PAS une base.  │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Refonte d'un de MES notebooks** → source = `1_MES_NOTEBOOKS/ipynb/<nom>.ipynb`. On préserve
+  mes sections, on modernise, on teste. `2_NOUVEAUX/` peut servir de simple référence d'idées,
+  pas de point de départ.
+- **Sujet NEUF (un des 24)** → pas d'original ; on part du plan (`2_NOUVEAUX/plans/`) et on
+  s'inspire du refait existant (`2_NOUVEAUX/ipynb/`), à valider/tester intégralement.
 
 ---
 
@@ -15,8 +39,8 @@ Il existe parce qu'une session antérieure a livré 44 notebooks annoncés "✅ 
 
 Pour CHAQUE notebook, dans l'ordre exact :
 
-1. **`ipynb` → `md`** : convertir le notebook d'origine en markdown via `scripts/02_ipynb_to_md.sh` (ou jupytext direct).
-2. **Lecture du `md` original** : `Read` (pas `Grep`) le `1_MES_NOTEBOOKS/md/<nom>.md` **en entier**. Si > 25k tokens, en plusieurs passes avec `offset`/`limit`. Lire tout le code, pas seulement les titres.
+1. **S'assurer d'avoir les vrais originaux** : `bash scripts/restore_originaux.sh` (dézippe `1_MES_NOTEBOOKS/Notebooks.zip` → `1_MES_NOTEBOOKS/ipynb/`). Le `.md` correspondant est dans `1_MES_NOTEBOOKS/md/<nom>.md`.
+2. **Lecture du `md` original** : `Read` (pas `Grep`) le `1_MES_NOTEBOOKS/md/<nom>.md` **en entier** (le VRAI original, pas un guté). Si > 25k tokens, en plusieurs passes avec `offset`/`limit`. Lire tout le code, pas seulement les titres.
 3. **Plan d'amélioration** dans `scripts/_sandbox/plan_<nom>.md` suivant les règles ci-dessous :
    - **Préserver le contenu original** : table sections × décision (garde / refactore / supprime / ajoute), justifier chaque suppression.
    - **Format `00_consignes.md`** : titre seul dans sa cellule, description avant ET après chaque cellule code, marqueurs jupytext `<!-- #region -->` autour de chaque bloc markdown.
@@ -128,7 +152,7 @@ Le temps n'est pas le problème. Le respect du workflow et l'honnêteté du rapp
 
 ## 6. UV / venv : **utiliser exclusivement UV côté WSL** sur ce projet
 
-Le projet vit dans WSL (`/home/florian/mes_projets/Notebooks_convertion`).
+Le projet vit dans WSL (`~/Projets/Notebooks/Notebooks-Cheat-Sheet`).
 
 **Piège** : créer le `.venv` avec **UV Windows** (depuis MSYS, PowerShell, ou via `\\wsl.localhost\...`) produit un venv avec des binaires Windows + symlink Linux `lib64` qui :
 
@@ -151,7 +175,7 @@ sudo apt update && sudo apt install -y pipx && pipx ensurepath && pipx install u
 Puis créer le venv Linux + enregistrer le kernel côté Linux :
 
 ```bash
-cd ~/mes_projets/Notebooks_convertion
+cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet
 rm -rf .venv
 uv sync
 uv run python -m ipykernel install --user --name=notebooks-refonte --display-name="Python (notebooks-refonte)"
@@ -165,13 +189,13 @@ Le kernel se retrouve à `~/.local/share/jupyter/kernels/notebooks-refonte/` et 
 
 ```bash
 # Depuis MSYS / PowerShell :
-wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv sync"
-wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv add <pkg>"
-wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv run python scripts/_sandbox/notebook_<nom>.py"
-wsl -d ubuntu-24.04 -- bash -lc "cd /home/florian/mes_projets/Notebooks_convertion && uv run python scripts/check_format.py --both <md> <ipynb>"
+wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv sync"
+wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv add <pkg>"
+wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv run python scripts/_sandbox/notebook_<nom>.py"
+wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv run python scripts/check_format.py --both <md> <ipynb>"
 ```
 
-Si l'assistant se retrouve avec un `.venv` cassé Windows ↔ WSL (`error: failed to remove file ...lib64`) : c'est qu'il a accidentellement lancé UV Windows. Fix : `wsl -d ubuntu-24.04 -- bash -c "rm -rf ~/mes_projets/Notebooks_convertion/.venv"` puis re-sync via WSL.
+Si l'assistant se retrouve avec un `.venv` cassé Windows ↔ WSL (`error: failed to remove file ...lib64`) : c'est qu'il a accidentellement lancé UV Windows. Fix : `wsl -d ubuntu-24.04 -- bash -c "rm -rf ~/Projets/Notebooks/Notebooks-Cheat-Sheet/.venv"` puis re-sync via WSL.
 
 ### Piège du kernel fantôme (doublon homonyme)
 
@@ -205,12 +229,14 @@ C'est idempotent — peut être lancé sans risque même si le kernel existe dé
 
 ## 8. État actuel du projet
 
-- **0 notebook** ne passe les 5 critères au moment où ce contrat est écrit.
-- Les 44 fichiers dans `2_NOUVEAUX/ipynb/` sont au mieux des 🟡 v0.
-- Le `00_status_notebooks.md` est aligné sur cette réalité.
-- Les `.md` originaux sont dans `1_MES_NOTEBOOKS/md/` (gitignored, générables via `bash scripts/01_unzip.sh && bash scripts/02_ipynb_to_md.sh`).
-- Env UV fonctionnel, scripts de conversion OK.
-- Script `scripts/check_format.py` opérationnel (testé et trouvant des issues réelles).
+- **0 notebook** ne passe les 5 critères AU SENS DE LA RÈGLE D'OR (basé sur le vrai original).
+- Les 44 fichiers dans `2_NOUVEAUX/ipynb/` ont presque tous été bâtis sur des **gutés** :
+  seuls `DL_Deep_Learning_Maths` et `EDA_Stats_Analyse_Desc_Visual` ont vraiment utilisé l'original
+  (cf. `00_VERIFICATION_BASE.md`). Tout le reste est à refaire/recontrôler sur l'original.
+- L'état complet par notebook est dans **`00_FAIT_A_FAIRE.md`**.
+- Les vrais originaux sont dans `1_MES_NOTEBOOKS/` (zip committé + `ipynb/` gitignoré régénérable
+  via `bash scripts/restore_originaux.sh` + `md/` jupytext).
+- Env UV fonctionnel ; `scripts/check_format.py` et `scripts/verifier_base.py` opérationnels.
 
 ## 9. Règles couleurs dans les notebooks de viz / EDA
 
