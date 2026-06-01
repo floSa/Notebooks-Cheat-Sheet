@@ -1,4 +1,8 @@
-# 📊 Suivi des notebooks
+> ⛔ **FICHIER REMPLACÉ** — utilise désormais [`00_FAIT_A_FAIRE.md`](00_FAIT_A_FAIRE.md) (état réel)
+> et [`00_VERIFICATION_BASE.md`](00_VERIFICATION_BASE.md). Conservé pour historique uniquement ;
+> ses statuts "✅ fait" reposaient sur des refontes gutées — ne plus s'y fier.
+
+# 📊 Suivi des notebooks (HISTORIQUE)
 
 > **⚠️ ALERTE HONNÊTETÉ (correction)** :
 > Les statuts `✅ fait` qui apparaissent dans ce tableau ci-dessous **ne reflètent PAS le contrat** défini dans `00_workflow_contract.md`.
