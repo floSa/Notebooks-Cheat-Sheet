@@ -2,13 +2,13 @@
 
 Usage :
     # Pre-conversion (sur .md) :
-    python scripts/check_format.py --pre 03_md_ameliores/NOM.md
+    python scripts/check_format.py --pre 2_NOUVEAUX/md/NOM.md
 
     # Post-conversion (sur .ipynb) :
-    python scripts/check_format.py --post 04_notebooks_finaux/NOM.ipynb
+    python scripts/check_format.py --post 2_NOUVEAUX/ipynb/NOM.ipynb
 
     # Les deux (vérification croisée pre→post) :
-    python scripts/check_format.py --both 03_md_ameliores/NOM.md 04_notebooks_finaux/NOM.ipynb
+    python scripts/check_format.py --both 2_NOUVEAUX/md/NOM.md 2_NOUVEAUX/ipynb/NOM.ipynb
 
 Codes de sortie :
     0  : tous les checks verts
