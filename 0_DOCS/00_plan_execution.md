@@ -32,9 +32,9 @@ Ce document décrit, étape par étape, ce qui va être fait. Aucune étape ne d
 
 Dans `scripts/` :
 
-- `01_unzip.sh` — dézippe `Notebooks_ok/Notebooks.zip` vers `01_notebooks_originaux/`.
-- `02_ipynb_to_md.sh` — convertit tout `01_notebooks_originaux/*.ipynb` vers `02_md_originaux/*.md` via `jupytext --to md`.
-- `04_md_to_ipynb.sh` — convertit tout `03_md_ameliores/*.md` vers `04_notebooks_finaux/*.ipynb` via `jupytext --to ipynb`.
+- `01_unzip.sh` — dézippe `Notebooks_ok/Notebooks.zip` vers `1_MES_NOTEBOOKS/ipynb/`.
+- `02_ipynb_to_md.sh` — convertit tout `1_MES_NOTEBOOKS/ipynb/*.ipynb` vers `1_MES_NOTEBOOKS/md/*.md` via `jupytext --to md`.
+- `04_md_to_ipynb.sh` — convertit tout `2_NOUVEAUX/md/*.md` vers `2_NOUVEAUX/ipynb/*.ipynb` via `jupytext --to ipynb`.
 - `99_test_cell.sh <fichier.py>` — exécute un `.py` temporaire dans l'env UV pour tester un bloc de code avant de l'intégrer dans le `.md`.
 
 Note : on n'écrit **aucun** script qui édite directement du `.ipynb`. Le seul outil d'I/O `.ipynb` est jupytext.
@@ -43,9 +43,9 @@ Note : on n'écrit **aucun** script qui édite directement du `.ipynb`. Le seul 
 
 ## Phase 2 — Ingestion
 
-- Exécution de `01_unzip.sh` → 45 fichiers dans `01_notebooks_originaux/`.
+- Exécution de `01_unzip.sh` → 45 fichiers dans `1_MES_NOTEBOOKS/ipynb/`.
 - Vérification : nom étrange `DL_PyTorch` (sans extension `.ipynb`) dans la liste du zip → inspecter (probablement un dossier).
-- Exécution de `02_ipynb_to_md.sh` → 45 `.md` dans `02_md_originaux/`.
+- Exécution de `02_ipynb_to_md.sh` → 45 `.md` dans `1_MES_NOTEBOOKS/md/`.
 - Mise à jour de `00_status_notebooks.md` : passage à `📥 ingéré` pour chaque notebook converti avec succès, `⚠️ erreur conversion` sinon.
 
 **Sortie de phase :** tous les notebooks lisibles en `.md`.
@@ -70,13 +70,13 @@ Avant de refondre, je lis chaque `.md` original et je remplis dans le tableau de
 
 Pour **chaque** notebook (dans l'ordre décidé en Phase 3) :
 
-1. **Lire** `02_md_originaux/<notebook>.md` en entier.
+1. **Lire** `1_MES_NOTEBOOKS/md/<notebook>.md` en entier.
 2. **Recherches web** si le sujet est sensible à l'évolution 2025→2026.
 3. **Brouiller** un plan de refonte dans la tête (ou en commentaire en haut du nouveau `.md`) :
    - Rôle(s) du notebook
    - Sections à garder / refondre / ajouter
    - Maths à intégrer
-4. **Écrire** `03_md_ameliores/<notebook>.md` en suivant strictement le format du `00_consignes.md`.
+4. **Écrire** `2_NOUVEAUX/md/<notebook>.md` en suivant strictement le format du `00_consignes.md`.
 5. **Tester** les cellules de code critiques :
    - Extraire dans un `.py` temporaire (`scripts/_sandbox/`)
    - Lancer dans l'env UV
@@ -89,9 +89,9 @@ Pour **chaque** notebook (dans l'ordre décidé en Phase 3) :
 
 ## Phase 5 — Conversion finale & vérifications
 
-- Exécution finale de `04_md_to_ipynb.sh` sur tout `03_md_ameliores/`.
+- Exécution finale de `04_md_to_ipynb.sh` sur tout `2_NOUVEAUX/md/`.
 - Inspection : ouvrir 2-3 notebooks aléatoires dans Jupyter pour vérifier le rendu.
-- Vérification round-trip : `04_notebooks_finaux/<x>.ipynb` → re-convertir en `.md` → diff avec `03_md_ameliores/<x>.md` (doit être nul ou cosmétique).
+- Vérification round-trip : `2_NOUVEAUX/ipynb/<x>.ipynb` → re-convertir en `.md` → diff avec `2_NOUVEAUX/md/<x>.md` (doit être nul ou cosmétique).
 
 ---
 

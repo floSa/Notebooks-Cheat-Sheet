@@ -18,15 +18,15 @@ en 9 étapes, les 5 critères de "fait", et le vocabulaire de rapporting honnêt
 Notebook à refaire cette session : <NOM_DU_NOTEBOOK>
 
 Applique le workflow 9 étapes en entier, sans raccourci :
-1. ipynb -> md (si pas déjà dans 02_md_originaux/)
-2. Read (PAS Grep) le 02_md_originaux/<NOM>.md EN ENTIER
+1. ipynb -> md (si pas déjà dans 1_MES_NOTEBOOKS/md/)
+2. Read (PAS Grep) le 1_MES_NOTEBOOKS/md/<NOM>.md EN ENTIER
 3. Plan d'amélioration dans scripts/_sandbox/plan_<NOM>.md
    (table sections de l'original : garde/refactore/supprime/ajoute + justif suppressions)
 4. Plan détaillé structure du nouveau notebook dans scripts/_sandbox/structure_<NOM>.md (sans code)
 5. Code Python dans scripts/_sandbox/notebook_<NOM>.py (toutes les cellules, dans l'ordre)
 6. Teste : uv run python scripts/_sandbox/notebook_<NOM>.py jusqu'à exit 0
-7. Intègre le code testé dans 03_md_ameliores/<NOM>.md (titre seul, description avant ET après code)
-8. Audit : uv run python scripts/check_format.py --both 03_md_ameliores/<NOM>.md 04_notebooks_finaux/<NOM>.ipynb -> doit être [OK] TOUT VERT
+7. Intègre le code testé dans 2_NOUVEAUX/md/<NOM>.md (titre seul, description avant ET après code)
+8. Audit : uv run python scripts/check_format.py --both 2_NOUVEAUX/md/<NOM>.md 2_NOUVEAUX/ipynb/<NOM>.ipynb -> doit être [OK] TOUT VERT
 9. Convertis md -> ipynb via jupytext
 
 Puis MAJ 00_status_notebooks.md + commit + push (message listant garde/supprime/ajoute).

@@ -4,7 +4,7 @@ Document de **propositions** de nouveaux notebooks pour couvrir les rôles que t
 
 Format : titre, rôle(s) cible, dataset(s), **plan détaillé des sections à aborder**.
 
-> Pour chacune des préconisations ci-dessous, un **notebook plan détaillé** est créé dans le dossier `05_nouveaux_notebooks/` (cf section "Implémentation" en fin de document).
+> Pour chacune des préconisations ci-dessous, un **notebook plan détaillé** est créé dans le dossier `2_NOUVEAUX/plans/` (cf section "Implémentation" en fin de document).
 
 ---
 
@@ -445,9 +445,9 @@ Format : titre, rôle(s) cible, dataset(s), **plan détaillé des sections à ab
 
 ## 6. Implémentation
 
-Pour **chacun** des 24 nouveaux sujets ci-dessus, un fichier `05_nouveaux_notebooks/<NOM>.md` est créé contenant le **plan détaillé** (déjà rempli dans ce document) — prêt à être implémenté.
+Pour **chacun** des 24 nouveaux sujets ci-dessus, un fichier `2_NOUVEAUX/plans/<NOM>.md` est créé contenant le **plan détaillé** (déjà rempli dans ce document) — prêt à être implémenté.
 
-Les notebooks `05_nouveaux_notebooks/` sont des **squelettes** : titres + sections + descriptions + datasets à utiliser. Ils ne contiennent **pas encore le code complet** (volonté d'incremental delivery sans surcharger).
+Les notebooks `2_NOUVEAUX/plans/` sont des **squelettes** : titres + sections + descriptions + datasets à utiliser. Ils ne contiennent **pas encore le code complet** (volonté d'incremental delivery sans surcharger).
 
 Pour exécuter chacun :
 

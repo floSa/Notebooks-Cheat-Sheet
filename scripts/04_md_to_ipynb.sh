@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Convertit tous les .md de 03_md_ameliores/ vers .ipynb dans 04_notebooks_finaux/
+# Convertit tous les .md de 2_NOUVEAUX/md/ vers .ipynb dans 2_NOUVEAUX/ipynb/
 # Utilise jupytext via uv. Idempotent : écrase la sortie existante.
 # Usage: ./04_md_to_ipynb.sh             # tout convertir
 #        ./04_md_to_ipynb.sh fichier.md  # un seul fichier
@@ -7,8 +7,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC_DIR="$ROOT/03_md_ameliores"
-OUT_DIR="$ROOT/04_notebooks_finaux"
+SRC_DIR="$ROOT/2_NOUVEAUX/md"
+OUT_DIR="$ROOT/2_NOUVEAUX/ipynb"
 
 mkdir -p "$OUT_DIR"
 
@@ -22,7 +22,7 @@ fi
 fail=0
 ok=0
 for md in "${targets[@]}"; do
-    # accepter chemin absolu ou nom relatif à 03_md_ameliores/
+    # accepter chemin absolu ou nom relatif à 2_NOUVEAUX/md/
     if [ ! -f "$md" ]; then
         md="$SRC_DIR/$md"
     fi

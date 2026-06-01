@@ -22,15 +22,16 @@ __pycache__/
 scripts/_sandbox/
 *.tmp
 
-# ── Artefacts reproductibles (à régénérer via scripts/) ──
-# 01 = dézip du zip source, 02 = jupytext conversion. Trop lourds (~90MB) et reproductibles.
-01_notebooks_originaux/
-02_md_originaux/
+# ── Artefacts reproductibles (à régénérer via scripts/restore_originaux.sh) ──
+# Les .ipynb originaux (52 MB) sont régénérés en dézippant 1_MES_NOTEBOOKS/Notebooks.zip.
+# Le zip lui-même EST committé (source de vérité) ; les .ipynb dézippés ne le sont pas.
+1_MES_NOTEBOOKS/ipynb/
 
 # ── Données volumineuses (à committer au cas par cas) ──
-# data/
 # BDD_DuckDB : NYC Taxi parquet (~50 MB) + bases .duckdb, régénérés par le notebook
 data/BDD_DuckDB/
+# Bruit Windows (Alternate Data Stream)
+*:Zone.Identifier
 
 # ── OS / éditeurs ──
 .DS_Store

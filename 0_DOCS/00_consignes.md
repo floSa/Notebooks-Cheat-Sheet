@@ -130,7 +130,7 @@ Test round-trip : `uv run jupytext --to ipynb fichier.md` produit bien 1 cellule
 
 À la fin du projet :
 
-1. Le dossier `04_notebooks_finaux/` contient **45 `.ipynb`** refondus (ou moins si certains sont fusionnés / supprimés — à justifier dans le tableau de suivi).
+1. Le dossier `2_NOUVEAUX/ipynb/` contient **45 `.ipynb`** refondus (ou moins si certains sont fusionnés / supprimés — à justifier dans le tableau de suivi).
 2. Le fichier `00_status_notebooks.md` est à jour avec l'état de chaque notebook (à faire / en cours / fait / fusionné / supprimé).
 3. Le dossier `data/` contient les datasets nécessaires, organisés par notebook.
 4. L'env UV (`pyproject.toml` + `uv.lock`) permet de relancer n'importe quel notebook.
