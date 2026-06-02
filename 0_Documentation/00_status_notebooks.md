@@ -88,7 +88,7 @@
 
 | # | Notebook | Statut | Rôle | Effort | 🌐 | Notes audit |
 |---|---|---|---|---|---|---|
-| 1 | `Structure_Pyhton.md` | 📥 ingéré | TUTO | S | | Fragmenté (apply, décorateur, f-strings, lambda, typing, yield, pickle, pattern matching, multiprocessing). **Renommer Python**. Ajouter intro structurée, moderniser MP. Candidat absorbtion `Preprocessing_Function_Utiles`. |
+| 1 | `Structure_Python.md` | ✅ fait | TUTO + WIKI | S | | Refait sur le vrai original (`1_Old_Notebooks/md/Structure_Pyhton.md`). 17 sections, 34 cellules code. Sandbox end-to-end exit 0 + `check_format --both` vert. Original 100 % préservé (apply, `__code__`, args, décorateur, f-strings, unpacking, yield, typing, match, break/continue/pass, pickle, import, multiprocessing) + ajouts (compréhensions/itertools, fonctionnel, generics 3.12, Protocol, `except*`, context managers, dataclasses, Pydantic v2, futures, asyncio). |
 | 2 | `Structures_L_T_D_Cheat_Sheet.md` | 📥 ingéré | CS | L | | Volumineux (1.4 MB) — numpy reshape, dict ops, listes texte, xarray. **Manque TOC/index**. Refresh xarray API. |
 | 3 | `Structures_DataFrame.md` | 📥 ingéré | TUTO + CS | L | | Solide (chargement, infos, colonnes, NaN, types) mais centré Colab. **Manque merge/join, groupby avancé, pivot**. Refresh pandas 2.0+. |
 | 4 | `Structure_BDD_&_DataFrame.md` | 📥 ingéré | TUTO | M | | DataFrame ↔ Postgres (SQLAlchemy/psycopg) / MongoDB. Manque gestion erreurs, transactions, retry. Vérif psycopg3. **Renommer (virer `&`)**. |
