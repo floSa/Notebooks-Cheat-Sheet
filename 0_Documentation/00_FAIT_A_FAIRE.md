@@ -4,30 +4,29 @@
 > Règle : refonte d'un de mes notebooks faite **après 2026-06-01** (= depuis qu'on a mes vrais
 > originaux) → ✅ FAIT. Avant → 🔧 à refaire (faite sur du vidé). 🐞 = bug de format détecté.
 
-## ✅ FAIT (10)
+## ✅ FAIT (14)
 
 | | | |
 |---|---|---|
-| DL_PyTorch (2026-06-02) | Structure_BDD_DataFrame (2026-06-02) | Structure_Generer_Donnees_Classification (2026-06-02) |
-| Structure_Python (2026-06-02) | Structures_DataFrame (2026-06-02) | TS_ARIMA (2026-06-01) |
-| TS_Generer_Sequence (2026-06-01) | TS_Maintenance_Predictive (2026-06-01) | TS_Time_Series_Intro (2026-06-01) |
-| TS_Time_Series_Overview (2026-06-01) |  |  |
+| DL_PyTorch (2026-06-02) | Detection_Outliers (2026-06-02) | ML_Regression_Classification_CV_GridSearch (2026-06-02) |
+| ML_Regression_Classification_Multiple (2026-06-02) | Structure_BDD_DataFrame (2026-06-02) | Structure_Generer_Donnees_Classification (2026-06-02) |
+| Structure_Python (2026-06-02) | Structures_DataFrame (2026-06-02) | Structures_L_T_D_Cheat_Sheet (2026-06-02) |
+| TS_ARIMA (2026-06-01) | TS_Generer_Sequence (2026-06-01) | TS_Maintenance_Predictive (2026-06-01) |
+| TS_Time_Series_Intro (2026-06-01) | TS_Time_Series_Overview (2026-06-01) |  |
 
-## 🔧 À REFAIRE (31)
+## 🔧 À REFAIRE (27)
 
 | | | |
 |---|---|---|
 | BDD_DuckDB (2026-05-31) | BDD_Vectorielles (2026-05-31) | DE_Docling (2026-05-31) |
 | DL_Deep_Learning_Maths () | DL_KAN_Kolmogorov_Arnold () | DL_Keras (2026-05-31) |
-| DL_TensorFlow (2026-05-31) | Detection_Outliers () | EDA_Analyse_Multivarie () |
-| EDA_Stats_Analyse_Desc_Visual () | EDA_Visualisation_Introduction (2026-05-26) | Flask_API (2026-05-31) |
-| INRIA_SKLearn_MOOC (2026-05-31) | ML_Apprentissage_par_Renforcement (2026-05-31) | ML_Bagging_Boosting (2026-05-31) |
-| ML_Explication_Feature_Importance_Selection (2026-05-31) | ML_MLFlow_Bench (2026-05-25) 🐞 | ML_Optimisation_de_Modeles () |
-| ML_Regression_Classification_CV_GridSearch () 🐞 | ML_Regression_Classification_Multiple () | NLP_Classification_Smote (2026-05-25) |
+| DL_TensorFlow (2026-05-31) | EDA_Analyse_Multivarie () | EDA_Stats_Analyse_Desc_Visual () |
+| EDA_Visualisation_Introduction (2026-05-26) | Flask_API (2026-05-31) | INRIA_SKLearn_MOOC (2026-05-31) |
+| ML_Apprentissage_par_Renforcement (2026-05-31) | ML_Bagging_Boosting (2026-05-31) | ML_Explication_Feature_Importance_Selection (2026-05-31) |
+| ML_MLFlow_Bench (2026-05-25) 🐞 | ML_Optimisation_de_Modeles () | NLP_Classification_Smote (2026-05-25) |
 | NLP_Classification_Supervisee (2026-05-25) 🐞 | NLP_NER (2026-05-25) 🐞 | NLP_NER_BiLSTM_CRF (2026-05-25) |
 | NLP_Recherche_d_informations (2026-05-25) 🐞 | NLP_Transformers (2026-05-25) 🐞 | Streamlit_brique () 🐞 |
-| Structures_L_T_D_Cheat_Sheet () 🐞 | Structures_Preprocessing () | TdS_Introduction_Traitement_Signal () 🐞 |
-| Test_donnees_manquante_modeles () 🐞 |  |  |
+| Structures_Preprocessing () | TdS_Introduction_Traitement_Signal () 🐞 | Test_donnees_manquante_modeles () 🐞 |
 
 ## 🆕 À CRÉER — sujets neufs (27)
 
@@ -45,4 +44,4 @@
 
 ---
 
-**Compteur : 10 faits · 31 à refaire · 27 à créer.**
+**Compteur : 14 faits · 27 à refaire · 27 à créer.**
