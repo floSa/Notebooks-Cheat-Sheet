@@ -4,7 +4,7 @@
 > Règle : refonte d'un de mes notebooks faite **après 2026-06-01** (= depuis qu'on a mes vrais
 > originaux) → ✅ FAIT. Avant → 🔧 à refaire (faite sur du vidé). 🐞 = bug de format détecté.
 
-## ✅ FAIT (20)
+## ✅ FAIT (21)
 
 | | | |
 |---|---|---|
@@ -13,10 +13,10 @@
 | ML_Regression_Classification_CV_GridSearch (2026-06-02) | ML_Regression_Classification_Multiple (2026-06-02) | Structure_BDD_DataFrame (2026-06-02) |
 | Structure_Generer_Donnees_Classification (2026-06-02) | Structure_Python (2026-06-02) | Structures_DataFrame (2026-06-02) |
 | Structures_L_T_D_Cheat_Sheet (2026-06-02) | Structures_Preprocessing (2026-06-02) | TS_ARIMA (2026-06-01) |
-| TS_Generer_Sequence (2026-06-01) | TS_Maintenance_Predictive (2026-06-01) | TS_Time_Series_Intro (2026-06-01) |
-| TS_Time_Series_Overview (2026-06-01) | Test_donnees_manquante_modeles (2026-06-02) |  |
+| TS_Generer_Sequence (2026-06-01) | TS_Maintenance_Predictive (2026-06-01) | TS_Time_Series_Intro (2026-06-02) |
+| TS_Time_Series_Overview (2026-06-01) | TdS_Introduction_Traitement_Signal (2026-06-02) | Test_donnees_manquante_modeles (2026-06-02) |
 
-## 🔧 À REFAIRE (21)
+## 🔧 À REFAIRE (20)
 
 | | | |
 |---|---|---|
@@ -26,7 +26,7 @@
 | Flask_API (2026-05-31) | ML_Explication_Feature_Importance_Selection (2026-05-31) | ML_MLFlow_Bench (2026-05-25) 🐞 |
 | ML_Optimisation_de_Modeles () | NLP_Classification_Smote (2026-05-25) | NLP_Classification_Supervisee (2026-05-25) 🐞 |
 | NLP_NER (2026-05-25) 🐞 | NLP_NER_BiLSTM_CRF (2026-05-25) | NLP_Recherche_d_informations (2026-05-25) 🐞 |
-| NLP_Transformers (2026-05-25) 🐞 | Streamlit_brique () 🐞 | TdS_Introduction_Traitement_Signal () 🐞 |
+| NLP_Transformers (2026-05-25) 🐞 | Streamlit_brique () 🐞 |  |
 
 ## 🆕 À CRÉER — sujets neufs (27)
 
@@ -44,4 +44,4 @@
 
 ---
 
-**Compteur : 20 faits · 21 à refaire · 27 à créer.**
+**Compteur : 21 faits · 20 à refaire · 27 à créer.**
