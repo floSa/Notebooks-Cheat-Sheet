@@ -94,7 +94,7 @@
 | 4 | `Structure_BDD_&_DataFrame.md` | 📥 ingéré | TUTO | M | | DataFrame ↔ Postgres (SQLAlchemy/psycopg) / MongoDB. Manque gestion erreurs, transactions, retry. Vérif psycopg3. **Renommer (virer `&`)**. |
 | 5 | `Structures_Preprocessing.md` | 📥 ingéré | TUTO + WIKI | L | | Beaucoup de matière mais brouillon (imports, encoding, KNNImputer, PCA, LOF). Manque structure pipeline progressive. |
 | 6 | `Structures_Preprocessing_Function_Utiles.md` | 📥 ingéré | WIKI | S | | Micro (2 KB) — `var to string`, recherche liste, dict. **Candidat fusion → absorber dans Preprocessing ou Python**. |
-| 7 | `Structure_Generer_Données_pour_Classification.md` | 📥 ingéré | TUTO | L | | Datasets synthétiques (gaussian, moon, blobs, make_classification, JSON). Manque docs paramètres + comparaison. **Renommer**. |
+| 7 | `Structure_Generer_Donnees_Classification.md` | ✅ fait | CS + TUTO + WIKI | L | | Refait sur le vrai original (`1_Old_Notebooks/md/Structure_Generer_Données_pour_Classification.md`). 19 cellules code, 16 sections. Sandbox end-to-end exit 0 + `check_format --both` vert. **Original 100 % préservé** : `make_gaussian_quantiles` (simple + composite), `make_circles`, `make_moons`, `make_blobs`, `make_classification` (déséquilibré), `make_multilabel_classification`, dataset composite 15000×21, export CSV, drawdata (1464 pts dessinés rejoués). **Ajouts** : charte CHART + helpers, maths quantiles χ², tableau params, panorama 2D, `make_regression`, helper imbalance, Faker (exécuté), SDV (panorama 2026). Drive→local, `draw_scatter()` widget documenté (interactif). |
 
 ## EDA
 
