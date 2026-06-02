@@ -106,6 +106,58 @@ On échange `(poids + activation fixe)` contre `(activation apprenable)`. Pour c
 <!-- #endregion -->
 
 <!-- #region -->
+### Illustration : le théorème implémenté *littéralement*
+<!-- #endregion -->
+
+<!-- #region -->
+Pour bien voir le piège, voici une transcription **directe** de la formule du théorème en code — exactement l'esprit de l'implémentation naïve d'origine. On câble la structure $\sum_{i} \Phi_i\big(\sum_j \psi_{ij}(x_j)\big)$ en **fixant arbitrairement** les fonctions internes et externes :
+
+- $\psi_{ij}(x) = \sin(x + j)$ (fonction interne, fixée) ;
+- $\Phi_i(y) = \sum y + i$ (fonction externe, fixée).
+<!-- #endregion -->
+
+```python
+import numpy as np
+
+
+def psi(x: np.ndarray, j: int) -> np.ndarray:
+    """Fonction de transformation univariée interne psi_ij (ici figée : sin(x + j))."""
+    return np.sin(x + j)
+
+
+def phi(y: np.ndarray, i: int) -> np.ndarray:
+    """Fonction de superposition univariée externe Phi_i (ici figée : somme + i)."""
+    return np.sum(y) + i
+
+
+def kolmogorov_arnold_literal(X: np.ndarray) -> float:
+    """Transcription littérale du théorème KA avec des fonctions psi/phi FIXÉES.
+
+    Args:
+        X: batch de points, shape (N, n_features).
+
+    Returns:
+        La sortie scalaire agrégée (pédagogique — ce réseau n'apprend rien).
+    """
+    n = X.shape[1]
+    output = 0.0
+    for i in range(2 * n + 1):  # 2n+1 termes externes, comme dans le théorème
+        sum_psi = np.zeros(X.shape[0])
+        for j in range(n):
+            sum_psi += psi(X[:, j], j)
+        output += phi(sum_psi, i)
+    return output
+
+
+X_demo = np.array([[0.1, 0.2], [0.4, 0.5], [0.7, 0.8]])
+print("Sortie du KA littéral (fonctions figées) :", kolmogorov_arnold_literal(X_demo))
+```
+
+<!-- #region -->
+**Pourquoi c'est un cul-de-sac.** Ici les $\psi_{ij}$ et $\Phi_i$ sont **choisies à la main et figées** — aucun paramètre n'est appris, le « réseau » ne s'entraîne sur rien et n'approxime aucune cible en particulier. Le théorème garantit qu'il *existe* de bonnes fonctions, mais celles-ci peuvent être **pathologiques** (non-lisses) et il ne dit pas comment les trouver. Tout l'apport de Liu et al. (2024) est précisément de **rendre ces fonctions apprenables et lisses** via des B-splines — c'est l'objet de la section suivante.
+<!-- #endregion -->
+
+<!-- #region -->
 ## 3. B-splines — la brique apprenable
 <!-- #endregion -->
 
