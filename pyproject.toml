@@ -80,6 +80,8 @@ dependencies = [
     "iteration-utilities>=0.13.0",
     "hyperopt>=0.2.7",
     "mpl-chord-diagram>=0.4.1",
+    "librosa>=0.11.0",
+    "nltk>=3.9.4",
 ]
 
 [tool.jupytext]
