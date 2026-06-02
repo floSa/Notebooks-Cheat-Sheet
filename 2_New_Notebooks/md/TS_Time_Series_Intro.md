@@ -16,19 +16,29 @@ jupyter:
 <!-- #endregion -->
 
 <!-- #region -->
-Notebook **tutoriel** pour aborder une série temporelle pour la première fois. On déroule la
-boîte à outils fondamentale, du premier coup d'œil à un premier modèle évalué proprement :
+Notebook **tutoriel + cheat-sheet** pour aborder une série temporelle de bout en bout. Il se lit
+en deux temps :
+
+**Partie 1 — Comprendre et modéliser** (sections 1 à 11) : du premier coup d'œil à un premier
+modèle évalué proprement.
 
 1. **Qu'est-ce qu'une série temporelle** et quelles tâches on lui pose.
 2. **Visualisation** (line plot + heatmap calendaire).
 3. **Décomposition** : tendance, saisonnalité, résidus (additive vs multiplicative).
-4. **Stationnarité** et tests (ADF, KPSS).
-5. **Différenciation** pour rendre stationnaire.
-6. **Autocorrélation** (ACF / PACF) — la signature d'une série.
-7. **Lag features** pour passer à un modèle ML standard.
-8. **Train/test split temporel** (jamais shuffle !) + baselines.
+4. **Extraction de tendance** : `detrend` et régression sur le temps.
+5. **Stationnarité** et tests (ADF, KPSS).
+6. **Différenciation** pour rendre stationnaire.
+7. **Autocorrélation** (ACF / PACF) — la signature d'une série.
+8. **Lag features** pour passer à un modèle ML standard.
+9. **Train/test split temporel** (jamais shuffle !) + baselines.
+10. **Prévision récursive multi-step** (KNN, LinReg, RandomForest).
 
-Dataset : **Air Passengers** (Box & Jenkins, 1949-1960), le classique de l'apprentissage TS.
+**Partie 2 — Boîte à outils pandas pour les dates** (sections 12 à 17) : les recettes de
+manipulation temporelle indispensables au quotidien (valeurs manquantes, interpolation,
+génération de grilles de dates, fusions `merge`/`merge_asof`, déduplication, agrégation pondérée).
+
+Dataset principal : **Air Passengers** (Box & Jenkins, 1949-1960), le classique de l'apprentissage
+TS. Les recettes pandas s'appuient sur de petits jeux jouets déterministes (seed = 42).
 
 > Pour la vue **wiki exhaustive** (toutes les méthodes 2026), voir `TS_Time_Series_Overview`.
 > Pour **ARIMA** en détail → `TS_ARIMA`. Pour les **séquences LSTM** → `TS_Generer_Sequence`.
@@ -51,7 +61,7 @@ y :     112       118       132      ...
 
 - **L'ordre compte** — la valeur à `t+1` dépend de celles à `t, t-1, …`.
 - **Autocorrélation** — les valeurs proches dans le temps se ressemblent (sinon : *white noise*).
-- **Non-iid** — on ne peut pas faire un k-fold cross-validation classique (cf. section 8).
+- **Non-iid** — on ne peut pas faire un k-fold cross-validation classique (cf. section 9).
 
 **Familles de tâches** :
 
@@ -84,6 +94,7 @@ import warnings
 PRIMARY = "#00798c"
 ACCENT = "#66a182"
 MAUVAIS = "#d1495b"
+MOYEN = "#edae49"
 
 
 def load_air_passengers() -> pd.Series:
@@ -219,7 +230,87 @@ série avant de la modéliser (le log transforme le multiplicatif en additif).
 <!-- #endregion -->
 
 <!-- #region -->
-## 5. Stationnarité
+## 5. Extraire la tendance : detrend & régression
+<!-- #endregion -->
+
+<!-- #region -->
+La décomposition n'est pas la seule façon d'isoler la **tendance**. Deux approches directes,
+utiles quand on veut juste *retirer* la tendance :
+
+- **`statsmodels.tsa.tsatools.detrend`** : retire une tendance **polynomiale** d'ordre `k` par
+  moindres carrés et retourne la série **détendue** (les résidus). La tendance estimée vaut alors
+  $T = y - \texttt{detrend}(y)$. Ordre 1 = droite, ordre 2 = parabole.
+- **Régression OLS sur le temps** : on régresse $y$ sur une base du temps
+  $X = [1, t, t^2, \dots]$ ; la **valeur ajustée** $\hat y = X\hat\beta$ *est* la tendance. La
+  pente $\hat\beta_1$ se lit directement en « unités par pas de temps ».
+
+On illustre aussi la variante **log** : log-transformer avant d'estimer la tendance stabilise la
+variance d'une série à saisonnalité multiplicative.
+
+> Raccourci viz : `statsmodels.graphics.regressionplots.abline_plot(model_results=res)` trace
+> directement la droite de régression à partir d'un résultat OLS.
+<!-- #endregion -->
+
+```python
+from statsmodels.api import OLS
+from statsmodels.tsa.tsatools import detrend
+
+
+def trend_by_regression(series: pd.Series, order: int = 1) -> tuple[np.ndarray, "OLS"]:
+    """Estime la tendance d'une série par régression OLS sur le temps.
+
+    On régresse `y` sur une base polynomiale du temps `t` (ordre `order`). La
+    tendance est la valeur ajustée du modèle ; les résidus sont la série détenddue.
+
+    Args:
+        series: série temporelle.
+        order: degré polynomial (1 = droite, 2 = parabole).
+
+    Returns:
+        (valeurs_ajustées, résultat_OLS_ajusté).
+    """
+    y = series.to_numpy(dtype=float)
+    t = np.arange(len(y), dtype=float)
+    X = np.column_stack([t ** k for k in range(order + 1)])  # [1, t, t², ...]
+    res = OLS(y, X).fit()
+    return res.predict(X), res
+
+
+# detrend() de statsmodels retourne la série SANS sa tendance polynomiale.
+notrend_lin = detrend(ts, order=1)      # résidu après retrait d'une droite
+notrend_quad = detrend(ts, order=2)     # résidu après retrait d'une parabole
+trend_lin = ts - notrend_lin            # tendance linéaire = série - résidu
+trend_quad = ts - notrend_quad          # tendance quadratique
+
+# Variante "log" : on stabilise la variance avant d'estimer la tendance.
+log_ts = np.log(ts)
+log_trend = log_ts - detrend(log_ts, order=1)
+
+fitted_ols, ols_res = trend_by_regression(ts, order=1)
+print(f"OLS ordre 1 — intercept={ols_res.params[0]:.1f}, pente={ols_res.params[1]:.2f} passagers/mois")
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+axes[0].plot(ts.index, ts.values, color=PRIMARY, label="série")
+axes[0].plot(ts.index, trend_lin.values, color=MAUVAIS, lw=2, label="tendance linéaire (detrend o1)")
+axes[0].plot(ts.index, trend_quad.values, color=MOYEN, lw=2, label="tendance quadratique (detrend o2)")
+axes[0].set(title="Tendance par detrend (ordre 1 vs 2)", ylabel="Passagers")
+axes[0].legend(); axes[0].grid(True, alpha=0.3)
+
+axes[1].plot(log_ts.index, log_ts.values, color=PRIMARY, label="log(série)")
+axes[1].plot(log_ts.index, log_trend.values, color=MAUVAIS, lw=2, label="tendance linéaire sur log")
+axes[1].set(title="Tendance sur la série log-transformée", ylabel="log(passagers)")
+axes[1].legend(); axes[1].grid(True, alpha=0.3)
+fig.tight_layout();
+```
+
+<!-- #region -->
+La pente OLS (~2.7 passagers/mois) chiffre la croissance moyenne. La tendance **quadratique**
+épouse mieux la légère accélération que la droite. Sur le log, la tendance redevient quasi-linéaire
+— signe que la croissance est **exponentielle** (multiplicative), ce qui confirme la section 4.
+<!-- #endregion -->
+
+<!-- #region -->
+## 6. Stationnarité
 <!-- #endregion -->
 
 <!-- #region -->
@@ -266,7 +357,7 @@ on **différencie** (section suivante).
 <!-- #endregion -->
 
 <!-- #region -->
-## 6. Différenciation
+## 7. Différenciation
 <!-- #endregion -->
 
 <!-- #region -->
@@ -308,7 +399,7 @@ ce qui guidera le choix d'un modèle SARIMA dans `TS_ARIMA`.
 <!-- #endregion -->
 
 <!-- #region -->
-## 7. ACF et PACF — la signature d'une série
+## 8. ACF et PACF — la signature d'une série
 <!-- #endregion -->
 
 <!-- #region -->
@@ -347,7 +438,7 @@ fig.tight_layout();
 <!-- #endregion -->
 
 <!-- #region -->
-## 8. Lag features — passer à un modèle ML standard
+## 9. Lag features — passer à un modèle ML standard
 <!-- #endregion -->
 
 <!-- #region -->
@@ -412,7 +503,7 @@ les supprime avec `.dropna()`. Il reste **132 lignes × 15 colonnes**, prêtes p
 <!-- #endregion -->
 
 <!-- #region -->
-## 9. Train/test split temporel — JAMAIS shuffle !
+## 10. Train/test split temporel — JAMAIS shuffle !
 <!-- #endregion -->
 
 <!-- #region -->
@@ -477,7 +568,440 @@ strictement postérieur** à son train (expanding window).
 <!-- #endregion -->
 
 <!-- #region -->
-## 10. Pièges et anti-patterns
+## 11. Prévision récursive multi-step (KNN, LinReg, RandomForest)
+<!-- #endregion -->
+
+<!-- #region -->
+La section 10 évalue une prédiction **1 pas en avant** (le test dispose des vrais lags). Pour
+prévoir un **horizon** de plusieurs pas sans connaître le futur, on utilise la **stratégie
+récursive** : on prédit `t+1`, puis on **ré-injecte** cette prédiction comme lag pour prédire
+`t+2`, et ainsi de suite (la fenêtre glisse).
+
+$$\hat y_{t+1} = f(y_t, \dots, y_{t-n+1}), \qquad \hat y_{t+2} = f(\hat y_{t+1}, y_t, \dots)$$
+
+⚠️ **Attention** : l'erreur se **propage** (chaque prédiction bruitée nourrit la suivante). On
+compare ici trois régresseurs sklearn — **KNN**, **LinReg**, **RandomForest** — sur un horizon de
+12 mois, en n'utilisant que les lags autorégressifs.
+<!-- #endregion -->
+
+```python
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.ensemble import RandomForestRegressor
+
+
+def recursive_forecast(history: np.ndarray, model, n_lags: int, horizon: int) -> np.ndarray:
+    """Prévision récursive multi-step à partir des seuls lags autorégressifs.
+
+    On entraîne `model` à prédire `y(t)` depuis `[y(t-1), …, y(t-n_lags)]`, puis on
+    prédit pas à pas : chaque prédiction est ré-injectée comme lag pour la suivante
+    (la fenêtre glisse). C'est la stratégie "recursive" du forecasting multi-step.
+
+    Args:
+        history: valeurs observées (1D), ordonnées dans le temps.
+        model: régresseur sklearn (doit exposer `fit`/`predict`).
+        n_lags: nombre de retards utilisés comme features.
+        horizon: nombre de pas à prédire.
+
+    Returns:
+        Tableau des `horizon` valeurs prédites.
+    """
+    X, target = [], []
+    for i in range(n_lags, len(history)):
+        X.append(history[i - n_lags:i][::-1])   # [lag1, lag2, …, lagN]
+        target.append(history[i])
+    model.fit(np.asarray(X), np.asarray(target))
+
+    window = list(history[-n_lags:])
+    preds = []
+    for _ in range(horizon):
+        x = np.asarray(window[::-1]).reshape(1, -1)
+        yhat = float(model.predict(x)[0])
+        preds.append(yhat)
+        window = window[1:] + [yhat]
+    return np.asarray(preds)
+
+
+HORIZON, N_LAGS = 12, 12
+history = ts.to_numpy(dtype=float)
+train_hist, true_future = history[:-HORIZON], history[-HORIZON:]
+future_index = ts.index[-HORIZON:]
+
+models = {
+    "KNN (k=5)": KNeighborsRegressor(n_neighbors=5),
+    "LinReg": LinearRegression(),
+    "RandomForest": RandomForestRegressor(n_estimators=200, random_state=42),
+}
+forecasts = {}
+for name, mdl in models.items():
+    preds = recursive_forecast(train_hist, mdl, n_lags=N_LAGS, horizon=HORIZON)
+    forecasts[name] = preds
+    mape = mean_absolute_percentage_error(true_future, preds)
+    print(f"{name:14s} MAPE 12 mois : {mape:.2%}")
+
+fig, ax = plt.subplots(figsize=(12, 5))
+ax.plot(ts.index, history, color=PRIMARY, label="observé")
+palette = [MAUVAIS, MOYEN, ACCENT]
+for (name, preds), c in zip(forecasts.items(), palette):
+    ax.plot(future_index, preds, "--o", color=c, ms=4, label=f"prévision {name}")
+ax.axvline(future_index[0], color="grey", ls=":")
+ax.set(title="Prévision récursive multi-step (12 mois)", ylabel="Passagers")
+ax.legend(); ax.grid(True, alpha=0.3)
+fig.tight_layout();
+```
+
+<!-- #region -->
+La **régression linéaire** s'en sort le mieux ici (~3 % de MAPE) : la dynamique d'Air Passengers
+est très régulière, ce que le modèle linéaire extrapole bien. Le **KNN** souffre le plus (il ne
+peut pas extrapoler au-delà des valeurs vues → il « plafonne »), la **RandomForest** est entre les
+deux (même limite d'extrapolation, mais plus robuste au bruit). C'est le rappel classique :
+**les modèles à base d'arbres / de voisins n'extrapolent pas** une tendance, contrairement aux
+modèles linéaires.
+<!-- #endregion -->
+
+<!-- #region -->
+## 12. Valeurs manquantes sur l'axe des dates
+<!-- #endregion -->
+
+<!-- #region -->
+On passe à la **boîte à outils pandas** : les manipulations temporelles du quotidien. Premier
+réflexe sur un nouveau jeu de données — **visualiser où sont les trous**. La librairie
+**`missingno`** trace une matrice de complétude (une ligne par timestamp, une colonne par
+variable, blanc = valeur manquante) : on repère d'un coup d'œil les capteurs défaillants et les
+périodes de panne.
+<!-- #endregion -->
+
+```python
+import missingno as msno
+
+rng = np.random.default_rng(42)
+dates = pd.date_range(start="2020-01-01", end="2023-12-31", freq="D")
+df_missing = pd.DataFrame({"date": dates}).set_index("date")
+for i in range(8):
+    col = f"capteur_{i + 1}"
+    df_missing[col] = rng.random(len(df_missing))
+    holes = rng.choice(len(df_missing), size=int(len(df_missing) * 0.2), replace=False)
+    df_missing.iloc[holes, df_missing.columns.get_loc(col)] = np.nan
+
+print(f"Taux de NaN par capteur :\n{(df_missing.isna().mean() * 100).round(1)}")
+
+fig, ax = plt.subplots(figsize=(12, 5))
+msno.matrix(df_missing, ax=ax, sparkline=False, color=(0.0, 0.47, 0.55))
+ax.set_title("Matrice de complétude (blanc = valeur manquante)")
+fig.tight_layout();
+```
+
+<!-- #region -->
+Chaque capteur a ~20 % de trous (générés aléatoirement ici). Sur de vraies données, les bandes
+blanches **alignées** entre colonnes trahiraient une panne système (toutes les variables manquent
+en même temps), tandis que des trous **indépendants** pointent vers des capteurs individuels.
+<!-- #endregion -->
+
+<!-- #region -->
+## 13. Compléter les dates manquantes & interpoler
+<!-- #endregion -->
+
+<!-- #region -->
+Quand des **dates entières manquent** (échantillonnage irrégulier), on procède en deux temps :
+
+1. **Densifier la grille** : `resample("D").asfreq()` insère les jours absents avec des `NaN`.
+2. **Interpoler** : `interpolate(method="time")` remplit les `NaN` en **pondérant par l'écart réel
+   entre timestamps** (plus correct que `method="linear"` qui ignore l'espacement des dates).
+<!-- #endregion -->
+
+```python
+gaps = pd.DataFrame(
+    {"date": ["2016-01-01", "2016-01-03", "2016-01-07", "2016-01-11"], "value": [10, 20, 40, 0]}
+)
+gaps["date"] = pd.to_datetime(gaps["date"])
+gaps = gaps.set_index("date")
+print("Avant (dates espacées irrégulièrement) :")
+print(gaps)
+
+# Étape 1 — densifier la grille au jour : asfreq insère les jours absents (NaN).
+filled = gaps.resample("D").asfreq()
+# Étape 2 — interpoler ; method="time" pondère par l'écart réel entre timestamps.
+filled["value_interp"] = filled["value"].interpolate(method="time")
+print("\nAprès resample('D') + interpolate('time') :")
+print(filled)
+
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.plot(filled.index, filled["value_interp"], "-", color=ACCENT, label="interpolé (time)")
+ax.plot(gaps.index, gaps["value"], "o", color=PRIMARY, ms=9, label="observé")
+ax.set(title="Complétion + interpolation temporelle", ylabel="value")
+ax.legend(); ax.grid(True, alpha=0.3)
+fig.tight_layout();
+```
+
+<!-- #region -->
+Les jours absents (02, 04, 05, 06…) ont été créés puis remplis par une droite reliant les points
+observés. Pour une série à tendance/saison forte, préférer `interpolate(method="spline")` ou une
+imputation par modèle ; `method="time"` reste le défaut sûr et local.
+<!-- #endregion -->
+
+<!-- #region -->
+## 14. Générer des grilles de dates (fréquences & fenêtres)
+<!-- #endregion -->
+
+<!-- #region -->
+`pd.date_range` génère une grille régulière selon un **alias de fréquence** : `"D"` (jour), `"MS"`
+(début de mois), `"W-MON"` (chaque lundi), `"h"` (heure)… Très utile pour fabriquer un index cible
+propre, puis y aligner ses données.
+
+Premier exemple : 20 observations hebdomadaires ancrées sur le lundi, puis insertion d'une date
+**hors-grille** et complétion des semaines manquantes. ⚠️ `DataFrame.append` a été **supprimé** de
+pandas 2.x → on utilise **`pd.concat`**.
+<!-- #endregion -->
+
+```python
+rng = np.random.default_rng(42)
+
+# 20 observations hebdomadaires, ancrées sur le lundi (freq="W-MON").
+weekly = pd.DataFrame(
+    {
+        "Dates": pd.date_range(start="2023-07-31", periods=20, freq="W-MON"),
+        "Value": rng.integers(1, 100, size=20),
+    }
+)
+print("Grille hebdomadaire (W-MON) :")
+print(weekly.head())
+
+# Insérer une date hors-grille puis compléter les semaines manquantes (concat, PAS append).
+base = weekly.head(5).copy()
+extra = pd.DataFrame([{"Dates": pd.Timestamp("2023-06-05"), "Value": 5}])
+base = pd.concat([base, extra], ignore_index=True)
+new_weeks = pd.date_range(start="2023-06-12", end="2023-07-24", freq="W-MON")
+gaps_weeks = pd.DataFrame({"Dates": new_weeks, "Value": np.nan})
+base = pd.concat([base, gaps_weeks], ignore_index=True).sort_values("Dates").reset_index(drop=True)
+print(f"\nAprès insertion + complétion ({len(base)} lignes) :")
+print(base)
+```
+
+<!-- #region -->
+Second exemple : représenter une **fenêtre** (du lundi au dimanche) sous forme de chaîne
+`"AAAA-MM-JJ/AAAA-MM-JJ"`, puis re-parser le **début de fenêtre** en `datetime` (indispensable pour
+re-trier ou fusionner ensuite).
+<!-- #endregion -->
+
+```python
+periode = 10
+debut_semaine = pd.date_range(start="2019-09-16", periods=periode, freq="W-MON")
+fin_semaine = debut_semaine + pd.offsets.Week(weekday=6)  # le dimanche suivant
+
+windows = pd.DataFrame(
+    {
+        "semaine": debut_semaine.strftime("%Y-%m-%d") + "/" + fin_semaine.strftime("%Y-%m-%d"),
+        "Value": rng.integers(0, 9, size=periode),
+    }
+)
+print("Colonne fenêtre 'AAAA-MM-JJ/AAAA-MM-JJ' :")
+print(windows.head(3))
+
+# Récupérer le début de fenêtre comme vraie date (utile pour re-trier / merger).
+windows["debut"] = pd.to_datetime(windows["semaine"].str.split("/").str[0])
+print("\nDébut de fenêtre reparsé en datetime :")
+print(windows[["semaine", "debut"]].head(3))
+```
+
+<!-- #region -->
+La chaîne de fenêtre est lisible pour un humain mais **inutilisable telle quelle** pour des calculs
+temporels : on garde la colonne `debut` (datetime) comme clé de tri/jointure.
+<!-- #endregion -->
+
+<!-- #region -->
+## 15. Fusionner deux séries : merge & merge_asof
+<!-- #endregion -->
+
+<!-- #region -->
+Deux capteurs n'échantillonnent presque jamais aux **mêmes instants**. Deux façons de les
+rapprocher :
+
+- **`pd.merge`** : jointure sur clé **exacte**. Avec `how="outer"`, les dates non communes sont
+  conservées et complétées par `NaN`.
+- **`pd.merge_asof`** : jointure sur la date **la plus proche** (`direction="nearest"` /
+  `"backward"` / `"forward"`). Idéal pour aligner deux séries désynchronisées sans perdre de lignes.
+
+On part de deux DataFrames aux dates légèrement décalées.
+<!-- #endregion -->
+
+```python
+df1 = pd.DataFrame(
+    {"Date": ["2022-01-01", "2022-01-08", "2022-01-15", "2022-01-22"], "Valeur1": [10, 20, 30, 40]}
+)
+df1["Date"] = pd.to_datetime(df1["Date"])
+df1 = df1.sort_values("Date")
+
+df2 = pd.DataFrame(
+    {"Date": ["2022-01-01", "2022-01-08", "2022-01-16", "2022-01-23"], "Valeur2": [100, 200, 300, 400]}
+)
+df2["Date"] = pd.to_datetime(df2["Date"])
+df2 = df2.sort_values("Date")
+print("df1 :\n", df1, "\n\ndf2 :\n", df2, sep="")
+```
+
+<!-- #region -->
+`df1` et `df2` coïncident les deux premières semaines puis divergent (15 vs 16, 22 vs 23). On
+compare les deux jointures sur ce décalage.
+<!-- #endregion -->
+
+```python
+# merge classique : jointure sur clé EXACTE (outer garde toutes les dates).
+merged = pd.merge(df1, df2, on="Date", how="outer")
+print("pd.merge (exact, outer) — les dates non communes deviennent NaN :")
+print(merged)
+
+# merge_asof : jointure sur la date la PLUS PROCHE (clé approximative, séries non alignées).
+asof = pd.merge_asof(df1, df2, on="Date", direction="nearest")
+print("\npd.merge_asof (nearest) — chaque ligne de df1 reçoit le df2 le plus proche dans le temps :")
+print(asof)
+```
+
+<!-- #region -->
+Le `merge` exact crée **6 lignes** (les dates 15, 16, 22, 23 ne s'apparient pas → `NaN`). Le
+`merge_asof` garde les **4 lignes** de `df1` et leur associe la mesure de `df2` la plus proche :
+aucune ligne perdue, aucun `NaN`. C'est l'outil de référence pour **aligner des capteurs
+asynchrones**. (`merge_asof` exige des clés **triées**.)
+<!-- #endregion -->
+
+<!-- #region -->
+## 16. Dédupliquer des timestamps (moyenne des doublons)
+<!-- #endregion -->
+
+<!-- #region -->
+Plusieurs mesures **au même instant** (capteurs redondants, logs concurrents) ? On agrège par
+timestamp. `groupby(timestamp).mean()` renvoie **une ligne par instant**, valeurs moyennées (on
+pourrait aussi prendre `.median()`, `.first()`, `.max()` selon le besoin).
+<!-- #endregion -->
+
+```python
+dup = pd.DataFrame(
+    {
+        "Date": ["2023-08-01 12:30:00", "2023-08-01 12:30:00", "2023-08-01 13:00:00", "2023-08-01 13:00:00"],
+        "Valeur1": [10, 20, 15, 25],
+        "Valeur2": [5, 10, 7, 12],
+    }
+)
+dup["Date"] = pd.to_datetime(dup["Date"])
+print("Avec doublons de timestamp :\n", dup, sep="")
+
+# groupby sur le timestamp + moyenne : 1 ligne par instant, valeurs moyennées.
+deduped = dup.groupby("Date", as_index=False).mean()
+print("\nAprès dédup (moyenne des doublons) :\n", deduped, sep="")
+```
+
+<!-- #region -->
+Les deux paires de doublons (12:30 et 13:00) sont fusionnées : `Valeur1` → moyenne (15, 20),
+`Valeur2` → moyenne (7.5, 9.5). La série a maintenant un index temporel **unique**, prérequis de
+`asfreq`, `resample` et `merge_asof`.
+<!-- #endregion -->
+
+<!-- #region -->
+## 17. Nettoyage temporel : recettes avancées
+<!-- #endregion -->
+
+<!-- #region -->
+Trois recettes plus pointues, fréquentes sur des **flux d'événements** horodatés (IoT, traces GPS).
+
+**(a) Agrégation horaire pondérée par la durée.** Chaque mesure « couvre » l'intervalle jusqu'à la
+suivante : sa durée $\Delta t$. Pour agréger à l'heure sans biaiser, on pondère chaque valeur par
+sa **part de l'heure** $\;w_i = \Delta t_i / \sum_{\text{heure}} \Delta t\;$ avant de sommer. (On
+utilise `resample("h")` — minuscule ; `"H"` est **déprécié** depuis pandas 2.2.)
+<!-- #endregion -->
+
+```python
+events = pd.DataFrame(
+    {
+        "time": [
+            "2023-07-19 16:32:08", "2023-07-19 16:32:28", "2023-07-19 16:32:50",
+            "2023-07-19 17:21:08", "2023-07-19 17:21:25", "2023-07-19 17:44:03",
+            "2023-07-19 17:45:10", "2023-07-19 17:46:20", "2023-07-19 17:47:20",
+        ],
+        "vitesse": [1.0, 2.0, 0.0, 1.0, 0.0, 4.0, 0.0, 1.0, 0.0],
+    }
+)
+events["time"] = pd.to_datetime(events["time"])
+
+# Durée (h) que "couvre" chaque mesure = écart jusqu'à la mesure suivante.
+events["dt_h"] = events["time"].diff().dt.total_seconds().div(3600).shift(-1)
+events = events[events["vitesse"] > 0].copy()                      # garder les mesures actives
+events["dt_sum_h"] = events.groupby(events["time"].dt.hour)["dt_h"].transform("sum")
+events["poids"] = events["dt_h"] / events["dt_sum_h"]              # part de l'heure couverte
+events["vitesse_ponderee"] = events["poids"] * events["vitesse"]   # moyenne pondérée par la durée
+
+hourly = events.resample("h", on="time").agg(vitesse_moy=("vitesse_ponderee", "sum"))
+print("Vitesse horaire pondérée par la durée de chaque mesure :")
+print(hourly)
+```
+
+<!-- #region -->
+**(b) Boucher les longs trous par une ligne « heure tronquée ».** Quand l'écart entre deux mesures
+dépasse 1 h, on injecte une ligne à `value = 0`, datée à l'**heure pleine** qui suit le dernier
+point — utile pour matérialiser une période d'inactivité avant un `resample`.
+<!-- #endregion -->
+
+```python
+series_gap = pd.DataFrame(
+    {
+        "time": [
+            "2023-07-19 16:32:08", "2023-07-19 16:32:28", "2023-07-19 16:32:50",
+            "2023-07-19 17:33:10", "2023-07-19 19:33:28", "2023-07-19 20:33:00",
+            "2023-07-19 20:33:50",
+        ],
+        "value": [1, 2, 3, 6, 1, 2, 1],
+    }
+)
+series_gap["time"] = pd.to_datetime(series_gap["time"])
+
+# Repérer les trous > 1h et y injecter une ligne à value=0, datée à l'heure pleine suivante.
+series_gap["gap_h"] = series_gap["time"].shift(-1).sub(series_gap["time"]).dt.total_seconds().div(3600)
+injected = series_gap[series_gap["gap_h"] > 1].copy()
+injected["time"] = (injected["time"] + pd.offsets.Hour(1)).dt.floor("h")
+injected["value"] = 0
+patched = (
+    pd.concat([series_gap, injected])
+    .drop(columns="gap_h")
+    .sort_values("time")
+    .reset_index(drop=True)
+)
+print("Lignes 'heure tronquée' injectées sur les trous > 1h :")
+print(patched)
+```
+
+<!-- #region -->
+**(c) Ne garder que le premier `NaN` de chaque trou.** Sur une série criblée de `NaN` consécutifs,
+on veut souvent **un seul marqueur** par trou (puis supprimer le reste). On numérote les segments
+consécutifs `NaN`/non-`NaN` via une somme cumulée de changements, puis on ne marque que le premier
+`NaN` de chaque segment.
+<!-- #endregion -->
+
+```python
+runs = pd.DataFrame(
+    {
+        "time": pd.date_range("2023-07-19 16:32:00", periods=6, freq="20s"),
+        "value": [np.nan, 1.0, np.nan, np.nan, np.nan, 3.0],
+    }
+)
+print("Avant (plusieurs NaN consécutifs) :\n", runs.to_string(index=False), sep="")
+
+# Numéroter les segments consécutifs (NaN / non-NaN), puis dans chaque segment de
+# NaN ne marquer que le premier (à 0) — les autres restent NaN pour être supprimés.
+runs["segment"] = (runs["value"].notnull() != runs["value"].notnull().shift()).cumsum()
+for _, grp in runs.groupby("segment"):
+    if grp["value"].isnull().any():
+        first_nan = grp.index[grp["value"].isnull()].min()
+        runs.at[first_nan, "value"] = 0
+runs = runs.drop(columns="segment")
+print("\nAprès (1 seul marqueur 0 par trou) :\n", runs.to_string(index=False), sep="")
+```
+
+<!-- #region -->
+Le trou de 3 `NaN` (indices 2-3-4) ne conserve qu'un `0` à l'indice 2 ; les deux autres restent
+`NaN` et seront éliminés par un `dropna()`. L'astuce de la **somme cumulée de changements**
+(`(x != x.shift()).cumsum()`) est le motif standard pour identifier des **plages consécutives** en
+pandas.
+<!-- #endregion -->
+
+<!-- #region -->
+## 18. Pièges et anti-patterns
 <!-- #endregion -->
 
 <!-- #region -->
@@ -491,10 +1015,14 @@ strictement postérieur** à son train (expanding window).
 | Oublier les features de Fourier | `sin/cos` pour une saisonnalité de période connue |
 | Imputation par moyenne globale | Interpolation **locale** (temporelle) |
 | Pas de baseline | Toujours comparer au naïf / seasonal-naive |
+| Attendre un arbre/KNN qu'il **extrapole** une tendance | Modèle linéaire, ou différencier/détrendre avant |
+| `DataFrame.append` (supprimé en pandas 2.x) | `pd.concat([...], ignore_index=True)` |
+| `resample("H")` (déprécié) | `resample("h")` (minuscule) |
+| `merge_asof` sur clés non triées | Trier les deux DataFrames sur la clé d'abord |
 <!-- #endregion -->
 
 <!-- #region -->
-## 11. Bonnes pratiques 2026
+## 19. Bonnes pratiques 2026
 <!-- #endregion -->
 
 <!-- #region -->
@@ -517,12 +1045,14 @@ strictement postérieur** à son train (expanding window).
 <!-- #endregion -->
 
 <!-- #region -->
-## 12. Sources
+## 20. Sources
 <!-- #endregion -->
 
 <!-- #region -->
 - [Forecasting: Principles and Practice — Hyndman & Athanasopoulos (référence libre)](https://otexts.com/fpp3/)
 - [statsmodels — Time Series Analysis](https://www.statsmodels.org/stable/tsa.html)
+- [pandas — Time series / date functionality](https://pandas.pydata.org/docs/user_guide/timeseries.html)
+- [missingno — visualisation des valeurs manquantes](https://github.com/ResidentMario/missingno)
 - [Nixtla — baseline forecasts](https://www.nixtla.io/blog/baseline-forecasts) & [écosystème Nixtla](https://nixtlaverse.nixtla.io/)
 - [The 2026 Time Series Toolkit — Foundation Models (MachineLearningMastery)](https://machinelearningmastery.com/the-2026-time-series-toolkit-5-foundation-models-for-autonomous-forecasting/)
 - Notebooks liés : `TS_Time_Series_Overview` (wiki complet), `TS_ARIMA` (ARIMA détaillé),
