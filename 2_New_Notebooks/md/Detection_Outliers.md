@@ -215,6 +215,10 @@ Tout point hors de ces bornes est aberrant. C'est exactement ce que dessinent le
 « moustaches » d'un boxplot.
 <!-- #endregion -->
 
+<!-- #region -->
+![Schéma IQR : Q1, Q2, Q3, IQR et bornes 1.5·IQR délimitant les outliers](images/outliers_orig_L113.png)
+<!-- #endregion -->
+
 ```python
 def iqr_bounds(x: np.ndarray, k: float = 1.5) -> tuple[float, float]:
     """Bornes de Tukey : (Q1 - k.IQR, Q3 + k.IQR)."""
@@ -290,6 +294,32 @@ plt.show()
 ```
 
 <!-- #region -->
+### 3.5 Supprimer les outliers et visualiser l'effet
+<!-- #endregion -->
+
+<!-- #region -->
+Une fois les aberrations repérées, on peut **nettoyer** la variable en retirant les
+points hors bornes de Tukey, puis comparer la distribution **avant / après** par
+boxplot. C'est le réflexe de base en pré-traitement. *(Note : on supprime ici via un
+**masque booléen** ; supprimer par index brut — comme le faisait la version d'origine
+de ce notebook — produit des suppressions incohérentes dès que l'index n'est plus
+0..n−1.)*
+<!-- #endregion -->
+
+```python
+mask_fare = iqr_outliers(fare)
+fare_clean = fare[~mask_fare]
+print(f"fare : {mask_fare.sum()} outliers retirés ({len(fare)} -> {len(fare_clean)})")
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 3), sharex=True)
+sns.boxplot(x=fare, ax=axes[0], color=PRIMARY_1, fliersize=4)
+axes[0].set_title("fare AVEC outliers")
+sns.boxplot(x=fare_clean, ax=axes[1], color=ACCENT, fliersize=4)
+axes[1].set_title("fare SANS outliers (bornes IQR)")
+plt.show()
+```
+
+<!-- #region -->
 ## 4. Détection multivariée
 <!-- #endregion -->
 
@@ -339,6 +369,10 @@ $$D_M(x) = \sqrt{(x - \mu)^\top \Sigma^{-1} (x - \mu)}.$$
 
 La covariance robuste $\Sigma$ évite que les outliers ne « gonflent » l'ellipse.
 **Limite** : suppose un nuage unimodal elliptique.
+<!-- #endregion -->
+
+<!-- #region -->
+![Intuition de l'Elliptic Envelope : une ellipse englobe le cœur du nuage, les points hors ellipse sont aberrants](images/outliers_orig_L44.png)
 <!-- #endregion -->
 
 ```python
@@ -708,6 +742,10 @@ $$D_i = \frac{\sum_{j=1}^{n} (\hat{y}_j - \hat{y}_{j(i)})^2}{p \cdot \text{MSE}}
 où $\hat{y}_{j(i)}$ est la prédiction sans l'observation $i$ et $p$ le nombre de
 paramètres. C'est le produit du **levier** (position extrême en $x$) et de
 l'**aberration** (résidu élevé). Règle empirique : on signale $D_i > 4/n$.
+<!-- #endregion -->
+
+<!-- #region -->
+![Formule de la distance de Cook](images/outliers_orig_L409.png)
 <!-- #endregion -->
 
 ```python
