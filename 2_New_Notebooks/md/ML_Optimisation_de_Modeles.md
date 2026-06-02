@@ -388,19 +388,28 @@ Une part substantielle des essais est coupée avant la fin : autant de budget r�
 <!-- #endregion -->
 
 <!-- #region -->
-Même jeu de données, même protocole (R² en CV 3 folds), trois frameworks de gradient boosting. On factorise le lancement d'une étude dans une petite fonction réutilisable.
+Même jeu de données, même protocole (R² en CV 3 folds), trois frameworks de gradient boosting (XGBoost, LightGBM, CatBoost). On factorise le lancement d'une étude dans une petite fonction réutilisable qui renvoie l'objet `Study` (réutilisé ensuite pour les visualisations).
 <!-- #endregion -->
 
 ```python
 from typing import Callable
 
 
-def run_study(objective: Callable[[optuna.Trial], float], n_trials: int, name: str) -> float:
-    """Lance une étude TPE reproductible et renvoie le meilleur R²."""
+def run_study(objective: Callable[[optuna.Trial], float], n_trials: int, name: str) -> optuna.Study:
+    """Lance une étude TPE reproductible et renvoie l'objet Study.
+
+    Args:
+        objective: fonction objective Optuna à maximiser.
+        n_trials: nombre d'essais.
+        name: étiquette affichée dans le log.
+
+    Returns:
+        L'objet `optuna.Study` complet (best_value, best_params, historique des trials).
+    """
     study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=42))
     study.optimize(objective, n_trials=n_trials)
     print(f"[{name}] best R²={study.best_value:.4f}  best params={study.best_params}")
-    return study.best_value
+    return study
 ```
 
 <!-- #region -->
@@ -429,7 +438,8 @@ def objective_xgb(trial: optuna.Trial) -> float:
     return cross_val_score(model, X_tr, y_tr, cv=3, scoring="r2", n_jobs=-1).mean()
 
 
-r2_xgb = run_study(objective_xgb, n_trials=20, name="xgboost")
+study_xgb = run_study(objective_xgb, n_trials=20, name="xgboost")
+r2_xgb = study_xgb.best_value
 ```
 
 <!-- #region -->
@@ -437,33 +447,22 @@ r2_xgb = run_study(objective_xgb, n_trials=20, name="xgboost")
 <!-- #endregion -->
 
 <!-- #region -->
-Pour `LGBMRegressor`, le levier central est `num_leaves` (complexité de l'arbre) à coupler avec `learning_rate`. `feature_fraction` / `bagging_fraction` apportent de la régularisation par échantillonnage.
+Pour `LGBMRegressor`, le levier central est `num_leaves` (complexité de l'arbre) à coupler avec `learning_rate` ; `feature_fraction` / `bagging_fraction` apportent de la régularisation par échantillonnage. Un espace Optuna typique :
+
+| Hyperparamètre | Suggestion Optuna |
+|---|---|
+| `n_estimators` | `suggest_int(100, 500)` |
+| `learning_rate` | `suggest_float(1e-3, 0.3, log=True)` |
+| `num_leaves` | `suggest_int(15, 255)` — **levier #1** |
+| `feature_fraction` | `suggest_float(0.5, 1.0)` |
+| `bagging_fraction` | `suggest_float(0.5, 1.0)` |
+| `min_child_samples` | `suggest_int(5, 100)` |
+| `reg_alpha` / `reg_lambda` | `suggest_float(1e-8, 10.0, log=True)` |
+
+La fonction objective serait **strictement identique** à celle de XGBoost ci-dessus, en remplaçant le modèle par `LGBMRegressor(random_state=42, n_jobs=1, verbose=-1, **params)` puis `run_study(objective_lgbm, 20, "lightgbm")` — c'est tout l'intérêt du define-by-run : changer de framework ne change pas la mécanique d'optimisation.
+
+> ⚠️ **Note d'environnement** : dans le runtime de ce notebook, la bibliothèque système **`libgomp` (OpenMP)** requise par LightGBM est absente (`OSError: libgomp.so.1` au `.fit()`). L'exemple exécuté de cette section se limite donc à **XGBoost** et **CatBoost** (dont l'OpenMP est embarqué dans le wheel). Sur une machine où LightGBM s'installe normalement, le bloc ci-dessus tourne tel quel.
 <!-- #endregion -->
-
-```python
-from lightgbm import LGBMRegressor
-
-
-def objective_lgbm(trial: optuna.Trial) -> float:
-    params = {
-        "n_estimators": trial.suggest_int("n_estimators", 100, 500),
-        "learning_rate": trial.suggest_float("learning_rate", 1e-3, 0.3, log=True),
-        "num_leaves": trial.suggest_int("num_leaves", 15, 255),
-        "feature_fraction": trial.suggest_float("feature_fraction", 0.5, 1.0),
-        "bagging_fraction": trial.suggest_float("bagging_fraction", 0.5, 1.0),
-        "min_child_samples": trial.suggest_int("min_child_samples", 5, 100),
-        "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 10.0, log=True),
-        "reg_lambda": trial.suggest_float("reg_lambda", 1e-8, 10.0, log=True),
-    }
-    model = LGBMRegressor(random_state=42, n_jobs=1, verbose=-1, **params)
-    return cross_val_score(model, X_tr, y_tr, cv=3, scoring="r2", n_jobs=-1).mean()
-
-
-study_lgbm = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=42))
-study_lgbm.optimize(objective_lgbm, n_trials=20)
-r2_lgbm = study_lgbm.best_value
-print(f"[lightgbm] best R²={r2_lgbm:.4f}  best params={study_lgbm.best_params}")
-```
 
 <!-- #region -->
 ### 10.3 CatBoost
@@ -490,16 +489,17 @@ def objective_cat(trial: optuna.Trial) -> float:
     return cross_val_score(model, X_tr, y_tr, cv=3, scoring="r2", n_jobs=-1).mean()
 
 
-r2_cat = run_study(objective_cat, n_trials=12, name="catboost")
+study_cat = run_study(objective_cat, n_trials=12, name="catboost")
+r2_cat = study_cat.best_value
 ```
 
 <!-- #region -->
-Récapitulatif des trois frameworks sur le même jeu de données : les R² sont très proches, ce qui est attendu sur un tabulaire de cette taille.
+Récapitulatif des frameworks exécutés sur le même jeu de données : les R² sont très proches, ce qui est attendu sur un tabulaire de cette taille (LightGBM donnerait un score du même ordre, cf. note d'environnement ci-dessus).
 <!-- #endregion -->
 
 ```python
 print("R² CV par framework :")
-for name, val in [("XGBoost", r2_xgb), ("LightGBM", r2_lgbm), ("CatBoost", r2_cat)]:
+for name, val in [("XGBoost", r2_xgb), ("CatBoost", r2_cat)]:
     print(f"  {name:10s} {val:.4f}")
 ```
 
@@ -512,8 +512,8 @@ L'**importance des hyperparamètres** (calculée par fANOVA) indique sur quels l
 <!-- #endregion -->
 
 ```python
-importance = optuna.importance.get_param_importances(study_lgbm)
-print("Importance des hyperparamètres (LightGBM) :")
+importance = optuna.importance.get_param_importances(study_xgb)
+print("Importance des hyperparamètres (XGBoost) :")
 for k, v in importance.items():
     print(f"  {k:18s} {v:.3f}")
 ```
@@ -529,13 +529,13 @@ Optuna fournit des graphiques prêts à l'emploi via `optuna.visualization.matpl
 ```python
 import optuna.visualization.matplotlib as ovm
 
-ovm.plot_optimization_history(study_lgbm)
+ovm.plot_optimization_history(study_xgb)
 plt.show()
 
-ovm.plot_param_importances(study_lgbm)
+ovm.plot_param_importances(study_xgb)
 plt.show()
 
-ovm.plot_slice(study_lgbm)
+ovm.plot_slice(study_xgb)
 plt.show()
 ```
 
