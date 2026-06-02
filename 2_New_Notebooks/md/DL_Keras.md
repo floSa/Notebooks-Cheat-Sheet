@@ -1083,7 +1083,15 @@ Les pixels en rouge poussent vers la classe, en bleu l'inverse.
 <!-- #endregion -->
 
 ```python
-shap.image_plot(shap_values, -test_images)
+# GradientExplainer renvoie un ndarray (n, H, W, C, n_classes). image_plot attend
+# une LISTE d'une carte par classe ; sans ce découpage, une seule colonne s'affiche.
+if isinstance(shap_values, list):
+    shap_per_class = shap_values  # versions plus anciennes : déjà une liste
+else:
+    sv = np.asarray(shap_values)
+    shap_per_class = [sv[..., k] for k in range(sv.shape[-1])]
+# chaque ligne = une image de test ; les 10 colonnes = attributions des classes 0-9.
+shap.image_plot(shap_per_class, -test_images)
 ```
 
 <!-- #region -->
