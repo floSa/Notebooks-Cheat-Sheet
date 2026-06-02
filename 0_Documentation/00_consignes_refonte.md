@@ -7,11 +7,30 @@
 
 ## 0. Où on travaille
 
-- Projet : `~/Projets/Notebooks/Notebooks-Cheat-Sheet` (WSL ubuntu-24.04).
+- Projet : `~/Projets/Notebooks/Notebooks-Cheat-Sheet` (**WSL ubuntu-24.04**).
 - Branche : `feat/restart-jupytext-workflow` (**jamais** `main`).
 - Toutes les commandes `uv` passent par WSL :
   `wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv ..."`
-- D'abord : `bash scripts/restore_originaux.sh` (régénère mes vrais originaux).
+
+## 0bis. Git — synchro portable ↔ fixe (OBLIGATOIRE)
+
+Je travaille tantôt sur mon **portable**, tantôt sur mon **PC fixe**. Pour que les deux ne
+divergent pas :
+
+1. **AU DÉBUT de la session** :
+   ```bash
+   git checkout feat/restart-jupytext-workflow
+   git pull          # récupère le travail fait sur l'autre machine
+   bash scripts/restore_originaux.sh   # régénère mes vrais originaux (dézip)
+   ```
+2. **À LA FIN** : `git add` + `git commit` + **`git push`**.
+3. **Une seule machine à la fois** sur un même notebook (sinon conflit / travail écrasé).
+
+**Push** : on est sur WSL et **j'ai normalement accès à ma clé SSH** (alias `github.com-perso`
+= compte perso `floSa`, propriétaire du repo). Donc `git push` passe en SSH sans mot de passe.
+Si le push demande un login HTTPS → bascule en SSH :
+`git remote set-url origin git@github.com-perso:floSa/Notebooks-Cheat-Sheet.git`.
+Ne **jamais** utiliser l'alias `github.com-pro` (autre compte → refusé).
 
 ## 1bis. Les toutes premières actions (lecture)
 
