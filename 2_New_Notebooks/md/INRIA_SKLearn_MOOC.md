@@ -104,6 +104,19 @@ X_clf.shape, np.unique(y_clf)
 ```
 
 <!-- #region -->
+Avant de modéliser, un coup d'œil **bivarié** sur California Housing (matrice de nuages + KDE en diagonale, sur un échantillon de 600 districts) : on repère la forte relation `MedInc` ↔ cible, l'asymétrie de `AveRooms`/`AveBedrms` et l'effet géographique de `Latitude`.
+<!-- #endregion -->
+
+```python
+pair_idx = np.random.RandomState(RANDOM_STATE).choice(len(data), 600, replace=False)
+pair_df = data.iloc[pair_idx][["MedInc", "AveRooms", "AveBedrms", "Latitude"]].copy()
+pair_df["MedHouseVal"] = target.iloc[pair_idx].values
+grid = sns.pairplot(pair_df, kind="reg", diag_kind="kde",
+                    plot_kws={"scatter_kws": {"alpha": 0.15, "s": 12}})
+_ = grid.figure.suptitle("California Housing — relations entre features et cible", y=1.02)
+```
+
+<!-- #region -->
 Le **Titanic** : on garde 4 colonnes numériques et 3 catégorielles, cible binaire `survived`. C'est le support des sections encodage / métriques / seuil de décision (il remplace l'ancien chargement via Google Drive, inutilisable hors Colab).
 <!-- #endregion -->
 
@@ -390,6 +403,21 @@ _ = ax.set_title("Validation curve — AdaBoost (n_estimators)")
 `HistGradientBoostingRegressor` discrétise chaque feature en **histogrammes** (256 *bins* par défaut), ce qui réduit drastiquement le nombre de splits à évaluer. Résultat : beaucoup plus rapide que `GradientBoostingRegressor` sur les gros jeux (>10 000 échantillons), à performance comparable, avec support natif des catégorielles et des valeurs manquantes. **C'est le choix par défaut moderne pour le tabulaire** (équivalent LightGBM dans scikit-learn). Le tableau ci-dessous compare temps et MAE.
 <!-- #endregion -->
 
+<!-- #region -->
+Pour comprendre l'idée du *binning*, on peut le reproduire « à la main » avec `KBinsDiscretizer` : chaque feature continue est ramenée à au plus 256 valeurs ordinales (quantiles). C'est exactement ce que HistGradientBoosting fait en interne, mais intégré et optimisé.
+<!-- #endregion -->
+
+```python
+from sklearn.preprocessing import KBinsDiscretizer
+
+discretizer = KBinsDiscretizer(n_bins=256, encode="ordinal", strategy="quantile",
+                               quantile_method="averaged_inverted_cdf",
+                               subsample=200_000, random_state=RANDOM_STATE)
+data_binned = discretizer.fit_transform(data)
+print("Valeurs uniques par feature après binning (≤256):",
+      [int(data_binned.iloc[:, j].nunique()) for j in range(data_binned.shape[1])])
+```
+
 ```python
 from sklearn.ensemble import GradientBoostingRegressor
 
@@ -489,6 +517,22 @@ pipe_kbest = make_pipeline(SelectKBest(score_func=f_classif, k=5),
                                                   random_state=RANDOM_STATE))
 print("baseline   :", evaluate_cv(clf_baseline, Xc, yc, scoring="accuracy", cv=5))
 print("k=5 (filter):", evaluate_cv(pipe_kbest, Xc, yc, scoring="accuracy", cv=5))
+```
+
+<!-- #region -->
+L'intérêt premier de la sélection n'est pas tant l'accuracy (les modèles modernes ignorent déjà le bruit) que le **gain de temps**. Le box plot compare le temps d'entraînement avec et sans `SelectKBest` sur les plis de CV.
+<!-- #endregion -->
+
+```python
+res_base_t = pd.DataFrame(cross_validate(clf_baseline, Xc, yc, cv=5, n_jobs=-1))
+res_kbest_t = pd.DataFrame(cross_validate(pipe_kbest, Xc, yc, cv=5, n_jobs=-1))
+cmp_time = pd.concat([res_base_t, res_kbest_t], axis=1,
+                     keys=["sans sélection", "SelectKBest k=5"]).swaplevel(axis="columns")
+fig, ax = plt.subplots(figsize=(7, 3.5))
+cmp_time["fit_time"].plot.box(vert=False, ax=ax,
+                              color={"whiskers": "black", "medians": "black", "caps": "black"})
+ax.set_xlabel("Temps d'entraînement (s)")
+_ = ax.set_title("Sélection de features — gain de temps à l'entraînement")
 ```
 
 <!-- #region -->
