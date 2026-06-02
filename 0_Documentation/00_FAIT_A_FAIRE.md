@@ -15,6 +15,7 @@
 | `DL_TensorFlow` | fait selon le blueprint |
 | `DL_Deep_Learning_Maths` | a utilisé mon original |
 | `EDA_Stats_Analyse_Desc_Visual` | a utilisé mon original |
+| `Structures_DataFrame` | refait sur le vrai original — 5 critères du contrat OK (sandbox exit 0, `check_format --both` vert), **9 images préservées**, contenu ≥ original + ajouts 2026 |
 
 > À valider = vérifier qu'ils respectent bien `00_consignes_refonte.md` (mes graphiques/images
 > présents, contenu ≥ original, exécution de bout en bout).
@@ -23,7 +24,7 @@
 
 | Thème | Notebooks |
 |---|---|
-| Structures | `Structures_DataFrame` · `Structures_Preprocessing` · `Structures_L_T_D_Cheat_Sheet` · `Structure_Python` · `Structure_Generer_Donnees_Classification` · `Structure_BDD_DataFrame` |
+| Structures | `Structures_Preprocessing` · `Structures_L_T_D_Cheat_Sheet` · `Structure_Python` · `Structure_Generer_Donnees_Classification` · `Structure_BDD_DataFrame` |
 | EDA | `EDA_Analyse_Multivarie` · `EDA_Visualisation_Introduction` · `Detection_Outliers` |
 | ML | `ML_Explication_Feature_Importance_Selection` · `ML_Regression_Classification_CV_GridSearch` · `ML_Bagging_Boosting` · `ML_Optimisation_de_Modeles` · `ML_Regression_Classification_Multiple` · `ML_Apprentissage_par_Renforcement` · `INRIA_SKLearn_MOOC` |
 | NLP | `NLP_NER` · `NLP_NER_BiLSTM_CRF` · `NLP_Classification_Smote` · `NLP_Classification_Supervisee` · `NLP_Recherche_d_informations` · `NLP_Transformers` |
@@ -53,7 +54,7 @@
 
 ## Compteur
 
-**5 faits (à valider) · ~26 à refaire · 24 à créer.**
+**6 faits (dont `Structures_DataFrame` aux 5 critères du contrat) · ~25 à refaire · 24 à créer.**
 
 > Note : la liste « faits » repose sur l'analyse de contenu (sections + techniques de mon
 > original présentes). L'ancien indicateur en % (`00_VERIFICATION_BASE.md`) était trompeur,
