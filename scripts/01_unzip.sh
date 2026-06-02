@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Dézippe l'archive source des notebooks vers 1_MES_NOTEBOOKS/ipynb/
+# Dézippe l'archive source des notebooks vers 1_Old_Notebooks/ipynb/
 # Idempotent : si le dossier de sortie existe déjà avec des .ipynb, ne refait rien.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ZIP_SRC="${ZIP_SRC:-/home/florian/mes_projets/Notebooks_ok/Notebooks.zip}"
-OUT_DIR="$ROOT/1_MES_NOTEBOOKS/ipynb"
+OUT_DIR="$ROOT/1_Old_Notebooks/ipynb"
 
 if [ -d "$OUT_DIR" ] && [ -n "$(find "$OUT_DIR" -maxdepth 2 -name '*.ipynb' -print -quit 2>/dev/null)" ]; then
     echo "[01_unzip] $OUT_DIR contient déjà des .ipynb — skip (rm -rf si vous voulez forcer)."

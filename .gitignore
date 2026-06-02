@@ -23,9 +23,9 @@ scripts/_sandbox/
 *.tmp
 
 # ── Artefacts reproductibles (à régénérer via scripts/restore_originaux.sh) ──
-# Les .ipynb originaux (52 MB) sont régénérés en dézippant 1_MES_NOTEBOOKS/Notebooks.zip.
+# Les .ipynb originaux (52 MB) sont régénérés en dézippant 1_Old_Notebooks/Notebooks.zip.
 # Le zip lui-même EST committé (source de vérité) ; les .ipynb dézippés ne le sont pas.
-1_MES_NOTEBOOKS/ipynb/
+1_Old_Notebooks/ipynb/
 
 # ── Données volumineuses (à committer au cas par cas) ──
 # BDD_DuckDB : NYC Taxi parquet (~50 MB) + bases .duckdb, régénérés par le notebook

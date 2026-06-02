@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Convertit tous les .ipynb de 1_MES_NOTEBOOKS/ipynb/ vers .md dans 1_MES_NOTEBOOKS/md/
+# Convertit tous les .ipynb de 1_Old_Notebooks/ipynb/ vers .md dans 1_Old_Notebooks/md/
 # Utilise jupytext via uv. Idempotent : écrase la sortie existante.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC_DIR="$ROOT/1_MES_NOTEBOOKS/ipynb"
-OUT_DIR="$ROOT/1_MES_NOTEBOOKS/md"
+SRC_DIR="$ROOT/1_Old_Notebooks/ipynb"
+OUT_DIR="$ROOT/1_Old_Notebooks/md"
 
 mkdir -p "$OUT_DIR"
 

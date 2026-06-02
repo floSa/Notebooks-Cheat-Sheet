@@ -1,4 +1,4 @@
-"""Génère les 25 notebooks de plans détaillés dans 2_NOUVEAUX/plans/.
+"""Génère les 25 notebooks de plans détaillés dans 2_New_Notebooks/plans/.
 
 Chaque notebook est un .md jupytext avec :
 - Titre + description + role + dataset
@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "2_NOUVEAUX/plans"
+OUT_DIR = ROOT / "2_New_Notebooks/plans"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 JUPYTEXT_HEADER = """---
