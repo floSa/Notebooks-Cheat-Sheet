@@ -74,6 +74,11 @@ dependencies = [
     "connectorx>=0.4.5",
     "adbc-driver-sqlite>=1.11.0",
     "adbc-driver-manager>=1.11.0",
+    "missingno>=0.5.2",
+    "xarray>=2026.4.0",
+    "netcdf4>=1.7.4",
+    "iteration-utilities>=0.13.0",
+    "hyperopt>=0.2.7",
 ]
 
 [tool.jupytext]
