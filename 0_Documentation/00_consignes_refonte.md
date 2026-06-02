@@ -13,14 +13,25 @@
   `wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv ..."`
 - D'abord : `bash scripts/restore_originaux.sh` (régénère mes vrais originaux).
 
-## 1. La base de départ — NON négociable
+## 1. Les sources — dans cet ordre
 
-- Pars de MON vrai original : `1_Old_Notebooks/ipynb/<NOM>.ipynb`
-  (version lisible : `1_Old_Notebooks/md/<NOM>.md`).
-- **Lis-le EN ENTIER** (`Read`, pas `Grep`) avant toute chose.
-- ❌ **JAMAIS** partir de `main` ni de `3_Sessions_Ratees/` : ce sont des versions VIDÉES
-  (mes notebooks réduits de ~200 cellules à ~20 par une mauvaise session).
-- `2_New_Notebooks/` n'est PAS une base (sauf pour les 24 sujets neufs sans original).
+**(A) BASE PRINCIPALE = mon vrai original** : `1_Old_Notebooks/ipynb/<NOM>.ipynb`
+   (version lisible : `1_Old_Notebooks/md/<NOM>.md`).
+   - **Lis-le EN ENTIER** (`Read`, pas `Grep`) avant toute chose.
+   - C'est lui qui fixe le contenu de référence, mes graphiques et mes images à préserver.
+
+**(B) SOURCE SECONDAIRE = la refonte déjà faite**, SI elle existe :
+   `2_New_Notebooks/ipynb/<NOM>.ipynb` (+ `2_New_Notebooks/md/<NOM>.md`).
+   - Du vrai travail y a souvent déjà été fait (modernisation 2026, code testé end-to-end).
+   - **Réutilise ce qui est bon** (mises à jour 2026, code qui tourne, nouvelles sections)
+     plutôt que de repartir de zéro.
+   - ⚠️ Mais elle a pu **perdre des graphiques/sections** de mon original → c'est (A) qui
+     tranche en cas de manque : on **réintègre** depuis l'original ce que (B) a oublié.
+
+**Résultat = (A) pour le fond et mes graphiques + (B) pour la modernisation déjà faite.**
+
+❌ **JAMAIS** partir de `main` ni de `3_Sessions_Ratees/` : ce sont des versions VIDÉES
+   (mes notebooks réduits de ~200 cellules à ~20 par une mauvaise session).
 
 ## 2. Ce que je veux que tu fasses
 
