@@ -1173,14 +1173,15 @@ print(f"GradientExplainer OK | type={type(shap_values).__name__}")
 <!-- #endregion -->
 
 ```python
+# GradientExplainer (shap 0.51) renvoie un ndarray (n, H, W, C, n_classes).
+# On le découpe en une carte par classe (canal conservé en dernier) :
+# chaque ligne = une image de test, les 10 colonnes = attributions des classes 0-9.
 if isinstance(shap_values, list):
-    sv = [s[..., 0] for s in shap_values]  # drop canal
-    pixels = to_explain[..., 0]
-    shap.image_plot(sv, pixels, show=False)
+    shap_numpy = shap_values  # versions plus anciennes : déjà une liste par classe
 else:
-    # array (n,H,W,C,classes) -> on garde quelques classes
-    sv = [shap_values[..., 0, k] for k in range(min(3, shap_values.shape[-1]))]
-    shap.image_plot(sv, to_explain[..., 0], show=False)
+    sv = np.asarray(shap_values)
+    shap_numpy = [sv[..., k] for k in range(sv.shape[-1])]
+shap.image_plot(shap_numpy, to_explain, show=False)
 plt.show()
 ```
 
