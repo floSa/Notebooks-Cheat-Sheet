@@ -79,6 +79,7 @@ dependencies = [
     "netcdf4>=1.7.4",
     "iteration-utilities>=0.13.0",
     "hyperopt>=0.2.7",
+    "mpl-chord-diagram>=0.4.1",
 ]
 
 [tool.jupytext]
