@@ -3816,6 +3816,17 @@ dill = [
 ]
 
 [[package]]
+name = "mpl-chord-diagram"
+version = "0.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d6/af/cb7c24e558073312c72f2f09bb384d4bd79028d3aad3698a501494f0cd4a/mpl_chord_diagram-0.4.1.zip", hash = "sha256:e19c338845eb9e8bcde2c1ad68584563fd64ce94e859f298de1a084a65a511a1", size = 18143, upload-time = "2022-12-10T14:41:04.472Z" }
+
+[[package]]
 name = "mpmath"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4134,6 +4145,7 @@ dependencies = [
     { name = "missingno" },
     { name = "mlflow" },
     { name = "mongomock" },
+    { name = "mpl-chord-diagram" },
     { name = "netcdf4" },
     { name = "numpy" },
     { name = "optuna" },
@@ -4217,6 +4229,7 @@ requires-dist = [
     { name = "missingno", specifier = ">=0.5.2" },
     { name = "mlflow", specifier = ">=3.12.0" },
     { name = "mongomock", specifier = ">=4.3.0" },
+    { name = "mpl-chord-diagram", specifier = ">=0.4.1" },
     { name = "netcdf4", specifier = ">=1.7.4" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "optuna", specifier = ">=4.8.0" },
