@@ -13,6 +13,18 @@
   `wsl -d ubuntu-24.04 -- bash -lc "cd ~/Projets/Notebooks/Notebooks-Cheat-Sheet && uv ..."`
 - D'abord : `bash scripts/restore_originaux.sh` (régénère mes vrais originaux).
 
+## 1bis. Les toutes premières actions (lecture)
+
+1. `bash scripts/restore_originaux.sh` = **dézippe mes originaux** (`1_Old_Notebooks/Notebooks.zip`
+   → `1_Old_Notebooks/ipynb/`). Ce ne sont PAS dans git directement (trop lourds), d'où le dézip.
+2. **`ipynb → md`** : la version markdown lisible de l'original existe déjà dans
+   `1_Old_Notebooks/md/<NOM>.md` (générée par **jupytext**). Si elle manque :
+   `uv run jupytext --to md 1_Old_Notebooks/ipynb/<NOM>.ipynb`.
+   (jupytext récupère TOUTES les cellules — markdown ET code.)
+3. **Étudier** ce `.md` original en entier.
+4. **Pareil pour la refonte déjà faite** si elle existe : lire `2_New_Notebooks/md/<NOM>.md`.
+5. **Réfléchir au plan en repartant de l'existant** (cf. §1 et §2).
+
 ## 1. Les sources — dans cet ordre
 
 **(A) BASE PRINCIPALE = mon vrai original** : `1_Old_Notebooks/ipynb/<NOM>.ipynb`
