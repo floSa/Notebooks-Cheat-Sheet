@@ -219,6 +219,15 @@ $$\text{UCB}_i(t) = \underbrace{\hat{\mu}_i}_{\text{exploitation}} + \underbrace
 où $\hat{\mu}_i$ est le CTR empirique et $n_i$ le nombre de fois où le bras $i$ a été tiré. Moins un bras est tiré, plus son bonus d'exploration est large. Chaque bras est tiré une fois au départ (borne infinie) — ce qui corrige proprement le hack `ucb = N*10` de l'original. UCB1 a une borne de regret **logarithmique** $O(\ln T)$, bien meilleure qu'ε-greedy.
 <!-- #endregion -->
 
+<!-- #region -->
+La formule d'origine, telle qu'elle figurait (écrite à la main) dans le notebook initial :
+
+![image.png](data:image/png;base64,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)
+
+* **xi** est la proportion de clics observée pour la publicité **i**
+* **ti** est le nombre de fois où la publicité **i** a été recommandé
+<!-- #endregion -->
+
 ```python
 def run_ucb1(bandit: BernoulliBandit, n_steps: int) -> BanditResult:
     """UCB1 : optimisme face à l'incertitude.
@@ -289,7 +298,7 @@ def run_thompson(bandit: BernoulliBandit, n_steps: int) -> BanditResult:
 <!-- #endregion -->
 
 <!-- #region -->
-On lance les quatre stratégies sur le **même** bandit et on trace le regret cumulé (plus bas = mieux) ainsi que la distribution des sélections de Thompson. On attend l'ordre : aléatoire $\gg$ ε-greedy / UCB1 $>$ Thompson.
+On lance les quatre stratégies sur le **même** bandit et on trace le regret cumulé (plus bas = mieux). On attend l'ordre : aléatoire $\gg$ UCB1 $>$ ε-greedy $>$ Thompson.
 <!-- #endregion -->
 
 ```python
@@ -304,22 +313,34 @@ for res in strategies:
     print(f"{res.name:10s} | reward total = {res.total_reward:5d} "
           f"| regret final = {res.cumulative_regret[-1]:7.1f}")
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 4.5))
+fig, ax = plt.subplots(figsize=(8, 4.5))
 for res, color in zip(strategies, PALETTE):
-    ax1.plot(res.cumulative_regret, label=res.name, color=color, lw=1.8)
-ax1.set_title("Regret cumulé (plus bas = mieux)")
-ax1.set_xlabel("Pas de temps")
-ax1.set_ylabel("Regret cumulé")
-ax1.legend()
+    ax.plot(res.cumulative_regret, label=res.name, color=color, lw=1.8)
+ax.set_title("Regret cumulé (plus bas = mieux)")
+ax.set_xlabel("Pas de temps")
+ax.set_ylabel("Regret cumulé")
+ax.legend()
+plt.show()
+```
 
-best = strategies[-1]  # Thompson
-ax2.bar(range(bandit.n_arms),
-        np.bincount(best.selected, minlength=bandit.n_arms), color=PALETTE[0])
-ax2.axvline(bandit.optimal_arm, color=PALETTE[1], ls="--", label="bras optimal")
-ax2.set_title(f"Sélections — {best.name}")
-ax2.set_xlabel("Annonce")
-ax2.set_ylabel("Nombre de sélections")
-ax2.legend()
+<!-- #region -->
+On reprend ensuite l'**histogramme des sélections d'annonces** de l'original — qui montrait, pour chaque stratégie, combien de fois chaque version publicitaire a été affichée — en l'étendant aux quatre stratégies. La sélection aléatoire étale ses tirages uniformément ; les stratégies qui apprennent (ε-greedy, UCB1, Thompson) concentrent les leurs sur l'annonce optimale.
+<!-- #endregion -->
+
+```python
+fig, axes = plt.subplots(2, 2, figsize=(12, 7), sharex=True)
+bins = np.arange(bandit.n_arms + 1) - 0.5
+for res, color, ax in zip(strategies, PALETTE, axes.ravel()):
+    ax.hist(res.selected, bins=bins, color=color, rwidth=0.85)
+    ax.axvline(bandit.optimal_arm, color="black", ls="--", lw=1.2,
+               label="annonce optimale")
+    ax.set_title(f"Sélections — {res.name}")
+    ax.set_ylabel("Nombre de sélections")
+    ax.legend(fontsize=8)
+for ax in axes[-1]:
+    ax.set_xlabel("Annonce")
+fig.suptitle("Histogramme des sélections d'annonces (héritage de l'original, étendu)")
+plt.tight_layout()
 plt.show()
 ```
 
