@@ -1,61 +1,48 @@
-# ✅ Fait / 🔧 À faire — état réel
+# ✅ Fait / 🔧 À faire — mises à jour 2026 (auto-généré)
 
-> Consigne de refonte : `00_consignes_refonte.md` (DL frameworks : `00_consignes_DL.md`).
-> Règle : on refait depuis MON vrai original (`1_Old_Notebooks/`), jamais depuis les versions
-> VIDÉES (`main` / `3_Sessions_Ratees/`). « Vidé » = mon notebook réduit de ~200 à ~20 cellules.
+> Régénéré par `uv run python scripts/etat_avancement.py`. Ne pas éditer à la main.
+> Règle : refonte d'un de mes notebooks faite **après 2026-06-01** (= depuis qu'on a mes vrais
+> originaux) → ✅ FAIT. Avant → 🔧 à refaire (faite sur du vidé). 🐞 = bug de format détecté.
 
----
+## ✅ FAIT (10)
 
-## ✅ FAIT (partis de mon vrai original — à VALIDER) — 5
+| | | |
+|---|---|---|
+| DL_PyTorch (2026-06-02) | Structure_BDD_DataFrame (2026-06-02) | Structure_Generer_Donnees_Classification (2026-06-02) |
+| Structure_Python (2026-06-02) | Structures_DataFrame (2026-06-02) | TS_ARIMA (2026-06-01) |
+| TS_Generer_Sequence (2026-06-01) | TS_Maintenance_Predictive (2026-06-01) | TS_Time_Series_Intro (2026-06-01) |
+| TS_Time_Series_Overview (2026-06-01) |  |  |
 
-| Notebook | note |
-|---|---|
-| `DL_PyTorch` | fait selon le blueprint (mix PyTorch + TF/Keras) |
-| `DL_Keras` | fait selon le blueprint |
-| `DL_TensorFlow` | fait selon le blueprint |
-| `DL_Deep_Learning_Maths` | a utilisé mon original |
-| `EDA_Stats_Analyse_Desc_Visual` | a utilisé mon original |
-| `Structures_DataFrame` | refait sur le vrai original — 5 critères du contrat OK (sandbox exit 0, `check_format --both` vert), **9 images préservées**, contenu ≥ original + ajouts 2026 |
+## 🔧 À REFAIRE (31)
 
-> À valider = vérifier qu'ils respectent bien `00_consignes_refonte.md` (mes graphiques/images
-> présents, contenu ≥ original, exécution de bout en bout).
+| | | |
+|---|---|---|
+| BDD_DuckDB (2026-05-31) | BDD_Vectorielles (2026-05-31) | DE_Docling (2026-05-31) |
+| DL_Deep_Learning_Maths () | DL_KAN_Kolmogorov_Arnold () | DL_Keras (2026-05-31) |
+| DL_TensorFlow (2026-05-31) | Detection_Outliers () | EDA_Analyse_Multivarie () |
+| EDA_Stats_Analyse_Desc_Visual () | EDA_Visualisation_Introduction (2026-05-26) | Flask_API (2026-05-31) |
+| INRIA_SKLearn_MOOC (2026-05-31) | ML_Apprentissage_par_Renforcement (2026-05-31) | ML_Bagging_Boosting (2026-05-31) |
+| ML_Explication_Feature_Importance_Selection (2026-05-31) | ML_MLFlow_Bench (2026-05-25) 🐞 | ML_Optimisation_de_Modeles () |
+| ML_Regression_Classification_CV_GridSearch () 🐞 | ML_Regression_Classification_Multiple () | NLP_Classification_Smote (2026-05-25) |
+| NLP_Classification_Supervisee (2026-05-25) 🐞 | NLP_NER (2026-05-25) 🐞 | NLP_NER_BiLSTM_CRF (2026-05-25) |
+| NLP_Recherche_d_informations (2026-05-25) 🐞 | NLP_Transformers (2026-05-25) 🐞 | Streamlit_brique () 🐞 |
+| Structures_L_T_D_Cheat_Sheet () 🐞 | Structures_Preprocessing () | TdS_Introduction_Traitement_Signal () 🐞 |
+| Test_donnees_manquante_modeles () 🐞 |  |  |
 
-## 🔧 À REFAIRE (faits sur du VIDÉ → mes graphiques/images perdus) — ~26
+## 🆕 À CRÉER — sujets neufs (27)
 
-| Thème | Notebooks |
-|---|---|
-| Structures | `Structures_Preprocessing` · `Structures_L_T_D_Cheat_Sheet` · `Structure_Python` · `Structure_Generer_Donnees_Classification` · `Structure_BDD_DataFrame` |
-| EDA | `EDA_Analyse_Multivarie` · `EDA_Visualisation_Introduction` · `Detection_Outliers` |
-| ML | `ML_Explication_Feature_Importance_Selection` · `ML_Regression_Classification_CV_GridSearch` · `ML_Bagging_Boosting` · `ML_Optimisation_de_Modeles` · `ML_Regression_Classification_Multiple` · `ML_Apprentissage_par_Renforcement` · `INRIA_SKLearn_MOOC` |
-| NLP | `NLP_NER` · `NLP_NER_BiLSTM_CRF` · `NLP_Classification_Smote` · `NLP_Classification_Supervisee` · `NLP_Recherche_d_informations` · `NLP_Transformers` |
-| TS / Signal | `TS_Time_Series_Overview` · `TS_Time_Series_Intro` · `TS_ARIMA` · `TS_Maintenance_Predictive` · `TS_Generer_Sequence` · `TdS_Introduction_Traitement_Signal` |
-| BDD / Apps | `BDD_DuckDB` · `BDD_Vectorielles` · `DE_Docling` · `Streamlit_brique` · `Flask_API` |
-| DL | `DL_KAN_Kolmogorov_Arnold` |
-| Divers | `ML_MLFlow_Bench` · `Test_donnees_manquante_modeles` |
-
-## 🆕 À CRÉER (sujets neufs, n'ont jamais existé chez moi) — 24
-
-| Rôle | Notebooks |
-|---|---|
-| Data Scientist | `DS_Bayesian` · `DS_Causal_Inference` · `DS_Geospatial` · `DS_Survival_Analysis` · `DS_Recommender_Systems` |
-| Data Engineer | `DE_PySpark` · `DE_Airflow_Prefect` · `DE_Kafka_Streaming` · `DE_dbt_Modeling` · `DE_Data_Quality` |
-| AI Engineer | `AI_Local_LLMs` · `AI_LLM_Finetuning_PEFT` · `AI_Agents_Tools` · `AI_Prompt_Engineering` · `AI_Multimodal_VLM` · `AI_Speech_Audio` |
-| ML Engineer | `MLE_Feature_Store` · `MLE_Online_Inference` · `MLE_Model_Serving` · `MLE_AB_Testing` |
-| MLOps | `MLOps_Pipelines_Airflow` · `MLOps_Model_Registry` · `MLOps_Drift_Monitoring` · `MLOps_CICD_GitHub_Actions` |
-
-## 🗑️ À jeter / cas spéciaux
-
-- `AAA_Test_ML`, `Suppr_ML_Bench_…(A finir)` → brouillons, ne pas refaire.
-- `Structures_Preprocessing_Function_Utiles` (8 cellules) → fusionner dans `Structures_Preprocessing`.
-- `TS_Maintenance_Prédictive` (ancien) → doublon, garder `TS_Maintenance_Predictive`.
-- `FastAPI_API` / `DL_JAX` / `DL_Frameworks_Comparatif` → pas d'original (sujets neufs DL/API).
+| | | |
+|---|---|---|
+| DL_Frameworks_Comparatif 🐞 | DL_JAX 🐞 | FastAPI_API 🐞 |
+| AI_Agents_Tools (plan seul) | AI_LLM_Finetuning_PEFT (plan seul) | AI_Local_LLMs (plan seul) |
+| AI_Multimodal_VLM (plan seul) | AI_Prompt_Engineering (plan seul) | AI_Speech_Audio (plan seul) |
+| DE_Airflow_Prefect (plan seul) | DE_Data_Quality (plan seul) | DE_Kafka_Streaming (plan seul) |
+| DE_PySpark (plan seul) | DE_dbt_Modeling (plan seul) | DS_Bayesian (plan seul) |
+| DS_Causal_Inference (plan seul) | DS_Geospatial (plan seul) | DS_Recommender_Systems (plan seul) |
+| DS_Survival_Analysis (plan seul) | MLE_AB_Testing (plan seul) | MLE_Feature_Store (plan seul) |
+| MLE_Model_Serving (plan seul) | MLE_Online_Inference (plan seul) | MLOps_CICD_GitHub_Actions (plan seul) |
+| MLOps_Drift_Monitoring (plan seul) | MLOps_Model_Registry (plan seul) | MLOps_Pipelines_Airflow (plan seul) |
 
 ---
 
-## Compteur
-
-**6 faits (dont `Structures_DataFrame` aux 5 critères du contrat) · ~25 à refaire · 24 à créer.**
-
-> Note : la liste « faits » repose sur l'analyse de contenu (sections + techniques de mon
-> original présentes). L'ancien indicateur en % (`00_VERIFICATION_BASE.md`) était trompeur,
-> surtout pour les DL frameworks (squelette renommé) — ne plus s'y fier seul.
+**Compteur : 10 faits · 31 à refaire · 27 à créer.**
