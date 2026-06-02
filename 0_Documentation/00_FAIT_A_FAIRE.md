@@ -52,7 +52,7 @@
 
 | Notebook | cas | action |
 |---|---|---|
-| `DL_PyTorch` | original présent sur `main` mais **absent du zip** | récupérer le vrai original PyTorch avant de refaire |
+|  | RÉCUPÉRÉ 2026-06-02 : ajouté au  (45 originaux complets) | refaire depuis le vrai original |
 | `FastAPI_API` / `DL_JAX` / `DL_Frameworks_Comparatif` | pas d'original | sujets neufs (cf. décision split DL `00_blueprint_DL_frameworks.md`) |
 | `AAA_Test_ML` · `Suppr_ML_Bench_…(A finir)` | 🗑️ brouillons | à jeter (ne pas refaire) |
 | `Structures_Preprocessing_Function_Utiles` | micro (8c) | fusionner dans `Structures_Preprocessing` |
