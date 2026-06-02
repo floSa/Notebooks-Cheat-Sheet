@@ -14,9 +14,9 @@ import json, re, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ORIG = ROOT / "1_MES_NOTEBOOKS" / "ipynb"
-GUTE = ROOT / "3_SESSIONS_RATEES" / "ipynb"
-REFAIT = ROOT / "2_NOUVEAUX" / "ipynb"
+ORIG = ROOT / "1_Old_Notebooks" / "ipynb"
+GUTE = ROOT / "3_Sessions_Ratees" / "ipynb"
+REFAIT = ROOT / "2_New_Notebooks" / "ipynb"
 
 
 def norm(name: str) -> str:
