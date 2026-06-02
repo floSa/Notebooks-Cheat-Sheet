@@ -295,3 +295,46 @@ ssh -T git@github.com-perso   # doit répondre "Hi floSa!"
 
 > ⚠️ Ne **jamais** utiliser `github.com-pro` pour ce repo (compte différent → permission denied).
 > Toujours pousser sur `feat/restart-jupytext-workflow`, jamais sur `main`.
+
+---
+
+## 12. Multi-agents / multi-sessions — isolation par worktrees
+
+Plusieurs agents/sessions peuvent travailler **en parallèle**, mais **chacun sur un notebook différent**. Le danger historique : partager un seul working tree + une seule branche → un `git add -A` d'une session embarque les fichiers non-committés des autres, ou une exécution de notebook salit l'arbre commun, ou un `reset/pull` clobbe le travail en cours d'un autre.
+
+**Règle : un worktree git + une branche par notebook en cours.** Un agent ne travaille jamais directement dans le dossier principal partagé.
+
+### Démarrer un notebook
+
+```bash
+cd ~/mes_projets/Notebooks_convertion
+git worktree add ../wt-<nom_notebook> -b feat/nb-<nom_notebook>
+cd ../wt-<nom_notebook>
+# … appliquer le workflow §1 (1-9) ici, en isolation totale …
+```
+
+Le `.venv` et le kernel sont partagés (côté WSL) ; seul le code/markdown du notebook est isolé. La source des originaux (`1_MES_NOTEBOOKS/Notebooks.zip` + `md/`) est committée donc présente dans chaque worktree.
+
+### Committer (par pathspec, jamais en masse)
+
+- **JAMAIS** `git add -A`, `git add .`, ni `git commit -a`.
+- Toujours committer SES fichiers par chemin explicite, p. ex. :
+  `git commit -m "…" -- 2_NOUVEAUX/ipynb/<nom>.ipynb 2_NOUVEAUX/md/<nom>.md 0_DOCS/00_FAIT_A_FAIRE.md`
+- Messages **sans** mention `claude` / `anthropic` / `Co-Authored-By` (règle repo).
+
+### Intégrer sur `feat` (sérialisé)
+
+```bash
+cd ~/mes_projets/Notebooks_convertion        # worktree principal sur feat
+git fetch origin && git merge --ff-only origin/feat/restart-jupytext-workflow   # se remettre a jour AVANT
+git merge --no-ff feat/nb-<nom_notebook>     # une intégration à la fois
+git push origin feat/restart-jupytext-workflow
+git worktree remove ../wt-<nom_notebook> && git branch -d feat/nb-<nom_notebook>
+```
+
+Comme les notebooks diffèrent, les merges ne se chevauchent pas. **Si le push est rejeté (non-fast-forward) : ne pas forcer** ; `git fetch` + rebaser/merger le distant, puis re-push. Sérialiser : une seule intégration à la fois.
+
+### Ne pas re-salir l'arbre
+
+- **Ne pas exécuter les `.ipynb` finaux** (pas de nbstripout sur ce repo) : lancer un notebook réinjecte des sorties → diffs parasites. La conformité d'exécution est garantie par l'étape 6 (sandbox `.py`), pas par l'exécution du `.ipynb`.
+- Les artefacts d'exécution (`catboost_info/`, `data_mnist/`, `runs/`, `model/`, `*.keras`, `*.pt`, `*.html`…) ne se committent pas.
