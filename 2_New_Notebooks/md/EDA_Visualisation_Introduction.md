@@ -1079,6 +1079,44 @@ plt.tight_layout(); plt.show()
 ```
 
 <!-- #region -->
+### 13.8 Chord diagram — flux entre entités
+<!-- #endregion -->
+
+<!-- #region -->
+Le **chord diagram** (diagramme en accords) visualise des **flux orientés entre catégories** : matrice carrée `N × N` où la cellule `(i, j)` est le volume de `i` vers `j`. Chaque entité est un arc sur le cercle ; chaque flux est un ruban dont l'épaisseur encode le volume.
+
+**Cas d'usage** : matrices de transition (migrations, exports commerciaux, parcours utilisateur, matrices de confusion, transferts inter-comptes). Là où une heatmap montre la matrice "à plat", le chord met en avant la **structure relationnelle** et les flux dominants.
+
+On utilise `mpl-chord-diagram` (rendu **matplotlib** natif, donc exportable en PNG — contrairement à l'original `holoviews`/`bokeh` qui ne produit que du HTML interactif). Couleurs issues de la charte (`PALETTE`), `use_gradient=True` pour colorer chaque ruban dans la couleur de sa source.
+<!-- #endregion -->
+
+```python
+from mpl_chord_diagram import chord_diagram
+
+# Matrice d'échanges (exports) entre 5 pays — flux orientés source → cible
+export_data = np.array([
+    [0, 50, 30, 20, 10],
+    [10,  0, 40, 30, 20],
+    [20, 10,  0, 35, 25],
+    [30, 20, 10,  0, 40],
+    [25, 15, 30, 20,  0],
+])
+countries = ["USA", "China", "Germany", "Japan", "India"]
+
+fig, ax = plt.subplots(figsize=(8, 8))
+chord_diagram(export_data, countries, ax=ax,
+              colors=PALETTE[:len(countries)],
+              use_gradient=True, sort="size", directed=True,
+              fontsize=10)
+ax.set_title("Chord diagram — flux d'export entre pays", pad=20)
+plt.tight_layout(); plt.show()
+```
+
+<!-- #region -->
+**Lecture** : l'épaisseur d'un ruban à son point d'attache = volume sortant de ce pays vers la cible. `directed=True` rétrécit le ruban du côté de la cible (asymétrie source→cible visible). Au-delà de ~15 entités le diagramme sature : préférer alors une heatmap ou un graphe filtré sur les flux majeurs.
+<!-- #endregion -->
+
+<!-- #region -->
 ## 14. Bonnes pratiques et anti-patterns
 <!-- #endregion -->
 
