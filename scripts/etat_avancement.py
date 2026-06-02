@@ -48,13 +48,20 @@ def git(*args) -> str:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 
 
+REFONTE_RE = re.compile(r"refont|refait|refondu|5 crit|conforme contrat|selon workflow|end-to-end|blueprint|gabarit", re.I)
+EXCLUDE_RE = re.compile(r"^(docs|chore|style|fix\(doc|refactor\(structure)", re.I)
+
+
 def last_date(path: Path) -> str:
-    """Date du commit de REFONTE le plus récent qui NOMME ce notebook dans son message.
-    (On ignore les commits de renommage de dossiers, qui ne citent pas les notebooks.)"""
-    stem = path.stem
+    """Date du VRAI commit de refonte le plus récent qui nomme ce notebook.
+    Exclut les commits de doc / fix-doc / renommage (faux positifs)."""
+    stem = path.stem.lower()
     log = git("log", "--format=%ad|%s", "--date=short")
-    dates = [ln.split("|", 1)[0] for ln in log.splitlines()
-             if stem.lower() in ln.split("|", 1)[1].lower()]
+    dates = []
+    for ln in log.splitlines():
+        date, subj = ln.split("|", 1)
+        if stem in subj.lower() and REFONTE_RE.search(subj) and not EXCLUDE_RE.search(subj):
+            dates.append(date)
     return max(dates) if dates else ""
 
 
