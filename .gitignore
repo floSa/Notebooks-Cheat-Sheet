@@ -38,3 +38,15 @@ data/BDD_DuckDB/
 Thumbs.db
 .vscode/
 .idea/
+
+# ── Artefacts d'entraînement générés en exécutant les notebooks (non versionnés) ──
+catboost_info/
+data_mnist/
+runs/
+tb_logs/
+model/
+*.keras
+*.pt
+*.pth
+*.h5
+*.onnx
