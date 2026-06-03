@@ -81,6 +81,17 @@ orig_keys = {norm(p.name) for p in ORIG.glob("*.ipynb")}
 
 plan_names = {p.stem for p in PLANS.glob("*.md") if p.stem != "README"}
 
+# registre des validations manuelles (notebooks vérifiés bons sans nouveau commit de contenu)
+VALIDES = {}  # norm(nom) -> date
+valides_file = ROOT / "0_Documentation" / "00_valides.txt"
+if valides_file.exists():
+    for line in valides_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "|" not in line:
+            continue
+        parts = [x.strip() for x in line.split("|")]
+        VALIDES[norm(parts[0])] = parts[1] if len(parts) > 1 else "validé"
+
 faits, a_refaire, neufs = [], [], []
 for p in sorted(REFAIT.glob("*.ipynb")):
     name = p.stem
@@ -88,8 +99,11 @@ for p in sorted(REFAIT.glob("*.ipynb")):
     target = ALIAS.get(key, key)
     has_orig = target in orig_keys
     date = last_date(p)
+    vdate = VALIDES.get(norm(p.name))
     bug = " 🐞" if has_format_bug(p) else ""
-    if not has_orig:
+    if vdate and vdate >= date:          # validé manuellement (et pas plus ancien qu'un commit récent)
+        faits.append(f"{name} ({vdate}, validé){bug}")
+    elif not has_orig:
         neufs.append(f"{name}{bug}")
     elif date >= SEUIL:
         faits.append(f"{name} ({date}){bug}")
