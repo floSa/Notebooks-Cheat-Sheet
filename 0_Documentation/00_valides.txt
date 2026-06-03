@@ -1,0 +1,13 @@
+# Registre des notebooks VALIDÉS "fait" manuellement.
+#
+# À utiliser quand un notebook a été vérifié bon (5 critères OK, couverture de l'original)
+# mais SANS nouveau commit de contenu — typiquement une re-vérification live qui confirme
+# que le contenu déjà committé est correct (donc rien à recommiter, le script ne peut pas
+# le deviner depuis l'historique git).
+#
+# Le script scripts/etat_avancement.py lit ce fichier et place ces notebooks en ✅ FAIT.
+#
+# Format : <nom_du_notebook> | <date AAAA-MM-JJ> | <note>
+# -------------------------------------------------------------------------------------------
+EDA_Analyse_Multivarie | 2026-06-02 | re-vérifié live, 5 critères OK (déjà conforme & poussé, commit 113f940)
+EDA_Stats_Analyse_Desc_Visual | 2026-06-02 | re-vérifié live, 5 critères OK (contenu déjà au HEAD, conforme)
