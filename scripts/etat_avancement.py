@@ -60,7 +60,10 @@ def last_date(path: Path) -> str:
     dates = []
     for ln in log.splitlines():
         date, subj = ln.split("|", 1)
-        if stem in subj.lower() and REFONTE_RE.search(subj) and not EXCLUDE_RE.search(subj):
+        pos = subj.lower().find(stem)
+        # le nom doit apparaître AU DÉBUT (vraie refonte "Nom : refonte..."),
+        # pas mentionné en fin de message (ex. un commit de suivi qui cite le nom).
+        if 0 <= pos <= 30 and REFONTE_RE.search(subj) and not EXCLUDE_RE.search(subj):
             dates.append(date)
     return max(dates) if dates else ""
 
