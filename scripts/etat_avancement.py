@@ -48,24 +48,21 @@ def git(*args) -> str:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 
 
-REFONTE_RE = re.compile(r"refont|refait|refondu|5 crit|conforme contrat|selon workflow|end-to-end|blueprint|gabarit", re.I)
-EXCLUDE_RE = re.compile(r"^(docs|chore|style|fix\(doc|refactor\(structure)", re.I)
+# Commits "techniques" (renommage, doc, suivi…) qui touchent les fichiers SANS être des refontes.
+EXCLUDE_RE = re.compile(r"^(docs|doc\b|chore|style|fix|refactor|reorg|merge|feat\(suivi)", re.I)
 
 
 def last_date(path: Path) -> str:
-    """Date du VRAI commit de refonte le plus récent qui nomme ce notebook.
-    Exclut les commits de doc / fix-doc / renommage (faux positifs)."""
-    stem = path.stem.lower()
-    log = git("log", "--format=%ad|%s", "--date=short")
-    dates = []
-    for ln in log.splitlines():
+    """Date du dernier commit qui MODIFIE réellement le contenu du fichier
+    (historique du fichier), en ignorant renommages / docs / suivi.
+    Fiable : peu importe comment le message nomme le notebook."""
+    rel = str(path.relative_to(ROOT)).replace("\\", "/")
+    out = git("log", "--follow", "--format=%ad|%s", "--date=short", "--", rel)
+    for ln in out.splitlines():
         date, subj = ln.split("|", 1)
-        pos = subj.lower().find(stem)
-        # le nom doit apparaître AU DÉBUT (vraie refonte "Nom : refonte..."),
-        # pas mentionné en fin de message (ex. un commit de suivi qui cite le nom).
-        if 0 <= pos <= 30 and REFONTE_RE.search(subj) and not EXCLUDE_RE.search(subj):
-            dates.append(date)
-    return max(dates) if dates else ""
+        if not EXCLUDE_RE.search(subj):
+            return date  # le plus récent commit "de fond"
+    return ""
 
 
 def has_format_bug(path: Path) -> bool:
