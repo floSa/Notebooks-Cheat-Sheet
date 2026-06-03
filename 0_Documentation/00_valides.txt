@@ -11,3 +11,4 @@
 # -------------------------------------------------------------------------------------------
 EDA_Analyse_Multivarie | 2026-06-02 | re-vérifié live, 5 critères OK (déjà conforme & poussé, commit 113f940)
 EDA_Stats_Analyse_Desc_Visual | 2026-06-02 | re-vérifié live, 5 critères OK (contenu déjà au HEAD, conforme)
+BDD_Vectorielles | 2026-06-03 | re-vérifié live, 5 critères OK (sandbox exit 0 + check_format vert ; contenu déjà au HEAD, commit 0f01d00)
