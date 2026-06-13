@@ -23,13 +23,15 @@ scripts/_sandbox/
 *.tmp
 
 # ── Artefacts reproductibles (à régénérer via scripts/restore_originaux.sh) ──
-# Les .ipynb originaux (52 MB) sont régénérés en dézippant 1_Old_Notebooks/Notebooks.zip.
+# Les .ipynb originaux (52 MB) sont régénérés en dézippant Notebook_2018-2021/Notebooks.zip.
 # Le zip lui-même EST committé (source de vérité) ; les .ipynb dézippés ne le sont pas.
-1_Old_Notebooks/ipynb/
+Notebook_2018-2021/ipynb/
 
 # ── Données volumineuses (à committer au cas par cas) ──
 # BDD_DuckDB : NYC Taxi parquet (~50 MB) + bases .duckdb, régénérés par le notebook
 data/BDD_DuckDB/
+# Bundle Colab régénérable (zip des .ipynb, à télécharger pour Drive/Colab)
+Notebook_2026/notebooks_colab.zip
 # Bruit Windows (Alternate Data Stream)
 *:Zone.Identifier
 

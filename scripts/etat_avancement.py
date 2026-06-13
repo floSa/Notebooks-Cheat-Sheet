@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-etat_avancement.py — régénère 0_Documentation/00_FAIT_A_FAIRE.md à partir de l'état RÉEL du dépôt.
+etat_avancement.py — régénère Notebook_2026/_doc/00_FAIT_A_FAIRE.md à partir de l'état RÉEL du dépôt.
 
 Logique (data-based, pas de message à interpréter) :
-- Pour chaque notebook refait (2_New_Notebooks/ipynb/*.ipynb), on regarde la DATE du dernier
+- Pour chaque notebook refait (Notebook_2026/ipynb/*.ipynb), on regarde la DATE du dernier
   commit qui l'a touché.
-- A-t-il un original (1_Old_Notebooks/ipynb, via zip) ? → c'est une REFONTE ; sinon SUJET NEUF.
+- A-t-il un original (Notebook_2018-2021/ipynb, via zip) ? → c'est une REFONTE ; sinon SUJET NEUF.
 - REFONTE touchée le >= SEUIL (date où on a eu les vrais originaux) → ✅ FAIT.
   REFONTE plus ancienne → 🔧 À REFAIRE (faite avant, sur du vidé).
 - check_format : 🐞 si le notebook a un bug de format (code dans markdown, etc.).
@@ -16,10 +16,10 @@ import json, re, subprocess, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ORIG = ROOT / "1_Old_Notebooks" / "ipynb"
-REFAIT = ROOT / "2_New_Notebooks" / "ipynb"
-PLANS = ROOT / "2_New_Notebooks" / "plans"
-OUT = ROOT / "0_Documentation" / "00_FAIT_A_FAIRE.md"
+ORIG = ROOT / "Notebook_2018-2021" / "ipynb"
+REFAIT = ROOT / "Notebook_2026" / "ipynb"
+PLANS = ROOT / "Notebook_2026" / "plans"
+OUT = ROOT / "Notebook_2026/_doc" / "00_FAIT_A_FAIRE.md"
 SEUIL = "2026-06-01"  # à partir d'ici on travaillait sur les VRAIS originaux
 
 def norm(name: str) -> str:
@@ -83,7 +83,7 @@ plan_names = {p.stem for p in PLANS.glob("*.md") if p.stem != "README"}
 
 # registre des validations manuelles (notebooks vérifiés bons sans nouveau commit de contenu)
 VALIDES = {}  # norm(nom) -> date
-valides_file = ROOT / "0_Documentation" / "00_valides.txt"
+valides_file = ROOT / "Notebook_2026/_doc" / "00_valides.txt"
 if valides_file.exists():
     for line in valides_file.read_text(encoding="utf-8").splitlines():
         line = line.strip()

@@ -1,47 +1,68 @@
 # Notebooks-Cheat-Sheet
 
-Organisation du dépôt en 3 familles + docs.
+Collection de cheat-sheets data science en notebooks Jupyter, organisée **par génération**.
+
+## Structure
 
 ```
-0_Documentation/                  Consignes, contrat de travail, statuts, références
-                         → 00_workflow_contract.md = LE contrat à lire en premier
-                         → 00_REFERENCE_ORIGINAUX.md = inventaire des vrais originaux
-                         → 00_REFAITS_A_REVERIFIER.md = refaits bâtis sur base gutée
+Notebook_2018-2021/   Génération d'origine (2018-2021)
+  Notebooks.zip         archive source — committée (source de vérité)
+  ipynb/                originaux dézippés (gitignoré, régénérable)
+  md/                   conversion jupytext des originaux
 
-1_Old_Notebooks/         FAMILLE 1 — mes vrais notebooks d'origine (source de vérité)
-  Notebooks.zip            source maître (committée)
-  ipynb/                   44 originaux dézippés (gitignoré, régénérable)
-  md/                      conversion jupytext des 44 originaux
-  00_REFERENCE_ORIGINAUX.md
+Notebook_2026/        Génération 2026 — refonte complète, BASE COURANTE
+  ipynb/                44 notebooks à jour
+  md/                   markdown de travail (source jupytext)
+  plans/                plans des sujets neufs
+  _doc/                 journal de la refonte 2026 (suivi, décisions)
+  COLAB_READINESS.md    état Colab par notebook
 
-2_New_Notebooks/              FAMILLE 2 — travail récent (refontes + sujets neufs)
-  ipynb/                   notebooks produits (ex-04_notebooks_finaux)
-  md/                      markdown de travail (ex-03_md_ameliores)
-  plans/                   plans des sujets neufs (ex-05_nouveaux_notebooks)
-
-3_Sessions_Ratees/      FAMILLE 3 — anciennes sorties IA gutées (mauvaises)
-  ipynb/                   64 notebooks réduits d'une session ratée
-                           ⚠️ NE PAS réutiliser comme base — voir incident ci-dessous
-
-scripts/                 outillage (restore, conversion jupytext, check_format)
-data/                    datasets de travail
-apps/                    apps Flask/FastAPI/Streamlit
+Documentation/        Méthode réutilisable pour les prochaines mises à jour
+                        (consignes de format, contrat de travail, stratégie datasets, blueprint DL)
+scripts/              outillage (conversion jupytext, check_format, download_data, restore)
+data/                 datasets de travail
+apps/                 démos Flask / FastAPI / Streamlit
 ```
 
-## ⚠️ Incident 2026-06-01 (à connaître)
+## Convention de versionnement
 
-Les vrais originaux (`1_Old_Notebooks/`) n'étaient pas présents sur la machine lors des
-sessions de refonte. `scripts/restore_originaux.sh` restaurait à tort depuis la branche
-`main` (gutée, ~20 cellules au lieu de 200+), peuplant `3_Sessions_Ratees/`. Les refontes
-de `2_New_Notebooks/` ont donc été bâties sur ce contenu réduit → voir
-`0_Documentation/00_REFAITS_A_REVERIFIER.md` pour la liste des notebooks à recontrôler contre les
-vrais originaux.
+Chaque génération vit dans son propre dossier `Notebook_<période>`. La plus récente
+(`Notebook_2026`) est la **base courante**. Pour une mise à jour future (dans un an ou
+plus) : repartir de la base courante vers un nouveau `Notebook_<année>`, et garder les
+générations précédentes comme archives. La méthode de travail réutilisable est dans
+`Documentation/`.
 
-**Règle** : toute refonte lit `1_Old_Notebooks/ipynb/<nom>.ipynb` (les vrais), jamais
-`main` ni `3_Sessions_Ratees/`.
+## Utilisation
 
-## Restaurer les originaux après clone
+Restaurer les originaux après un clone :
 
 ```bash
-bash scripts/restore_originaux.sh   # dézippe 1_Old_Notebooks/Notebooks.zip → ipynb/
+bash scripts/restore_originaux.sh   # dézippe Notebook_2018-2021/Notebooks.zip -> ipynb/
 ```
+
+Télécharger les jeux de données des case studies (les autres sont chargés à la volée
+via sklearn / seaborn / HuggingFace) :
+
+```bash
+bash scripts/download_data.sh
+```
+
+Convertir entre `.md` (source éditable) et `.ipynb` (généré) via jupytext :
+
+```bash
+bash scripts/02_ipynb_to_md.sh                 # ipynb -> md (originaux)
+bash scripts/04_md_to_ipynb.sh [fichier.md]    # md -> ipynb (génération 2026)
+```
+
+Auditer le format d'un notebook avant/après conversion :
+
+```bash
+python scripts/check_format.py --both Notebook_2026/md/NOM.md Notebook_2026/ipynb/NOM.ipynb
+```
+
+## Tester sur Google Colab
+
+Les notebooks récupèrent leurs données par programme (sklearn / seaborn / HuggingFace) ;
+un seul (`TS_Maintenance_Predictive`) demande un fichier à télécharger manuellement.
+Le détail par notebook (données, `pip install` éventuel) est dans
+[`Notebook_2026/COLAB_READINESS.md`](Notebook_2026/COLAB_READINESS.md).
