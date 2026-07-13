@@ -1,4 +1,4 @@
-# 🚀 Apps exécutables — Flask, FastAPI, Streamlit
+# Apps exécutables — Flask, FastAPI, Streamlit
 
 Apps de démonstration en pur Python pour les 3 frameworks couverts par les notebooks `Flask_API`, `FastAPI_API`, `Streamlit_brique`.
 
