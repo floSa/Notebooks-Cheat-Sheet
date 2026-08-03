@@ -82,6 +82,8 @@ dependencies = [
     "mpl-chord-diagram>=0.4.1",
     "librosa>=0.11.0",
     "nltk>=3.9.4",
+    # setuptools 82 supprime pkg_resources, encore importe par ydata-profiling 4.18.4
+    "setuptools<82",
 ]
 
 [tool.jupytext]
